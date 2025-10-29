@@ -198,7 +198,7 @@
             <button class="start-button" onclick="startGame()">Press SPACE to start</button>
         </div>
         
-        <div id="haikuProgress">Score: 0 | Poetry Progress: 0/17 syllables | Poems: 0</div>
+        <div id="haikuProgress">Poetry Progress: 0/17 syllables | Poems: 0</div>
         <div id="currentHaiku">Building your poem...</div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         <div id="instructions">
@@ -212,7 +212,6 @@
         </div>
         <div id="gameOver">
             <h2>Game Over!</h2>
-            <p>Final Score: <span id="finalScore">0</span></p>
             <button onclick="restartGame()">Play Again</button>
         </div>
     </div>
@@ -222,7 +221,6 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const gameOverElement = document.getElementById('gameOver');
-        const finalScoreElement = document.getElementById('finalScore');
         const pauseOverlayElement = document.getElementById('pauseOverlay');
 
         // Player name generation
@@ -293,7 +291,6 @@
         let gamePaused = false;
         let haikuCompleted = false;
         let gameStarted = false;
-        let score = 0;
 
         // Word fade animation
         let wordFadeStates = new Map(); // Track fade state for each word
@@ -1205,7 +1202,7 @@
                 
                 const progressElement = document.getElementById('haikuProgress');
                 const speedMultiplier = (baseSpawnInterval / currentSpawnInterval).toFixed(1);
-                progressElement.textContent = `Score: ${score} | Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
+                progressElement.textContent = `Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
             } catch (error) {
                 console.error('Error in updatePoetryProgress:', error);
             }
@@ -1338,7 +1335,6 @@
         function completePoem() {
             try {
                 haikuCount++;
-                score += 100; // Bonus points for completing poem
                 
                 // Increase game speed for next poem
                 increaseGameSpeed();
@@ -1788,7 +1784,6 @@
         // Game over
         function gameOver() {
             gameRunning = false;
-            finalScoreElement.textContent = score;
             gameOverElement.style.display = 'block';
         }
 
@@ -1798,7 +1793,6 @@
             gamePaused = false;
             haikuCompleted = false;
             gameStarted = true;
-            score = 0;
             haikuCount = 0;
             currentHaiku = [];
             caughtWords = [];
