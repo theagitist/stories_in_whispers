@@ -246,19 +246,20 @@ try {
         }
         .connections-carousel {
             position: relative;
-            height: 500px;
-            overflow: hidden;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 4px;
+            padding: 20px;
+            min-height: 200px;
         }
         .connection {
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #444;
-            border-radius: 10px;
+            background: rgba(255, 105, 180, 0.1);
+            border: 1px solid rgba(255, 105, 180, 0.5);
+            border-radius: 4px;
             padding: 20px;
-            margin: 20px;
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 20px;
+            left: 20px;
+            right: 20px;
             opacity: 0;
             transition: opacity 1.2s ease-in-out;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -491,6 +492,24 @@ try {
                     connection.classList.add('active');
                 }
             });
+            
+            // Adjust container height to fit active connection
+            const activeConnection = connections[currentConnectionIndex];
+            const carousel = document.querySelector('.connections-carousel');
+            if (activeConnection && carousel) {
+                // Temporarily make all connections visible to measure height
+                connections.forEach(conn => conn.style.visibility = 'hidden');
+                activeConnection.style.visibility = 'visible';
+                
+                // Get the height of the active connection
+                const connectionHeight = activeConnection.offsetHeight;
+                
+                // Set container height to fit the content
+                carousel.style.height = (connectionHeight + 40) + 'px'; // 40px for padding
+                
+                // Restore visibility
+                connections.forEach(conn => conn.style.visibility = '');
+            }
         }
 
         function nextConnection() {
