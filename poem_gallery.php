@@ -76,8 +76,8 @@ try {
             return strlen($word) > 2 && !in_array($word, $excluded_words); 
         });
         
-        // Add poem to each word's list
-        foreach ($poem_words as $word) {
+        // Add poem to each word's list (only once per word)
+        foreach (array_unique($poem_words) as $word) {
             if (!isset($word_to_poems[$word])) {
                 $word_to_poems[$word] = [];
             }
@@ -88,7 +88,8 @@ try {
     // Second pass: find groups of poems that share words
     $processed_groups = [];
     foreach ($word_to_poems as $word => $poem_indices) {
-        // Only consider words that appear in multiple poems
+        // Remove duplicates and only consider words that appear in multiple poems
+        $poem_indices = array_unique($poem_indices);
         if (count($poem_indices) > 1) {
             // Create a group key to avoid duplicates
             sort($poem_indices);
@@ -167,12 +168,6 @@ try {
         .header {
             text-align: center;
             margin-bottom: 30px;
-        }
-        .ascii-title {
-            font-size: 12px;
-            line-height: 1.2;
-            color: #ffff00;
-            margin-bottom: 20px;
         }
         h1 {
             color: #ffff00;
@@ -321,25 +316,6 @@ try {
 <body>
     <div class="container">
         <div class="header">
-                <div class="ascii-title">
-    ╔══════════════════════════════════════════════════════════════╗
-    ║                                                              ║
-    ║    ██████╗  ██████╗ ███████╗███╗   ███╗    ██████╗  █████╗ ██╗     ║
-    ║    ██╔══██╗██╔═══██╗██╔════╝████╗ ████║   ██╔════╝ ██╔══██╗██║     ║
-    ║    ██████╔╝██║   ██║█████╗  ██╔████╔██║   ██║  ███╗███████║██║     ║
-    ║    ██╔═══╝ ██║   ██║██╔══╝  ██║╚██╔╝██║   ██║   ██║██╔══██║██║     ║
-    ║    ██║     ╚██████╔╝███████╗██║ ╚═╝ ██║   ╚██████╔╝██║  ██║███████╗║
-    ║    ╚═╝      ╚═════╝ ╚══════╝╚═╝     ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝║
-    ║                                                              ║
-    ║         ██████╗  █████╗ ██╗     ██╗     ███████╗████████╗██████╗ ██╗║
-    ║        ██╔════╝ ██╔══██╗██║     ██║     ██╔════╝╚══██╔══╝██╔══██╗██║║
-    ║        ██║  ███╗███████║██║     ██║     █████╗     ██║   ██████╔╝██║║
-    ║        ██║   ██║██╔══██║██║     ██║     ██╔══╝     ██║   ██╔══██╗██║║
-    ║        ╚██████╔╝██║  ██║███████╗███████╗███████╗   ██║   ██║  ██║██║║
-    ║         ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝║
-    ║                                                              ║
-    ╚══════════════════════════════════════════════════════════════╝
-                </div>
                 <h1>Poem Gallery</h1>
                 <p>Discover connections between poems through shared words</p>
             </div>
@@ -420,7 +396,7 @@ try {
                                                 ?>
                                             </div>
                                             <div class="poem-meta">
-                                                <span class="author">by <?php echo htmlspecialchars(strtolower($poem['author'])); ?></span>
+                                                <span class="author">by a <?php echo htmlspecialchars(strtolower($poem['author'])); ?></span>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
