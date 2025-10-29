@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falling Islets - A haiku building game by Adri M.</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        #gameContainer {
+            text-align: center;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #333;
+            background: #000;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: border-color 0.1s ease;
+        }
+        
+        #gameCanvas.power-active {
+            border: 2px solid #88ccff;
+            animation: powerBorderBlink 0.5s infinite alternate;
+        }
+        
+        @keyframes powerBorderBlink {
+            0% { border-color: #88ccff; }
+            100% { border-color: #44aaff; }
+        }
+        
+        #instructions {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #888;
+        }
+        
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 18px;
+            color: #fff;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 2px solid #fff;
+            display: none;
+        }
+        
+        #pauseOverlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 2px solid #ffff00;
+            display: none;
+            text-align: center;
+        }
+        
+        
+        #haikuProgress {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 5px 15px;
+            border: 1px solid #666;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        #currentHaiku {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #ffff00;
+            padding: 10px 20px;
+            border: 2px solid #ffff00;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            text-align: center;
+            min-width: 300px;
+            display: none;
+        }
+        
+        #startScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            padding: 15px;
+            border: 3px solid #00ffff;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-align: center;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 2000;
+        }
+        
+        #startScreen h1 {
+            color: #00ffff;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        
+        #startScreen h2 {
+            color: #ffff00;
+            margin: 6px 0 4px 0;
+            font-size: 14px;
+        }
+        
+        #startScreen .controls {
+            background: rgba(0, 100, 100, 0.3);
+            padding: 8px;
+            margin: 4px 0;
+            border: 1px solid #00aaaa;
+        }
+        
+        #startScreen .colors {
+            display: flex;
+            justify-content: space-around;
+            margin: 4px 0;
+            flex-wrap: wrap;
+        }
+        
+        #startScreen .color-item {
+            margin: 2px;
+            padding: 3px 6px;
+            border: 1px solid #666;
+            background: rgba(0, 0, 0, 0.5);
+            font-size: 11px;
+        }
+        
+        #startScreen .start-button {
+            background: #00ffff;
+            color: #000;
+            border: 2px solid #00aaaa;
+            padding: 8px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        #startScreen .start-button:hover {
+            background: #00aaaa;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="startScreen">
+            <h1>FALLING ISLETS</h1>
+            <h2>A haiku building game by Adri M.</h2>
+            
+            <div style="display: flex; gap: 20px; text-align: left;">
+                <div style="flex: 1;">
+                    <div class="controls">
+                        <h2>How to Play</h2>
+                        <p>Build haikus by catching falling islets! Collect words to create 5-7-5 syllable poems.</p>
+                        <p>Multiple islets fall simultaneously at different speeds. Each islet contains a word with a specific syllable count.</p>
+                    </div>
+                    
+                    <div class="controls">
+                        <h2>Controls</h2>
+                        <p><strong>Movement:</strong> ← → arrow keys or A/D keys</p>
+                        <p><strong>Pause:</strong> SPACE or P key</p>
+                        <p><strong>Start Game:</strong> SPACE or P key (or click button below)</p>
+                    </div>
+                </div>
+                
+                <div style="flex: 1;">
+                    <div class="controls">
+                        <h2>Parts of Speech</h2>
+                        <div class="colors">
+                            <div class="color-item" style="color: #ff4444;"><strong>Red</strong> = Verbs</div>
+                            <div class="color-item" style="color: #aa44ff;"><strong>Purple</strong> = Nouns</div>
+                            <div class="color-item" style="color: #ffff44;"><strong>Yellow</strong> = Adjectives</div>
+                            <div class="color-item" style="color: #44ff44;"><strong>Green</strong> = Adverbs</div>
+                            <div class="color-item" style="color: #ff8844;"><strong>Orange</strong> = Articles</div>
+                            <div class="color-item" style="color: #ff69b4;"><strong>Pink</strong> = Conjunctions</div>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <h2>Special Rules</h2>
+                        <p>• Complete haikus by collecting exactly 17 syllables (5-7-5 pattern)</p>
+                        <p>• <span style="color: #ff4444;">Catching two articles in a row will make the second one explode!</span></p>
+                        <p>• <span style="color: #ffffff;">Catch the white blinking POWER islet for special abilities!</span></p>
+                        <p>• Each completed haiku awards 100 bonus points</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="start-button" onclick="startGame()">Press SPACE to start</button>
+        </div>
+        
+        <div id="score">Score: 0</div>
+        <div id="haikuProgress">Haiku Progress: 0/17 syllables | Haikus: 0</div>
+        <div id="currentHaiku">Building your haiku...</div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="instructions">
+            Build haikus by catching falling islets! Collect words to create 5-7-5 syllable poems.<br>
+            Use ← → arrow keys or A/D keys to move. Press SPACE or P to pause.<br>
+            <span style="color: #ff4444;">Verbs</span>, <span style="color: #aa44ff;">Nouns</span>, <span style="color: #ffff44;">Adjectives</span>, <span style="color: #44ff44;">Adverbs</span>, <span style="color: #ff8844;">Articles</span>, <span style="color: #ff69b4;">Conjunctions</span>
+        </div>
+        <div id="pauseOverlay">
+            <h2>GAME PAUSED</h2>
+            <p>Press SPACE or P to resume</p>
+        </div>
+        <div id="gameOver">
+            <h2>Game Over!</h2>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const gameOverElement = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
+        const pauseOverlayElement = document.getElementById('pauseOverlay');
+
+        // Game state
+        let gameRunning = false;
+        let gamePaused = false;
+        let haikuCompleted = false;
+        let gameStarted = false;
+        let score = 0;
+        
+        // Haiku building system
+        let caughtWords = [];
+        let currentHaiku = [];
+        let haikuCount = 0;
+        let maxWordsPerHaiku = 17; // 5 + 7 + 5 syllables max
+        
+        // Article explosion system
+        let lastCaughtType = null;
+        let consecutiveArticles = 0;
+        
+        // Special power system
+        let specialPowerActive = false;
+        let powerEndTime = 0;
+        let currentPower = null;
+        let originalPaddleWidth = 80;
+        let originalPaddleSpeed = 5;
+        let controlsInverted = false;
+        let screenUpsideDown = false;
+        let upsideDownTimeout = null;
+        
+        // Star animation
+        let starTimer = 0;
+        
+        // Exploding islets animation
+        let explodingIsletsTimer = 0;
+        
+        // Player acceleration system
+        let playerAcceleration = 0;
+        let maxAcceleration = 3; // Maximum speed multiplier
+        let accelerationRate = 0.1; // How fast acceleration increases
+        let decelerationRate = 0.15; // How fast acceleration decreases
+        
+        // Audio context for sound effects
+        let audioContext;
+        let paddle = {
+            x: canvas.width / 2 - 40,
+            y: canvas.height - 45,
+            width: 80,
+            height: 12,
+            speed: 5
+        };
+
+        let fallingShapes = [];
+        let lastSpawnTime = 0;
+        let baseSpawnInterval = 600; // Base spawn interval (faster spawning)
+        let currentSpawnInterval = 600; // Current spawn interval (gets faster)
+        let baseIsletSpeed = 1.5; // Base islet speed (slower start)
+        let currentIsletSpeed = 1.5; // Current islet speed (gets faster)
+        const maxIsletsAtOnce = 6; // Maximum islets falling simultaneously (doubled)
+        const speedIncreaseFactor = 0.9; // Each haiku makes game 10% faster
+
+        // Color definitions for parts of speech
+        const colors = {
+            verb: '#ff4444',      // Red
+            noun: '#aa44ff',      // Purple
+            adjective: '#ffff44', // Yellow
+            adverb: '#44ff44',    // Green
+            article: '#ff8844',   // Orange
+            conjunction: '#ff69b4' // Pink
+        };
+
+        // Word database for haiku building
+        const wordDatabase = {
+            verb: ['run', 'jump', 'sing', 'dance', 'fly', 'swim', 'grow', 'bloom', 'fall', 'rise', 'sleep', 'dream', 'laugh', 'cry', 'walk', 'talk', 'think', 'feel', 'love', 'hope'],
+            noun: ['tree', 'bird', 'moon', 'star', 'wind', 'rain', 'snow', 'flower', 'leaf', 'stone', 'river', 'mountain', 'ocean', 'cloud', 'sun', 'sky', 'earth', 'heart', 'soul', 'mind'],
+            adjective: ['bright', 'dark', 'soft', 'hard', 'warm', 'cold', 'quiet', 'loud', 'gentle', 'strong', 'beautiful', 'simple', 'pure', 'wild', 'calm', 'deep', 'high', 'low', 'old', 'new'],
+            adverb: ['slowly', 'quickly', 'gently', 'softly', 'brightly', 'quietly', 'deeply', 'highly', 'wildly', 'calmly', 'freely', 'easily', 'surely', 'truly', 'barely', 'nearly', 'almost', 'quite', 'very', 'so'],
+            article: ['the', 'a', 'an'],
+            conjunction: ['and', 'but', 'or', 'so', 'yet', 'for', 'nor', 'while', 'when', 'where', 'because', 'if', 'unless', 'since', 'until', 'though', 'although', 'as', 'than', 'that']
+        };
+
+        // Syllable counts for words (simplified)
+        const syllableCounts = {
+            verb: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            noun: [1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1],
+            adjective: [1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1],
+            adverb: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            article: [1, 1, 1],
+            conjunction: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1, 1, 1]
+        };
+
+        // ASCII art for paddle character
+        const paddleArt = [
+            "________________",
+            "________________",
+            "________________"
+        ];
+
+        // ASCII art for different shapes - each type has a unique shape
+        const shapeArts = {
+            verb: [
+                "  ██  ",
+                " ████ ",
+                "██████",
+                " ████ ",
+                "  ██  "
+            ], // Diamond shape
+            noun: [
+                "██████",
+                "██████",
+                "██████",
+                "██████",
+                "██████"
+            ], // Solid rectangle
+            adjective: [
+                "██████",
+                "█    █",
+                "█    █",
+                "█    █",
+                "██████"
+            ], // Hollow rectangle
+            adverb: [
+                "  ██  ",
+                " █  █ ",
+                "█    █",
+                " █  █ ",
+                "  ██  "
+            ], // Hollow diamond
+            article: [
+                "██████",
+                "  ██  ",
+                "██████",
+                "  ██  ",
+                "██████"
+            ], // Striped rectangle
+            conjunction: [
+                "  ██  ",
+                " ████ ",
+                "██████",
+                " ████ ",
+                "  ██  "
+            ], // Diamond shape (similar to verb but different color)
+            bomb: [
+                "████████",
+                "████████",
+                "████████",
+                "████████",
+                "████████"
+            ] // Simple bomb design
+        };
+
+        // Islet class (renamed from FallingShape)
+        class Islet {
+            constructor(isSpecial = false, isBomb = false) {
+                this.x = Math.random() * (canvas.width - 30);
+                this.y = -50;
+                this.width = 30;
+                this.height = 24;
+                // Use current speed settings for dynamic difficulty with much more variation
+                this.speed = currentIsletSpeed + Math.random() * (currentIsletSpeed * 3);
+                this.isSpecial = isSpecial;
+                this.isBomb = isBomb;
+                
+                if (isSpecial) {
+                    this.type = 'special';
+                    this.color = '#ffffff';
+                    this.word = 'POWER';
+                    this.syllables = 2;
+                    this.blinkTimer = 0;
+                } else if (isBomb) {
+                    this.type = 'bomb';
+                    this.color = '#88ccff';
+                    this.word = 'BOMB';
+                    this.syllables = 1;
+                    this.blinkTimer = 0;
+                } else {
+                    this.type = this.getRandomType();
+                    this.color = colors[this.type];
+                    this.word = this.getRandomWord();
+                    this.syllables = this.getSyllableCount();
+                }
+            }
+
+            getRandomType() {
+                const types = ['verb', 'noun', 'adjective', 'adverb', 'article', 'conjunction'];
+                return types[Math.floor(Math.random() * types.length)];
+            }
+
+            getRandomWord() {
+                const words = wordDatabase[this.type];
+                const randomIndex = Math.floor(Math.random() * words.length);
+                return words[randomIndex];
+            }
+
+            getSyllableCount() {
+                const syllables = syllableCounts[this.type];
+                const randomIndex = Math.floor(Math.random() * syllables.length);
+                return syllables[randomIndex];
+            }
+
+            update() {
+                this.y += this.speed;
+                if (this.isSpecial || this.isBomb) {
+                    this.blinkTimer += 0.1;
+                }
+            }
+
+            draw() {
+                if (this.isSpecial) {
+                    // Draw POW! text with blinking effect
+                    const blinkAlpha = Math.sin(this.blinkTimer) * 0.5 + 0.5;
+                    ctx.fillStyle = `rgba(255, 255, 255, ${blinkAlpha})`; // White text with blinking
+                    ctx.font = 'bold 16px monospace';
+                    ctx.textAlign = 'center';
+                    const textX = this.x + this.width / 2;
+                    const textY = this.y + this.height / 2 + 6;
+                    ctx.fillText('POW!', textX, textY);
+                    
+                    // Draw underline
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${blinkAlpha})`;
+                    ctx.lineWidth = 2;
+                    const textWidth = ctx.measureText('POW!').width;
+                    ctx.beginPath();
+                    ctx.moveTo(textX - textWidth/2, textY + 3);
+                    ctx.lineTo(textX + textWidth/2, textY + 3);
+                    ctx.stroke();
+                    
+                    ctx.textAlign = 'left'; // Reset text alignment
+                } else if (this.isBomb) {
+                    // Draw blinking bomb text with colored text, no background
+                    const blinkAlpha = Math.sin(this.blinkTimer) * 0.5 + 0.5;
+                    ctx.fillStyle = `rgba(136, 204, 255, ${blinkAlpha})`; // Light blue text
+                    ctx.font = 'bold 16px monospace';
+                    ctx.textAlign = 'center';
+                    const textX = this.x + this.width / 2;
+                    const textY = this.y + this.height / 2 + 6;
+                    ctx.fillText('BOOM!', textX, textY);
+                    
+                    // Draw underline
+                    ctx.strokeStyle = `rgba(136, 204, 255, ${blinkAlpha})`;
+                    ctx.lineWidth = 2;
+                    const textWidth = ctx.measureText('BOOM!').width;
+                    ctx.beginPath();
+                    ctx.moveTo(textX - textWidth/2, textY + 3);
+                    ctx.lineTo(textX + textWidth/2, textY + 3);
+                    ctx.stroke();
+                    
+                    ctx.textAlign = 'left'; // Reset text alignment
+                } else {
+                    // Draw the word with colored text, no background
+                    ctx.fillStyle = this.color; // Use the islet's color for text
+                    ctx.font = 'bold 16px monospace';
+                    ctx.textAlign = 'center';
+                    const wordText = this.word.toLowerCase();
+                    const textX = this.x + this.width / 2;
+                    const textY = this.y + this.height / 2 + 6;
+                    ctx.fillText(wordText, textX, textY);
+                    
+                    // Draw underline
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 2;
+                    const textWidth = ctx.measureText(wordText).width;
+                    ctx.beginPath();
+                    ctx.moveTo(textX - textWidth/2, textY + 3);
+                    ctx.lineTo(textX + textWidth/2, textY + 3);
+                    ctx.stroke();
+                    
+                    ctx.textAlign = 'left'; // Reset text alignment
+                }
+                
+            }
+
+            isOffScreen() {
+                return this.y > canvas.height;
+            }
+        }
+
+        // Sound effect functions
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Web Audio API not supported');
+            }
+        }
+
+        function playSound(frequency, duration, type = 'sine', volume = 0.3) {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playCatchSound() {
+            // Happy ascending sound for catching islet
+            playSound(440, 0.2, 'sine', 0.2);
+            setTimeout(() => playSound(554, 0.15, 'sine', 0.15), 50);
+            setTimeout(() => playSound(659, 0.1, 'sine', 0.1), 100);
+        }
+
+        function playMissSound() {
+            // Sad descending sound for missing islet
+            playSound(330, 0.3, 'sawtooth', 0.15);
+            setTimeout(() => playSound(220, 0.2, 'sawtooth', 0.1), 100);
+        }
+
+        function playHaikuCompleteSound() {
+            // Special sound for completing a haiku
+            playSound(523, 0.3, 'sine', 0.25);
+            setTimeout(() => playSound(659, 0.3, 'sine', 0.25), 150);
+            setTimeout(() => playSound(784, 0.4, 'sine', 0.25), 300);
+        }
+
+        function playExplosionSound() {
+            // Explosion sound effect for consecutive articles
+            playSound(100, 0.1, 'sawtooth', 0.3);
+            setTimeout(() => playSound(80, 0.1, 'sawtooth', 0.3), 50);
+            setTimeout(() => playSound(60, 0.1, 'sawtooth', 0.3), 100);
+            setTimeout(() => playSound(40, 0.2, 'sawtooth', 0.2), 150);
+        }
+
+        function playSpecialPowerSound() {
+            // Special sound for catching power islet
+            playSound(800, 0.2, 'sine', 0.3);
+            setTimeout(() => playSound(1000, 0.2, 'sine', 0.3), 100);
+            setTimeout(() => playSound(1200, 0.3, 'sine', 0.3), 200);
+        }
+
+        function playPowerIsletAppearSound() {
+            // Sound when power islet appears on screen
+            playSound(600, 0.3, 'triangle', 0.2);
+            setTimeout(() => playSound(800, 0.3, 'triangle', 0.2), 150);
+            setTimeout(() => playSound(1000, 0.4, 'triangle', 0.2), 300);
+        }
+
+        function playPowerIsletCatchSound() {
+            // Different sound for catching power islet
+            playSound(1000, 0.2, 'sawtooth', 0.4);
+            setTimeout(() => playSound(1200, 0.2, 'sawtooth', 0.4), 100);
+            setTimeout(() => playSound(1400, 0.3, 'sawtooth', 0.4), 200);
+            setTimeout(() => playSound(1600, 0.4, 'sawtooth', 0.3), 300);
+        }
+
+        // Haiku building functions
+        function removeLastWordFromHaiku() {
+            if (currentHaiku.length > 0) {
+                const removedWord = currentHaiku.pop();
+                caughtWords.pop(); // Also remove from caught words
+                updateHaikuProgress();
+                
+                // Show removal message
+                showWordRemovalMessage(removedWord);
+            }
+        }
+        
+        function showWordRemovalMessage(word) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: #ff4444;
+                padding: 10px 20px;
+                border: 2px solid #ff4444;
+                font-family: 'Courier New', monospace;
+                font-size: 16px;
+                z-index: 1500;
+                animation: wordRemoval 1.5s ease-out forwards;
+            `;
+            messageDiv.textContent = `BOOM! "${word.word}" removed!`;
+            
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes wordRemoval {
+                    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+                    20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(messageDiv);
+            
+            // Remove after animation
+            setTimeout(() => {
+                if (document.body.contains(messageDiv)) {
+                    document.body.removeChild(messageDiv);
+                }
+                if (document.head.contains(style)) {
+                    document.head.removeChild(style);
+                }
+            }, 1500);
+        }
+        
+        // Check if adding an article would end a line
+        function wouldArticleEndLine() {
+            let currentSyllables = 0;
+            let currentLine = 1;
+            
+            // Calculate current line and syllables
+            for (let word of currentHaiku) {
+                if (currentLine === 1) {
+                    if (currentSyllables + word.syllables <= 5) {
+                        currentSyllables += word.syllables;
+                        if (currentSyllables === 5) {
+                            currentLine = 2;
+                            currentSyllables = 0;
+                        }
+                    } else {
+                        currentLine = 2;
+                        currentSyllables = word.syllables;
+                        if (currentSyllables === 7) {
+                            currentLine = 3;
+                            currentSyllables = 0;
+                        }
+                    }
+                } else if (currentLine === 2) {
+                    if (currentSyllables + word.syllables <= 7) {
+                        currentSyllables += word.syllables;
+                        if (currentSyllables === 7) {
+                            currentLine = 3;
+                            currentSyllables = 0;
+                        }
+                    } else {
+                        currentLine = 3;
+                        currentSyllables = word.syllables;
+                    }
+                } else {
+                    currentSyllables += word.syllables;
+                }
+            }
+            
+            // Check if adding 1 syllable (article) would complete the current line
+            if (currentLine === 1 && currentSyllables + 1 === 5) return true;
+            if (currentLine === 2 && currentSyllables + 1 === 7) return true;
+            if (currentLine === 3 && currentSyllables + 1 === 5) return true;
+            
+            return false;
+        }
+        
+        function addWordToHaiku(islet) {
+            try {
+                // Check if it's a special power islet
+                if (islet.isSpecial) {
+                    activateSpecialPower();
+                    playPowerIsletCatchSound();
+                    return; // Don't add to haiku, just activate power
+                }
+            
+            // Check for consecutive articles
+            if (islet.type === 'article') {
+                if (lastCaughtType === 'article') {
+                    // Second article in a row - explode!
+                    consecutiveArticles++;
+                    playExplosionSound();
+                    showExplosionEffect(islet);
+                    return; // Don't add to haiku, just explode
+                } else {
+                    consecutiveArticles = 1;
+                }
+            } else {
+                consecutiveArticles = 0;
+            }
+            
+            // Check if article would end a line (not allowed)
+            if (islet.type === 'article') {
+                if (wouldArticleEndLine()) {
+                    // Article would end a line - explode!
+                    playExplosionSound();
+                    showExplosionEffect(islet);
+                    return; // Don't add to haiku, just explode
+                }
+            }
+            
+            lastCaughtType = islet.type;
+            
+            const wordData = {
+                word: islet.word,
+                type: islet.type,
+                syllables: islet.syllables
+            };
+            
+            // Check if adding this word would exceed 17 syllables
+            let totalSyllables = 0;
+            for (let word of currentHaiku) {
+                totalSyllables += word.syllables;
+            }
+            
+            if (totalSyllables + islet.syllables > 17) {
+                // Word would exceed 17 syllables, don't add it
+                playMissSound(); // Play miss sound to indicate rejection
+                return;
+            }
+            
+            currentHaiku.push(wordData);
+            caughtWords.push(wordData);
+            
+            // Update progress display
+            updateHaikuProgress();
+            
+            // Check if haiku is complete (exactly 17 syllables)
+            if (checkHaikuComplete()) {
+                completeHaiku();
+            }
+            
+            } catch (error) {
+                console.error('Error in addWordToHaiku:', error);
+                console.error('Islet data:', islet);
+            }
+        }
+
+        function showExplosionEffect(islet) {
+            // Create explosion visual effect
+            const explosion = document.createElement('div');
+            explosion.style.cssText = `
+                position: absolute;
+                left: ${islet.x + canvas.offsetLeft}px;
+                top: ${islet.y + canvas.offsetTop}px;
+                width: 60px;
+                height: 60px;
+                background: radial-gradient(circle, #ff4444, #ff8844, #ffff44, transparent);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 1000;
+                animation: explode 0.5s ease-out forwards;
+            `;
+            
+            // Add explosion animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes explode {
+                    0% { transform: scale(0); opacity: 1; }
+                    50% { transform: scale(1.5); opacity: 0.8; }
+                    100% { transform: scale(2); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(explosion);
+            
+            // Remove explosion after animation
+            setTimeout(() => {
+                if (document.body.contains(explosion)) {
+                    document.body.removeChild(explosion);
+                }
+                if (document.head.contains(style)) {
+                    document.head.removeChild(style);
+                }
+            }, 500);
+        }
+
+        function showPaddleExplosionEffect() {
+            // Create explosion visual effect at paddle position
+            const explosion = document.createElement('div');
+            explosion.style.cssText = `
+                position: absolute;
+                left: ${paddle.x + canvas.offsetLeft}px;
+                top: ${paddle.y + canvas.offsetTop}px;
+                width: 80px;
+                height: 80px;
+                background: radial-gradient(circle, #ff4444, #ff8844, #ffff44, transparent);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 1000;
+                animation: explode 0.5s ease-out forwards;
+            `;
+            
+            // Add explosion animation (reuse existing style if available)
+            let style = document.getElementById('explosion-style');
+            if (!style) {
+                style = document.createElement('style');
+                style.id = 'explosion-style';
+                style.textContent = `
+                    @keyframes explode {
+                        0% { transform: scale(0); opacity: 1; }
+                        50% { transform: scale(1.5); opacity: 0.8; }
+                        100% { transform: scale(2); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(explosion);
+            
+            // Remove explosion after animation
+            setTimeout(() => {
+                if (document.body.contains(explosion)) {
+                    document.body.removeChild(explosion);
+                }
+            }, 500);
+        }
+
+        // Helper function to darken a color
+        function darkenColor(color, factor = 0.5) {
+            // Convert hex to RGB
+            const hex = color.replace('#', '');
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            
+            // Darken by factor
+            const newR = Math.floor(r * factor);
+            const newG = Math.floor(g * factor);
+            const newB = Math.floor(b * factor);
+            
+            // Convert back to hex
+            return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+        }
+
+        // Helper function to fix article usage (a/an)
+        function fixArticle(word, nextWord) {
+            if (!nextWord || typeof nextWord !== 'string') return word; // No next word or not a string, keep as is
+            
+            const nextWordLower = nextWord.toLowerCase();
+            const vowels = ['a', 'e', 'i', 'o', 'u'];
+            const startsWithVowel = vowels.includes(nextWordLower.charAt(0));
+            
+            if (word.toLowerCase() === 'a' && startsWithVowel) {
+                return 'an';
+            } else if (word.toLowerCase() === 'an' && !startsWithVowel) {
+                return 'a';
+            }
+            
+            return word; // No change needed
+        }
+
+        // Special power functions
+        function activateSpecialPower() {
+            const powers = [
+                'wider',
+                'narrower', 
+                'inverted',
+                'ultra_speed',
+                'exploding_islets',
+                'upside_down'
+            ];
+            
+            currentPower = powers[Math.floor(Math.random() * powers.length)];
+            specialPowerActive = true;
+            powerEndTime = Date.now() + 5000; // 5 seconds
+            
+            // Add power-active class to canvas for border animation
+            canvas.classList.add('power-active');
+            
+            showPowerMessage(currentPower);
+            applyPower(currentPower);
+        }
+
+        function showPowerMessage(power) {
+            const messages = {
+                'wider': 'WIDER CHARACTER!',
+                'narrower': 'NARROWER CHARACTER!',
+                'inverted': 'INVERTED CONTROLS!',
+                'ultra_speed': 'ULTRA SPEED!',
+                'exploding_islets': 'EXPLODING ISLETS!',
+                'upside_down': 'UPSIDE DOWN!'
+            };
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: #ffff00;
+                padding: 15px 25px;
+                border: 2px solid #ffff00;
+                font-family: 'Courier New', monospace;
+                font-size: 18px;
+                font-weight: bold;
+                z-index: 1500;
+                animation: powerMessage 2s ease-out forwards;
+            `;
+            messageDiv.textContent = messages[power];
+            
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes powerMessage {
+                    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+                    20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(messageDiv);
+            
+            // Remove after animation
+            setTimeout(() => {
+                if (document.body.contains(messageDiv)) {
+                    document.body.removeChild(messageDiv);
+                }
+                if (document.head.contains(style)) {
+                    document.head.removeChild(style);
+                }
+            }, 2000);
+        }
+
+        function applyPower(power) {
+            switch(power) {
+                case 'wider':
+                    paddle.width = 120;
+                    break;
+                case 'narrower':
+                    paddle.width = 40;
+                    break;
+                case 'inverted':
+                    controlsInverted = true;
+                    break;
+                case 'ultra_speed':
+                    paddle.speed = 15;
+                    break;
+                case 'exploding_islets':
+                    // This will be handled in the collision detection
+                    break;
+                case 'upside_down':
+                    screenUpsideDown = true;
+                    // Set a specific timeout for upside down power
+                    if (upsideDownTimeout) {
+                        clearTimeout(upsideDownTimeout);
+                    }
+                    upsideDownTimeout = setTimeout(() => {
+                        screenUpsideDown = false;
+                        upsideDownTimeout = null;
+                    }, 5000);
+                    break;
+            }
+        }
+
+        function updateSpecialPowers() {
+            if (specialPowerActive && Date.now() > powerEndTime) {
+                // Power expired, reset to normal
+                specialPowerActive = false;
+                currentPower = null;
+                
+                // Remove power-active class from canvas
+                canvas.classList.remove('power-active');
+                
+                // Reset exploding islets animation timer
+                explodingIsletsTimer = 0;
+                
+                // Reset paddle properties
+                paddle.width = originalPaddleWidth;
+                paddle.speed = originalPaddleSpeed;
+                controlsInverted = false;
+                screenUpsideDown = false;
+                
+                // Clear upside down timeout if it exists
+                if (upsideDownTimeout) {
+                    clearTimeout(upsideDownTimeout);
+                    upsideDownTimeout = null;
+                }
+            }
+        }
+
+        function updateHaikuProgress() {
+            try {
+                let totalSyllables = 0;
+                for (let word of currentHaiku) {
+                    if (word && word.syllables) {
+                        totalSyllables += word.syllables;
+                    }
+                }
+                
+                const progressElement = document.getElementById('haikuProgress');
+                const speedMultiplier = (baseSpawnInterval / currentSpawnInterval).toFixed(1);
+                progressElement.textContent = `Syllables: ${totalSyllables}/17 | Haikus: ${haikuCount} | Speed: ${speedMultiplier}x`;
+            } catch (error) {
+                console.error('Error in updateHaikuProgress:', error);
+            }
+        }
+
+
+        function formatHaikuLines(words) {
+            let line1 = [];
+            let line2 = [];
+            let line3 = [];
+            let currentSyllables = 0;
+            let currentLine = 1;
+            
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                const nextWord = i + 1 < words.length ? words[i + 1] : null;
+                
+                // Fix article usage
+                let fixedWord = word.type === 'article' ? fixArticle(word.word, nextWord ? nextWord.word : null) : word.word;
+                
+                
+                if (currentLine === 1) {
+                    if (currentSyllables + word.syllables <= 5) {
+                        line1.push(fixedWord);
+                        currentSyllables += word.syllables;
+                        // Move to line 2 if we've reached exactly 5 syllables
+                        if (currentSyllables === 5) {
+                            currentLine = 2;
+                            currentSyllables = 0;
+                        }
+                    } else {
+                        // Word would exceed 5 syllables, move to line 2
+                        currentLine = 2;
+                        currentSyllables = word.syllables;
+                        line2.push(fixedWord);
+                    }
+                } else if (currentLine === 2) {
+                    if (currentSyllables + word.syllables <= 7) {
+                        line2.push(fixedWord);
+                        currentSyllables += word.syllables;
+                        // Move to line 3 if we've reached exactly 7 syllables
+                        if (currentSyllables === 7) {
+                            currentLine = 3;
+                            currentSyllables = 0;
+                        }
+                    } else {
+                        // Word would exceed 7 syllables, move to line 3
+                        currentLine = 3;
+                        currentSyllables = word.syllables;
+                        line3.push(fixedWord);
+                    }
+                } else if (currentLine === 3) {
+                    // Line 3 - add words up to 5 syllables
+                    if (currentSyllables + word.syllables <= 5) {
+                        line3.push(fixedWord);
+                        currentSyllables += word.syllables;
+                    }
+                    // If it would exceed 5 syllables, we don't add it (haiku is complete)
+                }
+            }
+            
+            // Format each line with proper grammar and case
+            const formatLine = (line, lineNumber) => {
+                if (line.length === 0) return '';
+                
+                let formattedLine = line.join(' ');
+                
+                // Capitalize first letter of each line
+                formattedLine = formattedLine.charAt(0).toUpperCase() + formattedLine.slice(1);
+                
+                // Add appropriate punctuation based on line number
+                if (lineNumber === 1) {
+                    // First line usually doesn't end with punctuation in haikus
+                    formattedLine = formattedLine;
+                } else if (lineNumber === 3) {
+                    // Last line typically ends with a period
+                    if (!formattedLine.endsWith('.') && !formattedLine.endsWith('!') && !formattedLine.endsWith('?')) {
+                        formattedLine += '.';
+                    }
+                } else {
+                    // Middle line might have a comma or no punctuation
+                    formattedLine = formattedLine;
+                }
+                
+                return formattedLine;
+            };
+            
+            const formattedLine1 = formatLine(line1, 1);
+            const formattedLine2 = formatLine(line2, 2);
+            const formattedLine3 = formatLine(line3, 3);
+            
+            return formattedLine1 + '<br>' + formattedLine2 + '<br>' + formattedLine3;
+        }
+
+        function checkHaikuComplete() {
+            try {
+                if (currentHaiku.length < 3) return false;
+                
+                let totalSyllables = 0;
+                for (let word of currentHaiku) {
+                    if (word && word.syllables) {
+                        totalSyllables += word.syllables;
+                    }
+                }
+                
+                // Check if we have exactly 17 syllables
+                return totalSyllables === 17; // 5 + 7 + 5
+            } catch (error) {
+                console.error('Error in checkHaikuComplete:', error);
+                return false;
+            }
+        }
+
+        function checkHaikuOverflow() {
+            let totalSyllables = 0;
+            for (let word of currentHaiku) {
+                totalSyllables += word.syllables;
+            }
+            
+            // If we exceed 17 syllables, remove the last word
+            if (totalSyllables > 17) {
+                const removedWord = currentHaiku.pop();
+                caughtWords.pop(); // Also remove from caught words
+                updateHaikuProgress();
+                return true; // Indicate overflow occurred
+            }
+            return false;
+        }
+
+        function completeHaiku() {
+            try {
+                haikuCount++;
+                score += 100; // Bonus points for completing haiku
+                scoreElement.textContent = `Score: ${score}`;
+                
+                // Increase game speed for next haiku
+                increaseGameSpeed();
+                
+                // Pause the game and show completed haiku
+                haikuCompleted = true;
+                gamePaused = true;
+                
+                // Display completed haiku
+                displayCompletedHaiku();
+                
+                // Play completion sound
+                playHaikuCompleteSound();
+            } catch (error) {
+                console.error('Error in completeHaiku:', error);
+            }
+        }
+
+        function increaseGameSpeed() {
+            // Make spawn interval faster (smaller number = faster spawning)
+            currentSpawnInterval = Math.max(150, currentSpawnInterval * speedIncreaseFactor);
+            
+            // Make islets fall faster with more variation
+            currentIsletSpeed = Math.min(10, currentIsletSpeed * (2 - speedIncreaseFactor));
+            
+            // Update progress display to show speed increase
+            updateHaikuProgress();
+        }
+
+        function continueAfterHaiku() {
+            // Reset for next haiku and resume game
+            currentHaiku = [];
+            haikuCompleted = false;
+            gamePaused = false;
+            
+            // Hide completed haiku display
+            const haikuDisplay = document.querySelector('.haiku-completion-display');
+            if (haikuDisplay) {
+                document.body.removeChild(haikuDisplay);
+            }
+            
+            // Update displays
+            updateHaikuProgress();
+        }
+
+        function displayCompletedHaiku() {
+            try {
+                // Create a temporary display of the completed haiku
+                const formattedHaiku = formatHaikuLines(currentHaiku);
+                
+                // Show haiku completion message
+                const haikuDisplay = document.createElement('div');
+                haikuDisplay.className = 'haiku-completion-display';
+                haikuDisplay.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.9);
+                    color: #ffff00;
+                    padding: 20px;
+                    border: 2px solid #ffff00;
+                    text-align: center;
+                    font-family: 'Courier New', monospace;
+                    font-size: 16px;
+                    z-index: 1000;
+                `;
+                haikuDisplay.innerHTML = `
+                    <h3>Haiku Complete!</h3>
+                    <div style="font-style: italic; margin: 10px 0; line-height: 1.5;">${formattedHaiku}</div>
+                    <p>Haikus completed: ${haikuCount}</p>
+                    <p>Press SPACE or P to continue</p>
+                `;
+                
+                document.body.appendChild(haikuDisplay);
+            } catch (error) {
+                console.error('Error in displayCompletedHaiku:', error);
+            }
+        }
+
+
+        function startGame() {
+            // Hide start screen
+            const startScreen = document.getElementById('startScreen');
+            startScreen.style.display = 'none';
+            
+            // Start the game
+            gameRunning = true;
+            gameStarted = true;
+            
+            // Initialize audio
+            initAudio();
+            
+            // Start game loop
+            gameLoop();
+        }
+
+        // Input handling
+        const keys = {};
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            
+            // Handle pause/resume, haiku completion continue, or start screen
+            if (e.key === ' ' || e.key === 'p' || e.key === 'P') {
+                e.preventDefault(); // Prevent page scroll on spacebar
+                if (!gameStarted) {
+                    startGame();
+                } else if (haikuCompleted) {
+                    continueAfterHaiku();
+                } else {
+                    togglePause();
+                }
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Pause functionality
+        function togglePause() {
+            if (gameRunning && !haikuCompleted) {
+                gamePaused = !gamePaused;
+                if (gamePaused) {
+                    pauseOverlayElement.innerHTML = '<h2>GAME PAUSED</h2><p>Press SPACE or P to resume</p>';
+                    pauseOverlayElement.style.display = 'block';
+                } else {
+                    pauseOverlayElement.style.display = 'none';
+                }
+            }
+        }
+
+        // Paddle movement
+        function updatePaddle() {
+            if (!gamePaused) {
+                let moveLeft = keys['ArrowLeft'] || keys['a'] || keys['A'];
+                let moveRight = keys['ArrowRight'] || keys['d'] || keys['D'];
+                
+                // Apply inverted controls if active
+                if (controlsInverted) {
+                    [moveLeft, moveRight] = [moveRight, moveLeft];
+                }
+                
+                // Handle acceleration
+                if (moveLeft || moveRight) {
+                    // Increase acceleration when moving
+                    playerAcceleration = Math.min(playerAcceleration + accelerationRate, maxAcceleration);
+                } else {
+                    // Decrease acceleration when not moving
+                    playerAcceleration = Math.max(playerAcceleration - decelerationRate, 0);
+                }
+                
+                // Calculate current speed with acceleration
+                const currentSpeed = paddle.speed * (1 + playerAcceleration);
+                
+                // Move paddle with accelerated speed
+                if (moveLeft && paddle.x > 0) {
+                    paddle.x -= currentSpeed;
+                }
+                if (moveRight && paddle.x < canvas.width - paddle.width) {
+                    paddle.x += currentSpeed;
+                }
+            }
+        }
+
+        // Spawn falling islets
+        function spawnIslets() {
+            if (!gamePaused) {
+                const now = Date.now();
+                if (now - lastSpawnTime > currentSpawnInterval) {
+                    // Spawn 2-5 islets at a time (more challenging)
+                    const numIslets = Math.floor(Math.random() * 4) + 2;
+                    
+                    for (let i = 0; i < numIslets && fallingShapes.length < maxIsletsAtOnce; i++) {
+                        // 15% chance for special power islet, 5% chance for bomb islet
+                        const isSpecial = Math.random() < 0.15;
+                        const isBomb = !isSpecial && Math.random() < 0.05;
+                        fallingShapes.push(new Islet(isSpecial, isBomb));
+                        
+                        // Play sound when power islet appears
+                        if (isSpecial) {
+                            playPowerIsletAppearSound();
+                        }
+                    }
+                    lastSpawnTime = now;
+                }
+            }
+        }
+
+        // Update falling islets
+        function updateIslets() {
+            if (!gamePaused) {
+                for (let i = fallingShapes.length - 1; i >= 0; i--) {
+                    const islet = fallingShapes[i];
+                    islet.update();
+
+                    // Check collision with paddle
+                    if (islet.y + islet.height > paddle.y &&
+                        islet.y < paddle.y + paddle.height &&
+                        islet.x + islet.width > paddle.x &&
+                        islet.x < paddle.x + paddle.width) {
+                        
+                        // Check if it's a bomb islet
+                        if (islet.isBomb) {
+                            // Bomb explodes when caught - remove last word
+                            showPaddleExplosionEffect();
+                            playExplosionSound();
+                            fallingShapes.splice(i, 1);
+                            // Remove last word from haiku
+                            removeLastWordFromHaiku();
+                        } else if (specialPowerActive && currentPower === 'exploding_islets') {
+                            // Paddle explodes when catching any islet - remove last word
+                            showPaddleExplosionEffect();
+                            playExplosionSound();
+                            fallingShapes.splice(i, 1);
+                            // Remove last word from haiku
+                            removeLastWordFromHaiku();
+                        } else {
+                            // Paddle caught the islet - add to haiku
+                            console.log('Caught islet:', islet);
+                            addWordToHaiku(islet);
+                            fallingShapes.splice(i, 1);
+                            playCatchSound(); // Play catch sound effect
+                        }
+                    } else if (islet.isOffScreen()) {
+                        // Islet fell off screen
+                        fallingShapes.splice(i, 1);
+                        playMissSound(); // Play miss sound effect
+                    }
+                }
+            }
+        }
+
+        // Draw paddle
+        function drawPaddle() {
+            ctx.fillStyle = '#00ffff';
+            ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+            
+            // Draw ASCII art on paddle
+            ctx.fillStyle = '#008888';
+            ctx.font = '8px monospace';
+            for (let i = 0; i < paddleArt.length; i++) {
+                ctx.fillText(paddleArt[i], paddle.x + 2, paddle.y + 12 + i * 8);
+            }
+        }
+
+        // Draw all islets
+        function drawIslets() {
+            // Update exploding islets animation timer
+            if (specialPowerActive && currentPower === 'exploding_islets') {
+                explodingIsletsTimer += 0.1;
+            }
+            
+            fallingShapes.forEach(islet => {
+                // Apply exploding islets power visual if active
+                if (specialPowerActive && currentPower === 'exploding_islets' && !islet.isSpecial) {
+                    // Calculate blink effect for each islet
+                    const blinkPhase = (islet.x + islet.y + explodingIsletsTimer) * 0.1;
+                    const blinkAlpha = Math.sin(blinkPhase) * 0.5 + 0.5; // 0 to 1
+                    
+                    // Only draw if islet is visible (blinking effect)
+                    if (blinkAlpha > 0.3) {
+                        const originalColor = islet.color;
+                        const originalWord = islet.word;
+                        islet.color = `rgba(136, 204, 255, ${blinkAlpha})`; // Light blue text with alpha
+                        islet.word = 'BOOM!'; // Change text to BOOM!
+                        islet.draw();
+                        islet.color = originalColor; // Restore original color
+                        islet.word = originalWord; // Restore original word
+                    }
+                } else {
+                    islet.draw();
+                }
+            });
+        }
+
+        // Draw current haiku in the middle of the screen
+        function drawCurrentHaikuOnScreen() {
+            if (currentHaiku.length === 0) return;
+            
+            // Calculate total syllables
+            let totalSyllables = 0;
+            for (let word of currentHaiku) {
+                totalSyllables += word.syllables;
+            }
+            
+            // Only show if we have some words
+            if (totalSyllables === 0) return;
+            
+            // Set up text styling (transparent background)
+            ctx.strokeStyle = '#ffff00';
+            ctx.lineWidth = 2;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '16px monospace';
+            ctx.textAlign = 'center';
+            
+            // Draw haiku lines
+            let y = canvas.height / 2 - 20;
+            let line1 = '';
+            let line2 = '';
+            let line3 = '';
+            let currentLine = 1;
+            let currentSyllables = 0;
+            
+            for (let i = 0; i < currentHaiku.length; i++) {
+                const word = currentHaiku[i];
+                const nextWord = i + 1 < currentHaiku.length ? currentHaiku[i + 1] : null;
+                
+                // Fix article usage
+                const fixedWord = word.type === 'article' ? fixArticle(word.word, nextWord ? nextWord.word : null) : word.word;
+                
+                let wordToAdd = fixedWord;
+                
+                if (currentLine === 1) {
+                    if (currentSyllables + word.syllables <= 5) {
+                        line1 += (line1 ? ' ' : '') + wordToAdd;
+                        currentSyllables += word.syllables;
+                        // Move to line 2 if we've reached exactly 5 syllables
+                        if (currentSyllables === 5) {
+                            currentLine = 2;
+                            currentSyllables = 0;
+                        }
+                    } else {
+                        // Word would exceed 5 syllables, move to line 2
+                        currentLine = 2;
+                        currentSyllables = word.syllables;
+                        line2 = wordToAdd;
+                    }
+                } else if (currentLine === 2) {
+                    if (currentSyllables + word.syllables <= 7) {
+                        line2 += (line2 ? ' ' : '') + wordToAdd;
+                        currentSyllables += word.syllables;
+                        // Move to line 3 if we've reached exactly 7 syllables
+                        if (currentSyllables === 7) {
+                            currentLine = 3;
+                            currentSyllables = 0;
+                        }
+                    } else {
+                        // Word would exceed 7 syllables, move to line 3
+                        currentLine = 3;
+                        currentSyllables = word.syllables;
+                        line3 = wordToAdd;
+                    }
+                } else if (currentLine === 3) {
+                    // Line 3 - add words up to 5 syllables
+                    if (currentSyllables + word.syllables <= 5) {
+                        line3 += (line3 ? ' ' : '') + wordToAdd;
+                        currentSyllables += word.syllables;
+                    }
+                    // If it would exceed 5 syllables, we don't add it (haiku is complete)
+                }
+            }
+            
+            // Draw the lines with proper capitalization
+            if (line1) {
+                const capitalizedLine1 = line1.charAt(0).toUpperCase() + line1.slice(1);
+                ctx.strokeText(capitalizedLine1, canvas.width / 2, y);
+                ctx.fillText(capitalizedLine1, canvas.width / 2, y);
+                y += 25;
+            }
+            if (line2) {
+                const capitalizedLine2 = line2.charAt(0).toUpperCase() + line2.slice(1);
+                ctx.strokeText(capitalizedLine2, canvas.width / 2, y);
+                ctx.fillText(capitalizedLine2, canvas.width / 2, y);
+                y += 25;
+            }
+            if (line3) {
+                const capitalizedLine3 = line3.charAt(0).toUpperCase() + line3.slice(1);
+                ctx.strokeText(capitalizedLine3, canvas.width / 2, y);
+                ctx.fillText(capitalizedLine3, canvas.width / 2, y);
+            }
+            
+            
+            // Reset text alignment
+            ctx.textAlign = 'left';
+        }
+
+        // Game over
+        function gameOver() {
+            gameRunning = false;
+            finalScoreElement.textContent = score;
+            gameOverElement.style.display = 'block';
+        }
+
+        // Restart game
+        function restartGame() {
+            gameRunning = true;
+            gamePaused = false;
+            haikuCompleted = false;
+            gameStarted = true;
+            score = 0;
+            haikuCount = 0;
+            currentHaiku = [];
+            caughtWords = [];
+            lastCaughtType = null;
+            consecutiveArticles = 0;
+            paddle.x = canvas.width / 2 - 40;
+            fallingShapes = [];
+            lastSpawnTime = 0;
+            
+            // Reset special powers
+            specialPowerActive = false;
+            currentPower = null;
+            powerEndTime = 0;
+            controlsInverted = false;
+            screenUpsideDown = false;
+            paddle.width = originalPaddleWidth;
+            paddle.speed = originalPaddleSpeed;
+            
+            // Clear upside down timeout if it exists
+            if (upsideDownTimeout) {
+                clearTimeout(upsideDownTimeout);
+                upsideDownTimeout = null;
+            }
+            
+            // Reset player acceleration
+            playerAcceleration = 0;
+            
+            // Remove power-active class from canvas
+            canvas.classList.remove('power-active');
+            
+            // Reset exploding islets animation timer
+            explodingIsletsTimer = 0;
+            
+            // Reset game speed to initial values
+            currentSpawnInterval = baseSpawnInterval;
+            currentIsletSpeed = baseIsletSpeed;
+            
+            scoreElement.textContent = `Score: ${score}`;
+            updateHaikuProgress();
+            gameOverElement.style.display = 'none';
+            pauseOverlayElement.style.display = 'none';
+            
+            // Hide start screen if it's showing
+            const startScreen = document.getElementById('startScreen');
+            startScreen.style.display = 'none';
+            
+            // Remove any haiku completion displays
+            const haikuDisplay = document.querySelector('.haiku-completion-display');
+            if (haikuDisplay) {
+                document.body.removeChild(haikuDisplay);
+            }
+        }
+
+        // Main game loop
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            try {
+            // Clear canvas with night sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#0a0a1a'); // Dark blue-black at top
+            gradient.addColorStop(0.5, '#1a1a2e'); // Slightly lighter in middle
+            gradient.addColorStop(1, '#16213e'); // Dark blue at bottom
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Apply upside down transformation if active
+            if (screenUpsideDown) {
+                ctx.save();
+                ctx.translate(canvas.width, canvas.height);
+                ctx.rotate(Math.PI);
+            }
+
+            // Update game objects
+            updatePaddle();
+            updateSpecialPowers();
+            spawnIslets();
+            updateIslets();
+
+            // Draw everything in correct layering order
+            // Draw background stars first
+            starTimer += 0.02; // Increment timer for animation
+            for (let i = 0; i < 80; i++) {
+                const x = (i * 37) % canvas.width;
+                const y = (i * 23) % canvas.height;
+                
+                // Each star blinks at a different rate based on its position
+                const blinkPhase = (i * 0.3) + starTimer;
+                const alpha = Math.sin(blinkPhase) * 0.4 + 0.3; // 0.3 to 0.7 for subtlety
+                
+                // Only draw star if it's visible (alpha > 0.2)
+                if (alpha > 0.2) {
+                    // Vary star colors slightly for more realistic night sky
+                    const starVariation = Math.sin(i * 0.7) * 0.3;
+                    const r = Math.min(255, 200 + starVariation * 30);
+                    const g = Math.min(255, 200 + starVariation * 20);
+                    const b = Math.min(255, 255 + starVariation * 10);
+                    
+                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+            
+            // Add some very subtle distant stars
+            for (let i = 0; i < 30; i++) {
+                const x = (i * 67) % canvas.width;
+                const y = (i * 41) % canvas.height;
+                
+                const blinkPhase = (i * 0.1) + starTimer * 0.5;
+                const alpha = Math.sin(blinkPhase) * 0.2 + 0.1; // Very subtle
+                
+                if (alpha > 0.05) {
+                    ctx.fillStyle = `rgba(150, 150, 200, ${alpha})`;
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+            
+            // Draw current haiku in the background
+            drawCurrentHaikuOnScreen();
+            
+            // Draw islets in the foreground
+            drawIslets();
+            
+            // Draw paddle on top
+            drawPaddle();
+
+            // Restore transformation if upside down was applied
+            if (screenUpsideDown) {
+                ctx.restore();
+            }
+
+            requestAnimationFrame(gameLoop);
+            
+            } catch (error) {
+                console.error('Error in gameLoop:', error);
+                // Continue the game loop even if there's an error
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // Game starts with instruction screen - no auto-start
+    </script>
+</body>
+</html>
