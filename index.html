@@ -655,7 +655,7 @@
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             } catch (e) {
-                console.log('Web Audio API not supported');
+                // Web Audio API not supported
             }
         }
 
@@ -914,8 +914,7 @@
             }
             
             } catch (error) {
-                console.error('Error in addWordToPoem:', error);
-                console.error('Whisper data:', whisper);
+                // Error in addWordToPoem - continue game
             }
         }
 
@@ -1224,7 +1223,7 @@
                 
                 progressElement.innerHTML = `<span id="playerNameDisplay">${playerName}</span>'s story so far: Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
             } catch (error) {
-                console.error('Error in updatePoetryProgress:', error);
+                // Error in updatePoetryProgress - continue game
             }
         }
 
@@ -1331,7 +1330,6 @@
                 // Check if we have exactly 17 syllables
                 return totalSyllables === 17; // 5 + 7 + 5
             } catch (error) {
-                console.error('Error in checkPoemComplete:', error);
                 return false;
             }
         }
@@ -1369,7 +1367,7 @@
                 // Play completion sound
                 playHaikuCompleteSound();
             } catch (error) {
-                console.error('Error in completePoem:', error);
+                // Error in completePoem - continue game
             }
         }
 
@@ -1431,7 +1429,7 @@
                 
                 document.body.appendChild(haikuDisplay);
             } catch (error) {
-                console.error('Error in displayCompletedPoem:', error);
+                // Error in displayCompletedPoem - continue game
             }
         }
 
@@ -1583,7 +1581,6 @@
                             removeLastWordFromPoem();
                         } else {
                             // Paddle caught the whisper - add to haiku
-                            console.log('Caught whisper:', whisper);
                             addWordToPoem(whisper);
                             fallingShapes.splice(i, 1);
                             playCatchSound(); // Play catch sound effect
@@ -1958,7 +1955,6 @@
             requestAnimationFrame(gameLoop);
             
             } catch (error) {
-                console.error('Error in gameLoop:', error);
                 // Continue the game loop even if there's an error
                 requestAnimationFrame(gameLoop);
             }
