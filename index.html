@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Falling Islets - A poetry building game by Adri M.</title>
+    <title>Stories in Whispers - A floating isle by Adri M.</title>
     <style>
         body {
             margin: 0;
@@ -182,8 +182,8 @@
 <body>
     <div id="gameContainer">
         <div id="startScreen">
-            <h1>FALLING ISLETS</h1>
-            <h2>A poetry building game by Adri M.</h2>
+            <h1>STORIES IN WHISPERS</h1>
+            <h2>A floating isle by Adri M.</h2>
             
             <div style="display: flex; gap: 20px; text-align: left;">
                 <div style="flex: 1;">
@@ -527,15 +527,74 @@
                         ctx.lineTo(textX + textWidth/2, textY + 3);
                         ctx.stroke();
                     } else {
-                        // Draw normal word
-                        ctx.fillStyle = this.color; // Use the islet's color for text
+                        // Draw normal word with bloom effect
                         const wordText = this.word.toLowerCase();
+                        const textWidth = ctx.measureText(wordText).width;
+                        
+                        // Parse the color to get RGB values for bloom
+                        const colorMatch = this.color.match(/#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i);
+                        if (colorMatch) {
+                            const r = parseInt(colorMatch[1], 16);
+                            const g = parseInt(colorMatch[2], 16);
+                            const b = parseInt(colorMatch[3], 16);
+                            
+                            // Create darker version of the color for bloom
+                            const darkR = Math.floor(r * 0.3);
+                            const darkG = Math.floor(g * 0.3);
+                            const darkB = Math.floor(b * 0.3);
+                            
+                            // Draw bloom layers (outer glow) - more subtle
+                            for (let i = 3; i >= 1; i--) {
+                                const alpha = 0.03 * (4 - i); // Much lower opacity
+                                const offset = i * 0.3; // Smaller offset
+                                
+                                // Draw bloom text with darker color
+                                ctx.fillStyle = `rgba(${darkR}, ${darkG}, ${darkB}, ${alpha})`;
+                                ctx.fillText(wordText, textX - offset, textY - offset);
+                                ctx.fillText(wordText, textX + offset, textY - offset);
+                                ctx.fillText(wordText, textX - offset, textY + offset);
+                                ctx.fillText(wordText, textX + offset, textY + offset);
+                                ctx.fillText(wordText, textX, textY - offset);
+                                ctx.fillText(wordText, textX, textY + offset);
+                                ctx.fillText(wordText, textX - offset, textY);
+                                ctx.fillText(wordText, textX + offset, textY);
+                            }
+                        }
+                        
+                        // Draw main text
+                        ctx.fillStyle = this.color; // Use the islet's color for text
                         ctx.fillText(wordText, textX, textY);
                         
-                        // Draw underline
+                        // Draw underline with bloom effect
+                        if (colorMatch) {
+                            const r = parseInt(colorMatch[1], 16);
+                            const g = parseInt(colorMatch[2], 16);
+                            const b = parseInt(colorMatch[3], 16);
+                            
+                            // Create darker version for underline bloom
+                            const darkR = Math.floor(r * 0.3);
+                            const darkG = Math.floor(g * 0.3);
+                            const darkB = Math.floor(b * 0.3);
+                            
+                            // Draw bloom underline - more subtle
+                            for (let i = 2; i >= 1; i--) {
+                                const alpha = 0.05 * (3 - i); // Much lower opacity
+                                const offset = i * 0.2; // Smaller offset
+                                
+                                ctx.strokeStyle = `rgba(${darkR}, ${darkG}, ${darkB}, ${alpha})`;
+                                ctx.lineWidth = 2 + i * 0.5; // Thinner lines
+                                ctx.beginPath();
+                                ctx.moveTo(textX - textWidth/2 - offset, textY + 3 - offset);
+                                ctx.lineTo(textX + textWidth/2 + offset, textY + 3 - offset);
+                                ctx.moveTo(textX - textWidth/2 - offset, textY + 3 + offset);
+                                ctx.lineTo(textX + textWidth/2 + offset, textY + 3 + offset);
+                                ctx.stroke();
+                            }
+                        }
+                        
+                        // Draw main underline
                         ctx.strokeStyle = this.color;
                         ctx.lineWidth = 2;
-                        const textWidth = ctx.measureText(wordText).width;
                         ctx.beginPath();
                         ctx.moveTo(textX - textWidth/2, textY + 3);
                         ctx.lineTo(textX + textWidth/2, textY + 3);
