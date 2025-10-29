@@ -17,12 +17,14 @@ try {
     ");
     $poems = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Get most used words
+    // Get most used words (excluding articles and conjunctions)
     $word_stats = [];
+    $excluded_words = ['the', 'a', 'an', 'and', 'but', 'or', 'so', 'yet', 'for', 'nor', 'while', 'when', 'where', 'because', 'if', 'unless', 'since', 'until', 'though', 'although', 'as', 'than', 'that'];
+    
     foreach ($poems as $poem) {
         $words = preg_split('/\s+/', strtolower(preg_replace('/[^\w\s]/', '', $poem['poem_text'])));
         foreach ($words as $word) {
-            if (strlen($word) > 2) { // Only count words longer than 2 characters
+            if (strlen($word) > 2 && !in_array($word, $excluded_words)) { // Only count words longer than 2 characters and not in excluded list
                 $word_stats[$word] = ($word_stats[$word] ?? 0) + 1;
             }
         }
@@ -61,15 +63,22 @@ try {
     $stats['total_poems'] = count($poems);
     $stats['total_players'] = count($user_stats);
     
-    // Find word connections between poems
+    // Find word connections between poems (excluding articles and conjunctions)
     $word_connections = [];
     for ($i = 0; $i < count($poems); $i++) {
         for ($j = $i + 1; $j < count($poems); $j++) {
             $poem1_words = array_map('strtolower', preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $poems[$i]['poem_text'])));
             $poem2_words = array_map('strtolower', preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $poems[$j]['poem_text'])));
             
+            // Filter out articles and conjunctions from both poems
+            $poem1_words = array_filter($poem1_words, function($word) use ($excluded_words) { 
+                return strlen($word) > 2 && !in_array($word, $excluded_words); 
+            });
+            $poem2_words = array_filter($poem2_words, function($word) use ($excluded_words) { 
+                return strlen($word) > 2 && !in_array($word, $excluded_words); 
+            });
+            
             $common_words = array_intersect($poem1_words, $poem2_words);
-            $common_words = array_filter($common_words, function($word) { return strlen($word) > 2; });
             
             if (count($common_words) > 0) {
                 $word_connections[] = [
@@ -299,8 +308,7 @@ try {
             </div>
             
         <div class="nav-links">
-            <a href="index.html">← Back to Game</a>
-            <a href="view_poems.php">View All Poems</a>
+            <a href="index.html" id="backToGameLink">← Back to Game (Press B)</a>
         </div>
         
         <?php if (empty($poems)): ?>
@@ -322,21 +330,6 @@ try {
                         <div class="word-cloud">
                             <?php foreach ($stats['most_used_words'] as $word => $count): ?>
                                 <span class="word-item"><?php echo htmlspecialchars($word); ?> (<?php echo $count; ?>)</span>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <h3>Player Activity</h3>
-                        <div class="user-stats">
-                            <?php foreach ($stats['user_stats'] as $player => $data): ?>
-                                <div class="user-item">
-                                    <span class="user-name"><?php echo htmlspecialchars($player); ?></span>
-                                    <span class="user-data">
-                                        <?php echo $data['poem_count']; ?> poems • 
-                                        <?php echo $data['estimated_time_minutes']; ?> min
-                                    </span>
-                                </div>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -379,6 +372,12 @@ try {
                                                 $poem_text = str_replace('&lt;br&gt;', "\n", $poem_text);
                                                 $poem_text = str_replace('&lt;br/&gt;', "\n", $poem_text);
                                                 $poem_text = str_replace('&lt;br /&gt;', "\n", $poem_text);
+                                                
+                                                // Highlight common words
+                                                foreach ($connection['common_words'] as $common_word) {
+                                                    $poem_text = preg_replace('/\b' . preg_quote($common_word, '/') . '\b/i', '<span style="background: #ffff00; color: #000; padding: 2px 4px; border-radius: 3px; font-weight: bold;">' . $common_word . '</span>', $poem_text);
+                                                }
+                                                
                                                 echo nl2br($poem_text);
                                             ?>
                                         </div>
@@ -394,6 +393,12 @@ try {
                                                 $poem_text = str_replace('&lt;br&gt;', "\n", $poem_text);
                                                 $poem_text = str_replace('&lt;br/&gt;', "\n", $poem_text);
                                                 $poem_text = str_replace('&lt;br /&gt;', "\n", $poem_text);
+                                                
+                                                // Highlight common words
+                                                foreach ($connection['common_words'] as $common_word) {
+                                                    $poem_text = preg_replace('/\b' . preg_quote($common_word, '/') . '\b/i', '<span style="background: #ffff00; color: #000; padding: 2px 4px; border-radius: 3px; font-weight: bold;">' . $common_word . '</span>', $poem_text);
+                                                }
+                                                
                                                 echo nl2br($poem_text);
                                             ?>
                                         </div>
@@ -408,5 +413,15 @@ try {
                 </div>
         <?php endif; ?>
     </div>
+
+    <script>
+        // Handle B key to go back to game
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'b' || e.key === 'B') {
+                e.preventDefault();
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
 </body>
 </html>
