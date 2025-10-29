@@ -198,8 +198,7 @@
             <button class="start-button" onclick="startGame()">Press SPACE to start</button>
         </div>
         
-        <div id="score">Score: 0</div>
-        <div id="haikuProgress">Poetry Progress: 0/17 syllables | Poems: 0</div>
+        <div id="haikuProgress">Score: 0 | Poetry Progress: 0/17 syllables | Poems: 0</div>
         <div id="currentHaiku">Building your poem...</div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         <div id="instructions">
@@ -222,7 +221,6 @@
         // Game variables
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
         const gameOverElement = document.getElementById('gameOver');
         const finalScoreElement = document.getElementById('finalScore');
         const pauseOverlayElement = document.getElementById('pauseOverlay');
@@ -1207,7 +1205,7 @@
                 
                 const progressElement = document.getElementById('haikuProgress');
                 const speedMultiplier = (baseSpawnInterval / currentSpawnInterval).toFixed(1);
-                progressElement.textContent = `Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
+                progressElement.textContent = `Score: ${score} | Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
             } catch (error) {
                 console.error('Error in updatePoetryProgress:', error);
             }
@@ -1341,7 +1339,6 @@
             try {
                 haikuCount++;
                 score += 100; // Bonus points for completing poem
-                scoreElement.textContent = `Score: ${score}`;
                 
                 // Increase game speed for next poem
                 increaseGameSpeed();
@@ -1851,8 +1848,7 @@
             currentSpawnInterval = baseSpawnInterval;
             currentIsletSpeed = baseIsletSpeed;
             
-            scoreElement.textContent = `Score: ${score}`;
-            updateHaikuProgress();
+            updatePoetryProgress();
             gameOverElement.style.display = 'none';
             pauseOverlayElement.style.display = 'none';
             
