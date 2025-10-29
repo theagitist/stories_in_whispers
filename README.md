@@ -44,7 +44,7 @@ A colorful HTML5 video game where players control a paddle at the bottom of the 
 ## Game Mechanics
 
 ### Poetry Building
-- **5-7-5 Structure**: First line has exactly 5 syllables, second line has 7, third line has 5
+- **5-7-5 Structure**: First line has loosely 5 syllables, second line has 7, third line has 5
 - **Real-time display**: Current poem is shown in the center of the screen
 - **Word removal**: Exploding islets remove your last collected word
 - **Automatic line breaks**: Words automatically move to the next line when syllable limits are reached
