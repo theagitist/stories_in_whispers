@@ -212,16 +212,17 @@ try {
             gap: 8px;
         }
         .word-item {
-            background: #ff69b4;
-            color: #000;
+            background: rgba(255, 105, 180, 0.3);
+            color: #ff69b4;
             padding: 4px 8px;
-            border-radius: 15px;
+            border-radius: 4px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: normal;
+            border: 1px solid rgba(255, 105, 180, 0.5);
         }
-        .word-item:nth-child(1) { font-size: 18px; background: #ffff00; }
-        .word-item:nth-child(2) { font-size: 16px; background: #ff69b4; }
-        .word-item:nth-child(3) { font-size: 14px; background: #44ff44; }
+        .word-item:nth-child(1) { font-size: 18px; background: rgba(255, 255, 0, 0.3); color: #ffff00; border-color: rgba(255, 255, 0, 0.5); }
+        .word-item:nth-child(2) { font-size: 16px; background: rgba(255, 105, 180, 0.3); color: #ff69b4; border-color: rgba(255, 105, 180, 0.5); }
+        .word-item:nth-child(3) { font-size: 14px; background: rgba(68, 255, 68, 0.3); color: #44ff44; border-color: rgba(68, 255, 68, 0.5); }
         .user-stats {
             max-height: 200px;
             overflow-y: auto;
@@ -243,13 +244,27 @@ try {
         .connections-section {
             margin-bottom: 40px;
         }
+        .connections-carousel {
+            position: relative;
+            height: 500px;
+            overflow: hidden;
+        }
         .connection {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             border: 1px solid #444;
             border-radius: 10px;
             padding: 20px;
-            margin-bottom: 20px;
-            position: relative;
+            margin: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .connection.active {
+            opacity: 1;
         }
         .connection-header {
             display: flex;
@@ -311,6 +326,29 @@ try {
             font-style: italic;
             padding: 40px;
         }
+        .random-poem {
+            background: rgba(255, 105, 180, 0.1);
+            border: 1px solid #ff69b4;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        .random-poem .poem-text {
+            font-style: italic;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        .random-poem .poem-meta {
+            color: #ff69b4;
+            font-size: 12px;
+            border-top: 1px solid #ff69b4;
+            padding-top: 8px;
+        }
+        .random-poem .author {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -346,6 +384,25 @@ try {
                             <?php endforeach; ?>
                         </div>
                     </div>
+                    
+                    <div class="stat-card">
+                        <h3>Random Poem</h3>
+                        <?php 
+                        $random_poem = $poems[array_rand($poems)];
+                        $poem_text = htmlspecialchars($random_poem['poem_text']);
+                        $poem_text = str_replace('&lt;br&gt;', "\n", $poem_text);
+                        $poem_text = str_replace('&lt;br/&gt;', "\n", $poem_text);
+                        $poem_text = str_replace('&lt;br /&gt;', "\n", $poem_text);
+                        ?>
+                        <div class="random-poem">
+                            <div class="poem-text">
+                                <?php echo nl2br($poem_text); ?>
+                            </div>
+                            <div class="poem-meta">
+                                <span class="author">by a <?php echo htmlspecialchars(strtolower($random_poem['player_name'])); ?></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Word Connections Section -->
@@ -359,50 +416,54 @@ try {
                             <p>No word connections found between poems yet. Keep writing to discover connections!</p>
                         </div>
                     <?php else: ?>
-                        <?php foreach (array_slice($word_connections, 0, 10) as $connection): ?>
-                            <div class="connection">
-                                <div class="connection-header">
-                                    <h3 style="color: #ffff00; margin: 0;">
-                                        Connected Poems (<?php echo $connection['poem_count']; ?> poems)
-                                    </h3>
-                                    <span class="connection-strength">
-                                        <?php echo $connection['connection_strength']; ?> shared words
-                                    </span>
-                                </div>
-                                
-                                <div class="common-words">
-                                    <strong style="color: #44ff44;">Common words:</strong>
-                                    <?php foreach ($connection['common_words'] as $word): ?>
-                                        <span><?php echo htmlspecialchars($word); ?></span>
-                                    <?php endforeach; ?>
-                                </div>
-                                
-                                <div class="poems-grid">
-                                    <?php foreach ($connection['poems'] as $poem): ?>
-                                        <div class="poem-card">
-                                            <div class="poem-text">
-                                                <?php 
-                                                    $poem_text = htmlspecialchars($poem['text']);
-                                                    $poem_text = str_replace('&lt;br&gt;', "\n", $poem_text);
-                                                    $poem_text = str_replace('&lt;br/&gt;', "\n", $poem_text);
-                                                    $poem_text = str_replace('&lt;br /&gt;', "\n", $poem_text);
-                                                    
-                                                    // Highlight common words
-                                                    foreach ($connection['common_words'] as $common_word) {
-                                                        $poem_text = preg_replace('/\b' . preg_quote($common_word, '/') . '\b/i', '<span style="background: #ffff00; color: #000; padding: 2px 4px; border-radius: 3px; font-weight: bold;">' . $common_word . '</span>', $poem_text);
-                                                    }
-                                                    
-                                                    echo nl2br($poem_text);
-                                                ?>
+                        
+                        <div class="connections-carousel">
+                            <?php foreach (array_slice($word_connections, 0, 10) as $index => $connection): ?>
+                                <div class="connection <?php echo $index === 0 ? 'active' : ''; ?>" data-index="<?php echo $index; ?>">
+                                    <div class="connection-header">
+                                        <h3 style="color: #ffff00; margin: 0;">
+                                            Connected Poems (<?php echo $connection['poem_count']; ?> poems)
+                                        </h3>
+                                        <span class="connection-strength">
+                                            <?php echo $connection['connection_strength']; ?> shared words
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="common-words">
+                                        <strong style="color: #44ff44;">Common words:</strong>
+                                        <?php foreach ($connection['common_words'] as $word): ?>
+                                            <span><?php echo htmlspecialchars($word); ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    
+                                    <div class="poems-grid">
+                                        <?php foreach ($connection['poems'] as $poem): ?>
+                                            <div class="poem-card">
+                                                <div class="poem-text">
+                                                    <?php 
+                                                        $poem_text = htmlspecialchars($poem['text']);
+                                                        $poem_text = str_replace('&lt;br&gt;', "\n", $poem_text);
+                                                        $poem_text = str_replace('&lt;br/&gt;', "\n", $poem_text);
+                                                        $poem_text = str_replace('&lt;br /&gt;', "\n", $poem_text);
+                                                        
+                                                        // Highlight common words
+                                                        foreach ($connection['common_words'] as $common_word) {
+                                                            $poem_text = preg_replace('/\b' . preg_quote($common_word, '/') . '\b/i', '<span style="background: #ffff00; color: #000; padding: 2px 4px; border-radius: 3px; font-weight: bold;">' . $common_word . '</span>', $poem_text);
+                                                        }
+                                                        
+                                                        echo nl2br($poem_text);
+                                                    ?>
+                                                </div>
+                                                <div class="poem-meta">
+                                                    <span class="author">by a <?php echo htmlspecialchars(strtolower($poem['author'])); ?></span>
+                                                </div>
                                             </div>
-                                            <div class="poem-meta">
-                                                <span class="author">by a <?php echo htmlspecialchars(strtolower($poem['author'])); ?></span>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
-                            </div>
-                        <?php endforeach; ?>
+                            <?php endforeach; ?>
+                        </div>
+                        
                     <?php endif; ?>
                 </div>
         <?php endif; ?>
@@ -416,6 +477,53 @@ try {
                 window.location.href = 'index.html';
             }
         });
+
+        // Carousel functionality
+        let currentConnectionIndex = 0;
+        const connections = document.querySelectorAll('.connection');
+        const totalConnections = connections.length;
+
+        function updateCarousel() {
+            // Update connection visibility with crossfade
+            connections.forEach((connection, index) => {
+                connection.classList.remove('active');
+                if (index === currentConnectionIndex) {
+                    connection.classList.add('active');
+                }
+            });
+        }
+
+        function nextConnection() {
+            currentConnectionIndex = (currentConnectionIndex + 1) % totalConnections;
+            updateCarousel();
+        }
+
+        // Auto-rotate every 4 seconds
+        let autoRotateInterval;
+        function startAutoRotate() {
+            autoRotateInterval = setInterval(() => {
+                nextConnection();
+            }, 4000);
+        }
+
+        function stopAutoRotate() {
+            if (autoRotateInterval) {
+                clearInterval(autoRotateInterval);
+            }
+        }
+
+        // Initialize carousel
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCarousel();
+            startAutoRotate();
+        });
+
+        // Pause auto-rotate on hover
+        const carousel = document.querySelector('.connections-carousel');
+        if (carousel) {
+            carousel.addEventListener('mouseenter', stopAutoRotate);
+            carousel.addEventListener('mouseleave', startAutoRotate);
+        }
     </script>
 </body>
 </html>
