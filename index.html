@@ -202,7 +202,7 @@
         <div id="currentHaiku">Building your poem...</div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         <div id="instructions">
-            Create poetry by catching falling islets! Collect words to create 5-7-5 syllable poems (loosely applied).<br>
+            Create poetry by catching falling whispers! Collect words to create 5-7-5 syllable poems (loosely applied).<br>
             Use ← → arrow keys or A/D keys to move. Press SPACE or P to pause.<br>
             <span style="color: #ff4444;">Verbs</span>, <span style="color: #aa44ff;">Nouns</span>, <span style="color: #ffff44;">Adjectives</span>, <span style="color: #44ff44;">Adverbs</span>, <span style="color: #ff8844;">Articles</span>, <span style="color: #ff69b4;">Conjunctions</span>
         </div>
@@ -245,12 +245,12 @@
         function generatePoeticLocale() {
             const locales = [
                 "the ethereal realm of floating verses, where whispered dreams take flight and every syllable dances like starlight upon the cosmic winds",
-                "the mystical sanctuary of drifting islets, where ancient stories bloom like celestial flowers and words weave themselves into the very fabric of existence",
+                "the mystical sanctuary of drifting whispers, where ancient stories bloom like celestial flowers and words weave themselves into the very fabric of existence",
                 "the enchanted cathedral of falling poetry, where every whisper echoes through the halls of eternity and syllables sing the songs of forgotten souls",
                 "the luminous garden of eternal tales, where floating words bloom into magnificent stories and dreams crystallize into verses of pure magic",
-                "the sacred labyrinth of whispered narratives, where drifting islets carry the weight of a thousand stories and every word holds the power to reshape reality",
+                "the sacred labyrinth of whispered narratives, where drifting whispers carry the weight of a thousand stories and every word holds the power to reshape reality",
                 "the celestial observatory of floating verses, where poetry orbits like distant stars and words cascade like meteor showers across the infinite canvas of imagination",
-                "the mystical archipelago of drifting dreams, where each floating islet is a world unto itself and words flow like rivers of liquid starlight",
+                "the mystical archipelago of drifting dreams, where each floating whisper is a world unto itself and words flow like rivers of liquid starlight",
                 "the ethereal theater of falling stories, where every syllable performs upon the stage of existence and words dance in perfect harmony with the cosmic symphony",
                 "the enchanted library of floating whispers, where ancient tomes drift through the air and every word is a key that unlocks the mysteries of the universe",
                 "the sacred monastery of drifting poetry, where monks of words meditate upon floating verses and every syllable is a prayer sent heavenward on wings of pure thought",
@@ -315,15 +315,15 @@
         let controlsInverted = false;
         let screenUpsideDown = false;
         let upsideDownTimeout = null;
-        let spawnMultiplier = 1; // Multiplier for islet spawn rate
+        let spawnMultiplier = 1; // Multiplier for whisper spawn rate
         let wordsHidden = false; // Track if words are hidden
         let respiteActive = false; // Track if respite power is active
         
         // Star animation
         let starTimer = 0;
         
-        // Exploding islets animation
-        let explodingIsletsTimer = 0;
+        // Exploding whispers animation
+        let explodingWhispersTimer = 0;
         
         // Player acceleration system
         let playerAcceleration = 0;
@@ -345,9 +345,9 @@
         let lastSpawnTime = 0;
         let baseSpawnInterval = 600; // Base spawn interval (faster spawning)
         let currentSpawnInterval = 600; // Current spawn interval (gets faster)
-        let baseIsletSpeed = 1.5; // Base islet speed (slower start)
-        let currentIsletSpeed = 1.5; // Current islet speed (gets faster)
-        let maxIsletsAtOnce = 6; // Maximum islets falling simultaneously (doubled)
+        let baseWhisperSpeed = 1.5; // Base whisper speed (slower start)
+        let currentWhisperSpeed = 1.5; // Current whisper speed (gets faster)
+        let maxWhispersAtOnce = 6; // Maximum whispers falling simultaneously (doubled)
         const speedIncreaseFactor = 0.9; // Each haiku makes game 10% faster
 
         // Color definitions for parts of speech
@@ -440,15 +440,15 @@
             ] // Simple bomb design
         };
 
-        // Islet class (renamed from FallingShape)
-        class Islet {
+        // Whisper class (renamed from FallingShape)
+        class Whisper {
             constructor(isSpecial = false, isBomb = false) {
                 this.x = Math.random() * (canvas.width - 30);
                 this.y = -50;
                 this.width = 30;
                 this.height = 24;
                 // Use current speed settings for dynamic difficulty with much more variation
-                this.speed = currentIsletSpeed + Math.random() * (currentIsletSpeed * 3);
+                this.speed = currentWhisperSpeed + Math.random() * (currentWhisperSpeed * 3);
                 this.isSpecial = isSpecial;
                 this.isBomb = isBomb;
                 
@@ -595,7 +595,7 @@
                         }
                         
                         // Draw main text
-                        ctx.fillStyle = this.color; // Use the islet's color for text
+                        ctx.fillStyle = this.color; // Use the whisper's color for text
                         ctx.fillText(wordText, textX, textY);
                         
                         // Draw underline with bloom effect
@@ -674,14 +674,14 @@
         }
 
         function playCatchSound() {
-            // Happy ascending sound for catching islet
+            // Happy ascending sound for catching whisper
             playSound(440, 0.2, 'sine', 0.2);
             setTimeout(() => playSound(554, 0.15, 'sine', 0.15), 50);
             setTimeout(() => playSound(659, 0.1, 'sine', 0.1), 100);
         }
 
         function playMissSound() {
-            // Sad descending sound for missing islet
+            // Sad descending sound for missing whisper
             playSound(330, 0.3, 'sawtooth', 0.15);
             setTimeout(() => playSound(220, 0.2, 'sawtooth', 0.1), 100);
         }
@@ -708,15 +708,15 @@
             setTimeout(() => playSound(1200, 0.3, 'sine', 0.3), 200);
         }
 
-        function playPowerIsletAppearSound() {
-            // Sound when power islet appears on screen
+        function playPowerWhisperAppearSound() {
+            // Sound when power whisper appears on screen
             playSound(600, 0.3, 'triangle', 0.2);
             setTimeout(() => playSound(800, 0.3, 'triangle', 0.2), 150);
             setTimeout(() => playSound(1000, 0.4, 'triangle', 0.2), 300);
         }
 
-        function playPowerIsletCatchSound() {
-            // Different sound for catching power islet
+        function playPowerWhisperCatchSound() {
+            // Different sound for catching power whisper
             playSound(1000, 0.2, 'sawtooth', 0.4);
             setTimeout(() => playSound(1200, 0.2, 'sawtooth', 0.4), 100);
             setTimeout(() => playSound(1400, 0.3, 'sawtooth', 0.4), 200);
@@ -834,22 +834,22 @@
             return false;
         }
         
-        function addWordToPoem(islet) {
+        function addWordToPoem(whisper) {
             try {
-                // Check if it's a special power islet
-                if (islet.isSpecial) {
+                // Check if it's a special power whisper
+                if (whisper.isSpecial) {
                     activateSpecialPower();
-                    playPowerIsletCatchSound();
+                    playPowerWhisperCatchSound();
                     return; // Don't add to haiku, just activate power
                 }
             
             // Check for consecutive articles
-            if (islet.type === 'article') {
+            if (whisper.type === 'article') {
                 if (lastCaughtType === 'article') {
                     // Second article in a row - explode!
                     consecutiveArticles++;
                     playExplosionSound();
-                    showExplosionEffect(islet);
+                    showExplosionEffect(whisper);
                     return; // Don't add to haiku, just explode
                 } else {
                     consecutiveArticles = 1;
@@ -859,21 +859,21 @@
             }
             
             // Check if article would end a line (not allowed)
-            if (islet.type === 'article') {
+            if (whisper.type === 'article') {
                 if (wouldArticleEndLine()) {
                     // Article would end a line - explode!
                     playExplosionSound();
-                    showExplosionEffect(islet);
+                    showExplosionEffect(whisper);
                     return; // Don't add to haiku, just explode
                 }
             }
             
-            lastCaughtType = islet.type;
+            lastCaughtType = whisper.type;
             
             const wordData = {
-                word: islet.word,
-                type: islet.type,
-                syllables: islet.syllables
+                word: whisper.word,
+                type: whisper.type,
+                syllables: whisper.syllables
             };
             
             // Check if adding this word would exceed 17 syllables
@@ -882,7 +882,7 @@
                 totalSyllables += word.syllables;
             }
             
-            if (totalSyllables + islet.syllables > 17) {
+            if (totalSyllables + whisper.syllables > 17) {
                 // Word would exceed 17 syllables, don't add it
                 playMissSound(); // Play miss sound to indicate rejection
                 return;
@@ -910,17 +910,17 @@
             
             } catch (error) {
                 console.error('Error in addWordToPoem:', error);
-                console.error('Islet data:', islet);
+                console.error('Whisper data:', whisper);
             }
         }
 
-        function showExplosionEffect(islet) {
+        function showExplosionEffect(whisper) {
             // Create explosion visual effect
             const explosion = document.createElement('div');
             explosion.style.cssText = `
                 position: absolute;
-                left: ${islet.x + canvas.offsetLeft}px;
-                top: ${islet.y + canvas.offsetTop}px;
+                left: ${whisper.x + canvas.offsetLeft}px;
+                top: ${whisper.y + canvas.offsetTop}px;
                 width: 60px;
                 height: 60px;
                 background: radial-gradient(circle, #ff4444, #ff8844, #ffff44, transparent);
@@ -1036,9 +1036,9 @@
                 'narrower', 
                 'inverted',
                 'ultra_speed',
-                'exploding_islets',
+                'exploding_whispers',
                 'upside_down',
-                'islet_rain',
+                'whisper_rain',
                 'hidden_words',
                 'respite'
             ];
@@ -1060,9 +1060,9 @@
                 'narrower': 'NARROW PADDLE!',
                 'inverted': 'INVERTED CONTROLS!',
                 'ultra_speed': 'ULTRA SPEED!',
-                'exploding_islets': 'EXPLODING ISLETS!',
+                'exploding_whispers': 'EXPLODING WHISPERS!',
                 'upside_down': 'UPSIDE DOWN!',
-                'islet_rain': 'ISLET RAIN!',
+                'whisper_rain': 'WHISPER RAIN!',
                 'hidden_words': 'HIDDEN WORDS!',
                 'respite': 'RESPITE!'
             };
@@ -1124,7 +1124,7 @@
                 case 'ultra_speed':
                     paddle.speed = 15;
                     break;
-                case 'exploding_islets':
+                case 'exploding_whispers':
                     // This will be handled in the collision detection
                     break;
                 case 'upside_down':
@@ -1138,9 +1138,9 @@
                         upsideDownTimeout = null;
                     }, 5000);
                     break;
-                case 'islet_rain':
+                case 'whisper_rain':
                     spawnMultiplier = 5; // 5x spawn rate
-                    maxIsletsAtOnce = 30; // Allow many more islets during rain
+                    maxWhispersAtOnce = 30; // Allow many more whispers during rain
                     break;
                 case 'hidden_words':
                     wordsHidden = true; // Hide all words
@@ -1174,8 +1174,8 @@
                 // Reset spawn multiplier
                 spawnMultiplier = 1;
                 
-                // Reset max islets
-                maxIsletsAtOnce = 6;
+                // Reset max whispers
+                maxWhispersAtOnce = 6;
                 
                 // Reset hidden words
                 wordsHidden = false;
@@ -1357,8 +1357,8 @@
             // Make spawn interval faster (smaller number = faster spawning)
             currentSpawnInterval = Math.max(150, currentSpawnInterval * speedIncreaseFactor);
             
-            // Make islets fall faster with more variation
-            currentIsletSpeed = Math.min(10, currentIsletSpeed * (2 - speedIncreaseFactor));
+            // Make whispers fall faster with more variation
+            currentWhisperSpeed = Math.min(10, currentWhisperSpeed * (2 - speedIncreaseFactor));
             
             // Update progress display to show speed increase
             updatePoetryProgress();
@@ -1499,32 +1499,32 @@
             }
         }
 
-        // Spawn falling islets
-        function spawnIslets() {
+        // Spawn falling whispers
+        function spawnWhispers() {
             if (!gamePaused) {
                 const now = Date.now();
-                // Apply spawn multiplier for islet rain power
+                // Apply spawn multiplier for whisper rain power
                 const effectiveSpawnInterval = currentSpawnInterval / spawnMultiplier;
                 if (now - lastSpawnTime > effectiveSpawnInterval) {
-                    // Spawn islets based on active power
-                    let numIslets;
-                    if (specialPowerActive && currentPower === 'islet_rain') {
-                        numIslets = Math.floor(Math.random() * 8) + 5; // 5-12 islets during rain
+                    // Spawn whispers based on active power
+                    let numWhispers;
+                    if (specialPowerActive && currentPower === 'whisper_rain') {
+                        numWhispers = Math.floor(Math.random() * 8) + 5; // 5-12 whispers during rain
                     } else if (specialPowerActive && currentPower === 'respite') {
-                        numIslets = 1; // Only 1 islet during respite
+                        numWhispers = 1; // Only 1 whisper during respite
                     } else {
-                        numIslets = Math.floor(Math.random() * 4) + 2; // 2-5 islets normally
+                        numWhispers = Math.floor(Math.random() * 4) + 2; // 2-5 whispers normally
                     }
-                    
-                    for (let i = 0; i < numIslets && fallingShapes.length < maxIsletsAtOnce; i++) {
-                        // 15% chance for special power islet, 5% chance for bomb islet
+
+                    for (let i = 0; i < numWhispers && fallingShapes.length < maxWhispersAtOnce; i++) {
+                        // 15% chance for special power whisper, 5% chance for bomb whisper
                         const isSpecial = Math.random() < 0.15;
                         const isBomb = !isSpecial && Math.random() < 0.05;
-                        fallingShapes.push(new Islet(isSpecial, isBomb));
-                        
-                        // Play sound when power islet appears
+                        fallingShapes.push(new Whisper(isSpecial, isBomb));
+
+                        // Play sound when power whisper appears
                         if (isSpecial) {
-                            playPowerIsletAppearSound();
+                            playPowerWhisperAppearSound();
                         }
                     }
                     lastSpawnTime = now;
@@ -1532,43 +1532,43 @@
             }
         }
 
-        // Update falling islets
-        function updateIslets() {
+        // Update falling whispers
+        function updateWhispers() {
             if (!gamePaused) {
                 for (let i = fallingShapes.length - 1; i >= 0; i--) {
-                    const islet = fallingShapes[i];
-                    islet.update();
+                    const whisper = fallingShapes[i];
+                    whisper.update();
 
                     // Check collision with paddle
-                    if (islet.y + islet.height > paddle.y &&
-                        islet.y < paddle.y + paddle.height &&
-                        islet.x + islet.width > paddle.x &&
-                        islet.x < paddle.x + paddle.width) {
+                    if (whisper.y + whisper.height > paddle.y &&
+                        whisper.y < paddle.y + paddle.height &&
+                        whisper.x + whisper.width > paddle.x &&
+                        whisper.x < paddle.x + paddle.width) {
                         
-                        // Check if it's a bomb islet
-                        if (islet.isBomb) {
+                        // Check if it's a bomb whisper
+                        if (whisper.isBomb) {
                             // Bomb explodes when caught - remove last word
                             showPaddleExplosionEffect();
                             playExplosionSound();
                             fallingShapes.splice(i, 1);
                             // Remove last word from haiku
                             removeLastWordFromPoem();
-                        } else if (specialPowerActive && currentPower === 'exploding_islets') {
-                            // Paddle explodes when catching any islet - remove last word
+                        } else if (specialPowerActive && currentPower === 'exploding_whispers') {
+                            // Paddle explodes when catching any whisper - remove last word
                             showPaddleExplosionEffect();
                             playExplosionSound();
                             fallingShapes.splice(i, 1);
                             // Remove last word from haiku
                             removeLastWordFromPoem();
                         } else {
-                            // Paddle caught the islet - add to haiku
-                            console.log('Caught islet:', islet);
-                            addWordToPoem(islet);
+                            // Paddle caught the whisper - add to haiku
+                            console.log('Caught whisper:', whisper);
+                            addWordToPoem(whisper);
                             fallingShapes.splice(i, 1);
                             playCatchSound(); // Play catch sound effect
                         }
-                    } else if (islet.isOffScreen()) {
-                        // Islet fell off screen
+                    } else if (whisper.isOffScreen()) {
+                        // Whisper fell off screen
                         fallingShapes.splice(i, 1);
                         playMissSound(); // Play miss sound effect
                     }
@@ -1589,32 +1589,32 @@
             }
         }
 
-        // Draw all islets
-        function drawIslets() {
-            // Update exploding islets animation timer
-            if (specialPowerActive && currentPower === 'exploding_islets') {
-                explodingIsletsTimer += 0.1;
+        // Draw all whispers
+        function drawWhispers() {
+            // Update exploding whispers animation timer
+            if (specialPowerActive && currentPower === 'exploding_whispers') {
+                explodingWhispersTimer += 0.1;
             }
             
-            fallingShapes.forEach(islet => {
-                // Apply exploding islets power visual if active
-                if (specialPowerActive && currentPower === 'exploding_islets' && !islet.isSpecial) {
-                    // Calculate blink effect for each islet
-                    const blinkPhase = (islet.x + islet.y + explodingIsletsTimer) * 0.1;
+            fallingShapes.forEach(whisper => {
+                // Apply exploding whispers power visual if active
+                if (specialPowerActive && currentPower === 'exploding_whispers' && !whisper.isSpecial) {
+                    // Calculate blink effect for each whisper
+                    const blinkPhase = (whisper.x + whisper.y + explodingWhispersTimer) * 0.1;
                     const blinkAlpha = Math.sin(blinkPhase) * 0.5 + 0.5; // 0 to 1
                     
-                    // Only draw if islet is visible (blinking effect)
+                    // Only draw if whisper is visible (blinking effect)
                     if (blinkAlpha > 0.3) {
-                        const originalColor = islet.color;
-                        const originalWord = islet.word;
-                        islet.color = `rgba(136, 204, 255, ${blinkAlpha})`; // Light blue text with alpha
-                        islet.word = 'BOOM!'; // Change text to BOOM!
-                        islet.draw();
-                        islet.color = originalColor; // Restore original color
-                        islet.word = originalWord; // Restore original word
+                        const originalColor = whisper.color;
+                        const originalWord = whisper.word;
+                        whisper.color = `rgba(136, 204, 255, ${blinkAlpha})`; // Light blue text with alpha
+                        whisper.word = 'BOOM!'; // Change text to BOOM!
+                        whisper.draw();
+                        whisper.color = originalColor; // Restore original color
+                        whisper.word = originalWord; // Restore original word
                     }
                 } else {
-                    islet.draw();
+                    whisper.draw();
                 }
             });
         }
@@ -1823,14 +1823,14 @@
             // Remove power-active class from canvas
             canvas.classList.remove('power-active');
             
-            // Reset exploding islets animation timer
-            explodingIsletsTimer = 0;
+            // Reset exploding whispers animation timer
+            explodingWhispersTimer = 0;
             
             // Reset spawn multiplier
             spawnMultiplier = 1;
             
-            // Reset max islets
-            maxIsletsAtOnce = 6;
+            // Reset max whispers
+            maxWhispersAtOnce = 6;
             
             // Reset hidden words
             wordsHidden = false;
@@ -1840,7 +1840,7 @@
             
             // Reset game speed to initial values
             currentSpawnInterval = baseSpawnInterval;
-            currentIsletSpeed = baseIsletSpeed;
+            currentWhisperSpeed = baseWhisperSpeed;
             
             updatePoetryProgress();
             gameOverElement.style.display = 'none';
@@ -1880,8 +1880,8 @@
             // Update game objects
             updatePaddle();
             updateSpecialPowers();
-            spawnIslets();
-            updateIslets();
+            spawnWhispers();
+            updateWhispers();
 
             // Draw everything in correct layering order
             // Draw background stars first
@@ -1924,8 +1924,8 @@
             // Draw current poem in the background
             drawCurrentPoemOnScreen();
             
-            // Draw islets in the foreground
-            drawIslets();
+            // Draw whispers in the foreground
+            drawWhispers();
             
             // Draw paddle on top
             drawPaddle();
