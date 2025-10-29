@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Falling Islets - A haiku building game by Adri M.</title>
+    <title>Falling Islets - A poetry building game by Adri M.</title>
     <style>
         body {
             margin: 0;
@@ -183,13 +183,13 @@
     <div id="gameContainer">
         <div id="startScreen">
             <h1>FALLING ISLETS</h1>
-            <h2>A haiku building game by Adri M.</h2>
+            <h2>A poetry building game by Adri M.</h2>
             
             <div style="display: flex; gap: 20px; text-align: left;">
                 <div style="flex: 1;">
                     <div class="controls">
                         <h2>How to Play</h2>
-                        <p>Build haikus by catching falling islets! Collect words to create 5-7-5 syllable poems.</p>
+                        <p>Build poetry by catching falling islets! Collect words to create 5-7-5 syllable poems.</p>
                         <p>Multiple islets fall simultaneously at different speeds. Each islet contains a word with a specific syllable count.</p>
                     </div>
                     
@@ -216,10 +216,10 @@
                     
                     <div class="controls">
                         <h2>Special Rules</h2>
-                        <p>• Complete haikus by collecting exactly 17 syllables (5-7-5 pattern)</p>
+                        <p>• Complete poetry by collecting exactly 17 syllables (5-7-5 pattern)</p>
                         <p>• <span style="color: #ff4444;">Catching two articles in a row will make the second one explode!</span></p>
                         <p>• <span style="color: #ffffff;">Catch the white blinking POWER islet for special abilities!</span></p>
-                        <p>• Each completed haiku awards 100 bonus points</p>
+                        <p>• Each completed poem awards 100 bonus points</p>
                     </div>
                 </div>
             </div>
@@ -228,11 +228,11 @@
         </div>
         
         <div id="score">Score: 0</div>
-        <div id="haikuProgress">Haiku Progress: 0/17 syllables | Haikus: 0</div>
-        <div id="currentHaiku">Building your haiku...</div>
+        <div id="haikuProgress">Poetry Progress: 0/17 syllables | Poems: 0</div>
+        <div id="currentHaiku">Building your poem...</div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         <div id="instructions">
-            Build haikus by catching falling islets! Collect words to create 5-7-5 syllable poems.<br>
+            Build poetry by catching falling islets! Collect words to create 5-7-5 syllable poems.<br>
             Use ← → arrow keys or A/D keys to move. Press SPACE or P to pause.<br>
             <span style="color: #ff4444;">Verbs</span>, <span style="color: #aa44ff;">Nouns</span>, <span style="color: #ffff44;">Adjectives</span>, <span style="color: #44ff44;">Adverbs</span>, <span style="color: #ff8844;">Articles</span>, <span style="color: #ff69b4;">Conjunctions</span>
         </div>
@@ -263,7 +263,7 @@
         let gameStarted = false;
         let score = 0;
         
-        // Haiku building system
+        // Poetry building system
         let caughtWords = [];
         let currentHaiku = [];
         let haikuCount = 0;
@@ -283,6 +283,7 @@
         let screenUpsideDown = false;
         let upsideDownTimeout = null;
         let spawnMultiplier = 1; // Multiplier for islet spawn rate
+        let wordsHidden = false; // Track if words are hidden
         
         // Star animation
         let starTimer = 0;
@@ -325,7 +326,7 @@
             conjunction: '#ff69b4' // Pink
         };
 
-        // Word database for haiku building
+        // Word database for poetry building
         const wordDatabase = {
             verb: ['run', 'jump', 'sing', 'dance', 'fly', 'swim', 'grow', 'bloom', 'fall', 'rise', 'sleep', 'dream', 'laugh', 'cry', 'walk', 'talk', 'think', 'feel', 'love', 'hope'],
             noun: ['tree', 'bird', 'moon', 'star', 'wind', 'rain', 'snow', 'flower', 'leaf', 'stone', 'river', 'mountain', 'ocean', 'cloud', 'sun', 'sky', 'earth', 'heart', 'soul', 'mind'],
@@ -504,22 +505,41 @@
                     ctx.textAlign = 'left'; // Reset text alignment
                 } else {
                     // Draw the word with colored text, no background
-                    ctx.fillStyle = this.color; // Use the islet's color for text
                     ctx.font = 'bold 16px monospace';
                     ctx.textAlign = 'center';
-                    const wordText = this.word.toLowerCase();
                     const textX = this.x + this.width / 2;
                     const textY = this.y + this.height / 2 + 6;
-                    ctx.fillText(wordText, textX, textY);
                     
-                    // Draw underline
-                    ctx.strokeStyle = this.color;
-                    ctx.lineWidth = 2;
-                    const textWidth = ctx.measureText(wordText).width;
-                    ctx.beginPath();
-                    ctx.moveTo(textX - textWidth/2, textY + 3);
-                    ctx.lineTo(textX + textWidth/2, textY + 3);
-                    ctx.stroke();
+                    // Check if words are hidden
+                    if (wordsHidden) {
+                        // Draw "xxxxx" in dark gray
+                        ctx.fillStyle = '#666666'; // Dark gray
+                        const hiddenText = 'xxxxx';
+                        ctx.fillText(hiddenText, textX, textY);
+                        
+                        // Draw underline in dark gray
+                        ctx.strokeStyle = '#666666';
+                        ctx.lineWidth = 2;
+                        const textWidth = ctx.measureText(hiddenText).width;
+                        ctx.beginPath();
+                        ctx.moveTo(textX - textWidth/2, textY + 3);
+                        ctx.lineTo(textX + textWidth/2, textY + 3);
+                        ctx.stroke();
+                    } else {
+                        // Draw normal word
+                        ctx.fillStyle = this.color; // Use the islet's color for text
+                        const wordText = this.word.toLowerCase();
+                        ctx.fillText(wordText, textX, textY);
+                        
+                        // Draw underline
+                        ctx.strokeStyle = this.color;
+                        ctx.lineWidth = 2;
+                        const textWidth = ctx.measureText(wordText).width;
+                        ctx.beginPath();
+                        ctx.moveTo(textX - textWidth/2, textY + 3);
+                        ctx.lineTo(textX + textWidth/2, textY + 3);
+                        ctx.stroke();
+                    }
                     
                     ctx.textAlign = 'left'; // Reset text alignment
                 }
@@ -610,12 +630,12 @@
             setTimeout(() => playSound(1600, 0.4, 'sawtooth', 0.3), 300);
         }
 
-        // Haiku building functions
-        function removeLastWordFromHaiku() {
+        // Poetry building functions
+        function removeLastWordFromPoem() {
             if (currentHaiku.length > 0) {
                 const removedWord = currentHaiku.pop();
                 caughtWords.pop(); // Also remove from caught words
-                updateHaikuProgress();
+                updatePoetryProgress();
                 
                 // Show removal message
                 showWordRemovalMessage(removedWord);
@@ -711,7 +731,7 @@
             return false;
         }
         
-        function addWordToHaiku(islet) {
+        function addWordToPoem(islet) {
             try {
                 // Check if it's a special power islet
                 if (islet.isSpecial) {
@@ -769,15 +789,15 @@
             caughtWords.push(wordData);
             
             // Update progress display
-            updateHaikuProgress();
+            updatePoetryProgress();
             
-            // Check if haiku is complete (exactly 17 syllables)
-            if (checkHaikuComplete()) {
-                completeHaiku();
+            // Check if poem is complete (exactly 17 syllables)
+            if (checkPoemComplete()) {
+                completePoem();
             }
             
             } catch (error) {
-                console.error('Error in addWordToHaiku:', error);
+                console.error('Error in addWordToPoem:', error);
                 console.error('Islet data:', islet);
             }
         }
@@ -906,7 +926,8 @@
                 'ultra_speed',
                 'exploding_islets',
                 'upside_down',
-                'islet_rain'
+                'islet_rain',
+                'hidden_words'
             ];
             
             currentPower = powers[Math.floor(Math.random() * powers.length)];
@@ -928,7 +949,8 @@
                 'ultra_speed': 'ULTRA SPEED!',
                 'exploding_islets': 'EXPLODING ISLETS!',
                 'upside_down': 'UPSIDE DOWN!',
-                'islet_rain': 'ISLET RAIN!'
+                'islet_rain': 'ISLET RAIN!',
+                'hidden_words': 'HIDDEN WORDS!'
             };
             
             const messageDiv = document.createElement('div');
@@ -1005,6 +1027,9 @@
                 case 'islet_rain':
                     spawnMultiplier = 5; // 5x spawn rate
                     break;
+                case 'hidden_words':
+                    wordsHidden = true; // Hide all words
+                    break;
             }
         }
 
@@ -1029,6 +1054,9 @@
                 // Reset spawn multiplier
                 spawnMultiplier = 1;
                 
+                // Reset hidden words
+                wordsHidden = false;
+                
                 // Clear upside down timeout if it exists
                 if (upsideDownTimeout) {
                     clearTimeout(upsideDownTimeout);
@@ -1037,7 +1065,7 @@
             }
         }
 
-        function updateHaikuProgress() {
+        function updatePoetryProgress() {
             try {
                 let totalSyllables = 0;
                 for (let word of currentHaiku) {
@@ -1048,14 +1076,14 @@
                 
                 const progressElement = document.getElementById('haikuProgress');
                 const speedMultiplier = (baseSpawnInterval / currentSpawnInterval).toFixed(1);
-                progressElement.textContent = `Syllables: ${totalSyllables}/17 | Haikus: ${haikuCount} | Speed: ${speedMultiplier}x`;
+                progressElement.textContent = `Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
             } catch (error) {
-                console.error('Error in updateHaikuProgress:', error);
+                console.error('Error in updatePoetryProgress:', error);
             }
         }
 
 
-        function formatHaikuLines(words) {
+        function formatPoemLines(words) {
             let line1 = [];
             let line2 = [];
             let line3 = [];
@@ -1106,7 +1134,7 @@
                         line3.push(fixedWord);
                         currentSyllables += word.syllables;
                     }
-                    // If it would exceed 5 syllables, we don't add it (haiku is complete)
+                    // If it would exceed 5 syllables, we don't add it (poem is complete)
                 }
             }
             
@@ -1121,7 +1149,7 @@
                 
                 // Add appropriate punctuation based on line number
                 if (lineNumber === 1) {
-                    // First line usually doesn't end with punctuation in haikus
+                    // First line usually doesn't end with punctuation in poems
                     formattedLine = formattedLine;
                 } else if (lineNumber === 3) {
                     // Last line typically ends with a period
@@ -1143,7 +1171,7 @@
             return formattedLine1 + '<br>' + formattedLine2 + '<br>' + formattedLine3;
         }
 
-        function checkHaikuComplete() {
+        function checkPoemComplete() {
             try {
                 if (currentHaiku.length < 3) return false;
                 
@@ -1157,12 +1185,12 @@
                 // Check if we have exactly 17 syllables
                 return totalSyllables === 17; // 5 + 7 + 5
             } catch (error) {
-                console.error('Error in checkHaikuComplete:', error);
+                console.error('Error in checkPoemComplete:', error);
                 return false;
             }
         }
 
-        function checkHaikuOverflow() {
+        function checkPoemOverflow() {
             let totalSyllables = 0;
             for (let word of currentHaiku) {
                 totalSyllables += word.syllables;
@@ -1172,32 +1200,32 @@
             if (totalSyllables > 17) {
                 const removedWord = currentHaiku.pop();
                 caughtWords.pop(); // Also remove from caught words
-                updateHaikuProgress();
+                updatePoetryProgress();
                 return true; // Indicate overflow occurred
             }
             return false;
         }
 
-        function completeHaiku() {
+        function completePoem() {
             try {
                 haikuCount++;
-                score += 100; // Bonus points for completing haiku
+                score += 100; // Bonus points for completing poem
                 scoreElement.textContent = `Score: ${score}`;
                 
-                // Increase game speed for next haiku
+                // Increase game speed for next poem
                 increaseGameSpeed();
                 
-                // Pause the game and show completed haiku
+                // Pause the game and show completed poem
                 haikuCompleted = true;
                 gamePaused = true;
                 
-                // Display completed haiku
-                displayCompletedHaiku();
+                // Display completed poem
+                displayCompletedPoem();
                 
                 // Play completion sound
                 playHaikuCompleteSound();
             } catch (error) {
-                console.error('Error in completeHaiku:', error);
+                console.error('Error in completePoem:', error);
             }
         }
 
@@ -1209,31 +1237,31 @@
             currentIsletSpeed = Math.min(10, currentIsletSpeed * (2 - speedIncreaseFactor));
             
             // Update progress display to show speed increase
-            updateHaikuProgress();
+            updatePoetryProgress();
         }
 
-        function continueAfterHaiku() {
-            // Reset for next haiku and resume game
+        function continueAfterPoem() {
+            // Reset for next poem and resume game
             currentHaiku = [];
             haikuCompleted = false;
             gamePaused = false;
             
-            // Hide completed haiku display
+            // Hide completed poem display
             const haikuDisplay = document.querySelector('.haiku-completion-display');
             if (haikuDisplay) {
                 document.body.removeChild(haikuDisplay);
             }
             
             // Update displays
-            updateHaikuProgress();
+            updatePoetryProgress();
         }
 
-        function displayCompletedHaiku() {
+        function displayCompletedPoem() {
             try {
-                // Create a temporary display of the completed haiku
-                const formattedHaiku = formatHaikuLines(currentHaiku);
+                // Create a temporary display of the completed poem
+                const formattedPoem = formatPoemLines(currentHaiku);
                 
-                // Show haiku completion message
+                // Show poem completion message
                 const haikuDisplay = document.createElement('div');
                 haikuDisplay.className = 'haiku-completion-display';
                 haikuDisplay.style.cssText = `
@@ -1251,15 +1279,15 @@
                     z-index: 1000;
                 `;
                 haikuDisplay.innerHTML = `
-                    <h3>Haiku Complete!</h3>
-                    <div style="font-style: italic; margin: 10px 0; line-height: 1.5;">${formattedHaiku}</div>
-                    <p>Haikus completed: ${haikuCount}</p>
+                    <h3>Poem Complete!</h3>
+                    <div style="font-style: italic; margin: 10px 0; line-height: 1.5;">${formattedPoem}</div>
+                    <p>Poems completed: ${haikuCount}</p>
                     <p>Press SPACE or P to continue</p>
                 `;
                 
                 document.body.appendChild(haikuDisplay);
             } catch (error) {
-                console.error('Error in displayCompletedHaiku:', error);
+                console.error('Error in displayCompletedPoem:', error);
             }
         }
 
@@ -1285,13 +1313,13 @@
         document.addEventListener('keydown', (e) => {
             keys[e.key] = true;
             
-            // Handle pause/resume, haiku completion continue, or start screen
+            // Handle pause/resume, poem completion continue, or start screen
             if (e.key === ' ' || e.key === 'p' || e.key === 'P') {
                 e.preventDefault(); // Prevent page scroll on spacebar
                 if (!gameStarted) {
                     startGame();
                 } else if (haikuCompleted) {
-                    continueAfterHaiku();
+                    continueAfterPoem();
                 } else {
                     togglePause();
                 }
@@ -1393,18 +1421,18 @@
                             playExplosionSound();
                             fallingShapes.splice(i, 1);
                             // Remove last word from haiku
-                            removeLastWordFromHaiku();
+                            removeLastWordFromPoem();
                         } else if (specialPowerActive && currentPower === 'exploding_islets') {
                             // Paddle explodes when catching any islet - remove last word
                             showPaddleExplosionEffect();
                             playExplosionSound();
                             fallingShapes.splice(i, 1);
                             // Remove last word from haiku
-                            removeLastWordFromHaiku();
+                            removeLastWordFromPoem();
                         } else {
                             // Paddle caught the islet - add to haiku
                             console.log('Caught islet:', islet);
-                            addWordToHaiku(islet);
+                            addWordToPoem(islet);
                             fallingShapes.splice(i, 1);
                             playCatchSound(); // Play catch sound effect
                         }
@@ -1460,8 +1488,8 @@
             });
         }
 
-        // Draw current haiku in the middle of the screen
-        function drawCurrentHaikuOnScreen() {
+        // Draw current poem in the middle of the screen
+        function drawCurrentPoemOnScreen() {
             if (currentHaiku.length === 0) return;
             
             // Calculate total syllables
@@ -1533,7 +1561,7 @@
                         line3 += (line3 ? ' ' : '') + wordToAdd;
                         currentSyllables += word.syllables;
                     }
-                    // If it would exceed 5 syllables, we don't add it (haiku is complete)
+                    // If it would exceed 5 syllables, we don't add it (poem is complete)
                 }
             }
             
@@ -1611,6 +1639,9 @@
             // Reset spawn multiplier
             spawnMultiplier = 1;
             
+            // Reset hidden words
+            wordsHidden = false;
+            
             // Reset game speed to initial values
             currentSpawnInterval = baseSpawnInterval;
             currentIsletSpeed = baseIsletSpeed;
@@ -1624,7 +1655,7 @@
             const startScreen = document.getElementById('startScreen');
             startScreen.style.display = 'none';
             
-            // Remove any haiku completion displays
+            // Remove any poem completion displays
             const haikuDisplay = document.querySelector('.haiku-completion-display');
             if (haikuDisplay) {
                 document.body.removeChild(haikuDisplay);
@@ -1695,8 +1726,8 @@
                 }
             }
             
-            // Draw current haiku in the background
-            drawCurrentHaikuOnScreen();
+            // Draw current poem in the background
+            drawCurrentPoemOnScreen();
             
             // Draw islets in the foreground
             drawIslets();
