@@ -284,6 +284,7 @@
         let upsideDownTimeout = null;
         let spawnMultiplier = 1; // Multiplier for islet spawn rate
         let wordsHidden = false; // Track if words are hidden
+        let respiteActive = false; // Track if respite power is active
         
         // Star animation
         let starTimer = 0;
@@ -313,7 +314,7 @@
         let currentSpawnInterval = 600; // Current spawn interval (gets faster)
         let baseIsletSpeed = 1.5; // Base islet speed (slower start)
         let currentIsletSpeed = 1.5; // Current islet speed (gets faster)
-        const maxIsletsAtOnce = 6; // Maximum islets falling simultaneously (doubled)
+        let maxIsletsAtOnce = 6; // Maximum islets falling simultaneously (doubled)
         const speedIncreaseFactor = 0.9; // Each haiku makes game 10% faster
 
         // Color definitions for parts of speech
@@ -927,7 +928,8 @@
                 'exploding_islets',
                 'upside_down',
                 'islet_rain',
-                'hidden_words'
+                'hidden_words',
+                'respite'
             ];
             
             currentPower = powers[Math.floor(Math.random() * powers.length)];
@@ -950,7 +952,8 @@
                 'exploding_islets': 'EXPLODING ISLETS!',
                 'upside_down': 'UPSIDE DOWN!',
                 'islet_rain': 'ISLET RAIN!',
-                'hidden_words': 'HIDDEN WORDS!'
+                'hidden_words': 'HIDDEN WORDS!',
+                'respite': 'RESPITE!'
             };
             
             const messageDiv = document.createElement('div');
@@ -1026,9 +1029,15 @@
                     break;
                 case 'islet_rain':
                     spawnMultiplier = 5; // 5x spawn rate
+                    maxIsletsAtOnce = 30; // Allow many more islets during rain
                     break;
                 case 'hidden_words':
                     wordsHidden = true; // Hide all words
+                    break;
+                case 'respite':
+                    respiteActive = true; // Enable respite mode
+                    // Clear all currently falling islets
+                    fallingShapes = [];
                     break;
             }
         }
@@ -1054,8 +1063,14 @@
                 // Reset spawn multiplier
                 spawnMultiplier = 1;
                 
+                // Reset max islets
+                maxIsletsAtOnce = 6;
+                
                 // Reset hidden words
                 wordsHidden = false;
+                
+                // Reset respite
+                respiteActive = false;
                 
                 // Clear upside down timeout if it exists
                 if (upsideDownTimeout) {
@@ -1382,8 +1397,15 @@
                 // Apply spawn multiplier for islet rain power
                 const effectiveSpawnInterval = currentSpawnInterval / spawnMultiplier;
                 if (now - lastSpawnTime > effectiveSpawnInterval) {
-                    // Spawn 2-5 islets at a time (more challenging)
-                    const numIslets = Math.floor(Math.random() * 4) + 2;
+                    // Spawn islets based on active power
+                    let numIslets;
+                    if (specialPowerActive && currentPower === 'islet_rain') {
+                        numIslets = Math.floor(Math.random() * 8) + 5; // 5-12 islets during rain
+                    } else if (specialPowerActive && currentPower === 'respite') {
+                        numIslets = 1; // Only 1 islet during respite
+                    } else {
+                        numIslets = Math.floor(Math.random() * 4) + 2; // 2-5 islets normally
+                    }
                     
                     for (let i = 0; i < numIslets && fallingShapes.length < maxIsletsAtOnce; i++) {
                         // 15% chance for special power islet, 5% chance for bomb islet
@@ -1639,8 +1661,14 @@
             // Reset spawn multiplier
             spawnMultiplier = 1;
             
+            // Reset max islets
+            maxIsletsAtOnce = 6;
+            
             // Reset hidden words
             wordsHidden = false;
+            
+            // Reset respite
+            respiteActive = false;
             
             // Reset game speed to initial values
             currentSpawnInterval = baseSpawnInterval;
