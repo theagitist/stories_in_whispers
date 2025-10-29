@@ -93,6 +93,11 @@
             text-align: center;
         }
         
+        #playerNameDisplay {
+            color: #ff69b4 !important;
+            font-weight: bold;
+        }
+        
         #currentHaiku {
             position: absolute;
             top: 50px;
@@ -198,7 +203,7 @@
             <button class="start-button" onclick="startGame()">Press SPACE to start</button>
         </div>
         
-        <div id="haikuProgress">Poetry Progress: 0/17 syllables | Poems: 0</div>
+        <div id="haikuProgress"><span id="playerNameDisplay"></span>'s story so far: Poetry Progress: 0/17 syllables | Poems: 0</div>
         <div id="currentHaiku">Building your poem...</div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         <div id="instructions">
@@ -273,11 +278,17 @@
         // Generate and display player name and greeting when page loads
         function initializePlayerName() {
             const playerNameElement = document.getElementById('playerName');
+            const playerNameDisplayElement = document.getElementById('playerNameDisplay');
             const greetingElement = document.getElementById('poeticGreeting');
             
             if (playerNameElement) {
                 const playerName = generatePlayerName();
                 playerNameElement.textContent = playerName;
+                
+                // Also set the display name for the progress panel
+                if (playerNameDisplayElement) {
+                    playerNameDisplayElement.textContent = playerName;
+                }
             }
             
             if (greetingElement) {
@@ -1200,8 +1211,23 @@
                 }
                 
                 const progressElement = document.getElementById('haikuProgress');
+                const playerNameElement = document.getElementById('playerNameDisplay');
                 const speedMultiplier = (baseSpawnInterval / currentSpawnInterval).toFixed(1);
-                progressElement.textContent = `Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
+                
+                // Get player name from the hidden element or generate one
+                let playerName = 'Wanderer';
+                if (playerNameElement && playerNameElement.textContent) {
+                    playerName = playerNameElement.textContent;
+                } else {
+                    // Try to get from the greeting element
+                    const greetingElement = document.getElementById('playerName');
+                    if (greetingElement && greetingElement.textContent) {
+                        playerName = greetingElement.textContent;
+                        playerNameElement.textContent = playerName;
+                    }
+                }
+                
+                progressElement.innerHTML = `<span id="playerNameDisplay">${playerName}</span>'s story so far: Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
             } catch (error) {
                 console.error('Error in updatePoetryProgress:', error);
             }
