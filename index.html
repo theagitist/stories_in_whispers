@@ -185,43 +185,13 @@
             <h1>STORIES IN WHISPERS</h1>
             <h2>A floating isle by Adri M.</h2>
             
-            <div style="display: flex; gap: 20px; text-align: left;">
-                <div style="flex: 1;">
-                    <div class="controls">
-                        <h2>How to Play</h2>
-                        <p>Build poetry by catching falling islets! Collect words to create 5-7-5 syllable poems.</p>
-                        <p>Multiple islets fall simultaneously at different speeds. Each islet contains a word with a loosely applied syllable count.</p>
-                    </div>
-                    
-                    <div class="controls">
-                        <h2>Controls</h2>
-                        <p><strong>Movement:</strong> ← → arrow keys or A/D keys</p>
-                        <p><strong>Pause:</strong> SPACE or P key</p>
-                        <p><strong>Start Game:</strong> SPACE or P key (or click button below)</p>
-                    </div>
-                </div>
-                
-                <div style="flex: 1;">
-                    <div class="controls">
-                        <h2>Parts of Speech</h2>
-                        <div class="colors">
-                            <div class="color-item" style="color: #ff4444;"><strong>Red</strong> = Verbs</div>
-                            <div class="color-item" style="color: #aa44ff;"><strong>Purple</strong> = Nouns</div>
-                            <div class="color-item" style="color: #ffff44;"><strong>Yellow</strong> = Adjectives</div>
-                            <div class="color-item" style="color: #44ff44;"><strong>Green</strong> = Adverbs</div>
-                            <div class="color-item" style="color: #ff8844;"><strong>Orange</strong> = Articles</div>
-                            <div class="color-item" style="color: #ff69b4;"><strong>Pink</strong> = Conjunctions</div>
-                        </div>
-                    </div>
-                    
-                    <div class="controls">
-                        <h2>Special Rules</h2>
-                        <p>• Complete poetry by collecting loosely 17 syllables (5-7-5 pattern)</p>
-                        <p>• <span style="color: #ff4444;">Catching two articles in a row will make the second one explode!</span></p>
-                        <p>• <span style="color: #ffffff;">Catch the white blinking POWER islet for special abilities!</span></p>
-                        <p>• Each completed poem awards 100 bonus points</p>
-                    </div>
-                </div>
+            <div id="playerGreeting" style="margin: 20px 0; font-size: 16px; color: #00ffff;">
+                <p id="poeticGreeting" style="font-size: 14px; color: #88ccff; font-style: italic; margin-bottom: 10px;"></p>
+                <span id="playerName" style="display: none;"></span>
+                <p style="font-size: 14px; color: #cccccc; margin-top: 10px;">
+                    Catch falling whispers to create poetry.<br>
+                    Create loosely 5-7-5 syllable poems and watch your stories come alive.
+                </p>
             </div>
             
             <button class="start-button" onclick="startGame()">Press SPACE to start</button>
@@ -232,7 +202,7 @@
         <div id="currentHaiku">Building your poem...</div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         <div id="instructions">
-            Build poetry by catching falling islets! Collect words to create 5-7-5 syllable poems (loosely applied).<br>
+            Create poetry by catching falling islets! Collect words to create 5-7-5 syllable poems (loosely applied).<br>
             Use ← → arrow keys or A/D keys to move. Press SPACE or P to pause.<br>
             <span style="color: #ff4444;">Verbs</span>, <span style="color: #aa44ff;">Nouns</span>, <span style="color: #ffff44;">Adjectives</span>, <span style="color: #44ff44;">Adverbs</span>, <span style="color: #ff8844;">Articles</span>, <span style="color: #ff69b4;">Conjunctions</span>
         </div>
@@ -255,6 +225,58 @@
         const gameOverElement = document.getElementById('gameOver');
         const finalScoreElement = document.getElementById('finalScore');
         const pauseOverlayElement = document.getElementById('pauseOverlay');
+
+        // Player name generation
+        function generatePlayerName() {
+            const verbs = ['dancing', 'singing', 'whispering', 'dreaming', 'floating', 'glowing', 'shining', 'drifting', 'soaring', 'sparkling'];
+            const adjectives = ['mystical', 'ethereal', 'luminous', 'gentle', 'radiant', 'serene', 'magical', 'peaceful', 'graceful', 'enchanting'];
+            const nouns = ['poet', 'dreamer', 'wanderer', 'storyteller', 'soul', 'spirit', 'heart', 'mind', 'voice', 'whisper'];
+            
+            const randomVerb = verbs[Math.floor(Math.random() * verbs.length)];
+            const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+            
+            // Capitalize each word properly
+            const capitalizedVerb = randomVerb.charAt(0).toUpperCase() + randomVerb.slice(1);
+            const capitalizedAdjective = randomAdjective.charAt(0).toUpperCase() + randomAdjective.slice(1);
+            const capitalizedNoun = randomNoun.charAt(0).toUpperCase() + randomNoun.slice(1);
+            
+            return `${capitalizedVerb} ${capitalizedAdjective} ${capitalizedNoun}`;
+        }
+
+        // Poetic locale generation
+        function generatePoeticLocale() {
+            const locales = [
+                "the ethereal realm of floating verses, where whispered dreams take flight and every syllable dances like starlight upon the cosmic winds",
+                "the mystical sanctuary of drifting islets, where ancient stories bloom like celestial flowers and words weave themselves into the very fabric of existence",
+                "the enchanted cathedral of falling poetry, where every whisper echoes through the halls of eternity and syllables sing the songs of forgotten souls",
+                "the luminous garden of eternal tales, where floating words bloom into magnificent stories and dreams crystallize into verses of pure magic",
+                "the sacred labyrinth of whispered narratives, where drifting islets carry the weight of a thousand stories and every word holds the power to reshape reality",
+                "the celestial observatory of floating verses, where poetry orbits like distant stars and words cascade like meteor showers across the infinite canvas of imagination",
+                "the mystical archipelago of drifting dreams, where each floating islet is a world unto itself and words flow like rivers of liquid starlight",
+                "the ethereal theater of falling stories, where every syllable performs upon the stage of existence and words dance in perfect harmony with the cosmic symphony",
+                "the enchanted library of floating whispers, where ancient tomes drift through the air and every word is a key that unlocks the mysteries of the universe",
+                "the sacred monastery of drifting poetry, where monks of words meditate upon floating verses and every syllable is a prayer sent heavenward on wings of pure thought"
+            ];
+            
+            return locales[Math.floor(Math.random() * locales.length)];
+        }
+
+        // Generate and display player name and greeting when page loads
+        function initializePlayerName() {
+            const playerNameElement = document.getElementById('playerName');
+            const greetingElement = document.getElementById('poeticGreeting');
+            
+            if (playerNameElement) {
+                const playerName = generatePlayerName();
+                playerNameElement.textContent = playerName;
+            }
+            
+            if (greetingElement) {
+                const locale = generatePoeticLocale();
+                greetingElement.innerHTML = `Welcome, you have arrived to ${locale}.<br>Your name today is <span style="color: #ff69b4; font-weight: bold;">${playerNameElement ? playerNameElement.textContent : generatePlayerName()}</span>.`;
+            }
+        }
 
         // Game state
         let gameRunning = false;
@@ -1835,6 +1857,9 @@
                 requestAnimationFrame(gameLoop);
             }
         }
+
+        // Initialize player name when page loads
+        initializePlayerName();
 
         // Game starts with instruction screen - no auto-start
     </script>
