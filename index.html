@@ -1358,6 +1358,9 @@
                 // Increase game speed for next poem
                 increaseGameSpeed();
                 
+                // Save poem to database
+                savePoemToDatabase();
+                
                 // Pause the game and show completed poem
                 haikuCompleted = true;
                 gamePaused = true;
@@ -1369,6 +1372,56 @@
                 playHaikuCompleteSound();
             } catch (error) {
                 // Error in completePoem - continue game
+            }
+        }
+
+        function savePoemToDatabase() {
+            try {
+                // Get player name
+                const playerNameElement = document.getElementById('playerNameDisplay');
+                const playerName = playerNameElement ? playerNameElement.textContent : 'Wanderer';
+                
+                // Format poem text
+                const formattedPoem = formatPoemLines(currentHaiku);
+                
+                // Calculate total syllables
+                let totalSyllables = 0;
+                for (let word of currentHaiku) {
+                    if (word && word.syllables) {
+                        totalSyllables += word.syllables;
+                    }
+                }
+                
+                // Prepare poem data
+                const poemData = {
+                    player_name: playerName,
+                    poem_text: formattedPoem,
+                    poem_lines: currentHaiku,
+                    syllables_count: totalSyllables
+                };
+                
+                // Send to API
+                fetch('save_poem.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(poemData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Poem saved successfully:', data.poem_id);
+                    } else {
+                        console.error('Failed to save poem:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving poem:', error);
+                });
+                
+            } catch (error) {
+                console.error('Error in savePoemToDatabase:', error);
             }
         }
 
