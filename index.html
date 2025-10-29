@@ -47,13 +47,6 @@
             color: #888;
         }
         
-        #score {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 18px;
-            color: #fff;
-        }
         
         #gameOver {
             position: absolute;
@@ -79,6 +72,7 @@
         }
         
         
+        /* Story panel - displays player's progress and stats */
         #haikuProgress {
             position: absolute;
             top: 10px;
@@ -91,6 +85,7 @@
             font-family: 'Courier New', monospace;
             font-size: 14px;
             text-align: center;
+            display: none; /* Hidden until game starts */
         }
         
         #playerNameDisplay {
@@ -285,7 +280,7 @@
                 const playerName = generatePlayerName();
                 playerNameElement.textContent = playerName;
                 
-                // Also set the display name for the progress panel
+                // Also set the display name for the story panel
                 if (playerNameDisplayElement) {
                     playerNameDisplayElement.textContent = playerName;
                 }
@@ -1445,6 +1440,10 @@
             // Hide start screen
             const startScreen = document.getElementById('startScreen');
             startScreen.style.display = 'none';
+            
+            // Show story panel
+            const storyPanel = document.getElementById('haikuProgress');
+            storyPanel.style.display = 'block';
             
             // Start the game
             gameRunning = true;
