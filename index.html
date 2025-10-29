@@ -1403,6 +1403,10 @@
                 // Create a temporary display of the completed poem
                 const formattedPoem = formatPoemLines(currentHaiku);
                 
+                // Get player name
+                const playerNameElement = document.getElementById('playerNameDisplay');
+                const playerName = playerNameElement ? playerNameElement.textContent : 'Wanderer';
+                
                 // Show poem completion message
                 const haikuDisplay = document.createElement('div');
                 haikuDisplay.className = 'haiku-completion-display';
@@ -1422,8 +1426,9 @@
                 `;
                 haikuDisplay.innerHTML = `
                     <h3>Poem Complete!</h3>
-                    <div style="font-style: italic; margin: 10px 0; line-height: 1.5;">${formattedPoem}</div>
-                    <p>Poems completed: ${haikuCount}</p>
+                    <div style="font-style: italic; margin: 10px 0; line-height: 1.5; color: #ffffff;">${formattedPoem}</div>
+                    <div style="margin: 10px 0; color: #ff69b4; font-weight: bold;">by ${playerName}</div>
+                    <p style="color: #ffffff;">Poems completed: ${haikuCount}</p>
                     <p>Press SPACE or P to continue</p>
                 `;
                 
