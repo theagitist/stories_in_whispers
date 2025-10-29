@@ -218,6 +218,7 @@ if ($is_authenticated) {
             <!-- Show logout link when authenticated -->
             <a href="?logout=1" class="logout-link">Logout</a>
             <a href="index.html" class="back-link">← Back to Game</a>
+            <a href="poem_gallery.php" class="back-link" style="margin-left: 10px;">Poem Gallery</a>
             <h1>Saved Poems</h1>
             
             <?php if (isset($delete_success)): ?>
