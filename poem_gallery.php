@@ -63,40 +63,77 @@ try {
     $stats['total_poems'] = count($poems);
     $stats['total_players'] = count($user_stats);
     
-    // Find word connections between poems (excluding articles and conjunctions)
+    // Find word connections between poems (grouping poems by shared words)
     $word_connections = [];
+    $word_to_poems = []; // Maps words to arrays of poem indices
+    
+    // First pass: build word-to-poems mapping
     for ($i = 0; $i < count($poems); $i++) {
-        for ($j = $i + 1; $j < count($poems); $j++) {
-            $poem1_words = array_map('strtolower', preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $poems[$i]['poem_text'])));
-            $poem2_words = array_map('strtolower', preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $poems[$j]['poem_text'])));
-            
-            // Filter out articles and conjunctions from both poems
-            $poem1_words = array_filter($poem1_words, function($word) use ($excluded_words) { 
-                return strlen($word) > 2 && !in_array($word, $excluded_words); 
-            });
-            $poem2_words = array_filter($poem2_words, function($word) use ($excluded_words) { 
-                return strlen($word) > 2 && !in_array($word, $excluded_words); 
-            });
-            
-            $common_words = array_intersect($poem1_words, $poem2_words);
-            
-            if (count($common_words) > 0) {
-                $word_connections[] = [
-                    'poem1_id' => $poems[$i]['id'],
-                    'poem2_id' => $poems[$j]['id'],
-                    'poem1_text' => $poems[$i]['poem_text'],
-                    'poem2_text' => $poems[$j]['poem_text'],
-                    'poem1_author' => $poems[$i]['player_name'],
-                    'poem2_author' => $poems[$j]['player_name'],
-                    'common_words' => array_values($common_words),
-                    'connection_strength' => count($common_words)
-                ];
+        $poem_words = array_map('strtolower', preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $poems[$i]['poem_text'])));
+        
+        // Filter out articles and conjunctions
+        $poem_words = array_filter($poem_words, function($word) use ($excluded_words) { 
+            return strlen($word) > 2 && !in_array($word, $excluded_words); 
+        });
+        
+        // Add poem to each word's list
+        foreach ($poem_words as $word) {
+            if (!isset($word_to_poems[$word])) {
+                $word_to_poems[$word] = [];
             }
+            $word_to_poems[$word][] = $i;
         }
     }
     
-    // Sort connections by strength
+    // Second pass: find groups of poems that share words
+    $processed_groups = [];
+    foreach ($word_to_poems as $word => $poem_indices) {
+        // Only consider words that appear in multiple poems
+        if (count($poem_indices) > 1) {
+            // Create a group key to avoid duplicates
+            sort($poem_indices);
+            $group_key = implode(',', $poem_indices);
+            
+            if (!isset($processed_groups[$group_key])) {
+                $processed_groups[$group_key] = [
+                    'poems' => [],
+                    'common_words' => [],
+                    'total_common_words' => 0
+                ];
+            }
+            
+            $processed_groups[$group_key]['common_words'][] = $word;
+            $processed_groups[$group_key]['total_common_words']++;
+        }
+    }
+    
+    // Convert processed groups to display format
+    foreach ($processed_groups as $group_key => $group_data) {
+        $poem_indices = explode(',', $group_key);
+        $poems_in_group = [];
+        
+        foreach ($poem_indices as $poem_index) {
+            $poems_in_group[] = [
+                'id' => $poems[$poem_index]['id'],
+                'text' => $poems[$poem_index]['poem_text'],
+                'author' => $poems[$poem_index]['player_name'],
+                'created_at' => $poems[$poem_index]['created_at']
+            ];
+        }
+        
+        $word_connections[] = [
+            'poems' => $poems_in_group,
+            'common_words' => $group_data['common_words'],
+            'connection_strength' => $group_data['total_common_words'],
+            'poem_count' => count($poems_in_group)
+        ];
+    }
+    
+    // Sort connections by strength (number of common words) and then by number of poems
     usort($word_connections, function($a, $b) {
+        if ($a['connection_strength'] == $b['connection_strength']) {
+            return $b['poem_count'] - $a['poem_count'];
+        }
         return $b['connection_strength'] - $a['connection_strength'];
     });
     
@@ -244,9 +281,9 @@ try {
             font-size: 11px;
             margin-right: 5px;
         }
-        .poems-pair {
+        .poems-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
         .poem-card {
@@ -350,7 +387,7 @@ try {
                             <div class="connection">
                                 <div class="connection-header">
                                     <h3 style="color: #ffff00; margin: 0;">
-                                        Connected Poems
+                                        Connected Poems (<?php echo $connection['poem_count']; ?> poems)
                                     </h3>
                                     <span class="connection-strength">
                                         <?php echo $connection['connection_strength']; ?> shared words
@@ -364,48 +401,29 @@ try {
                                     <?php endforeach; ?>
                                 </div>
                                 
-                                <div class="poems-pair">
-                                    <div class="poem-card">
-                                        <div class="poem-text">
-                                            <?php 
-                                                $poem_text = htmlspecialchars($connection['poem1_text']);
-                                                $poem_text = str_replace('&lt;br&gt;', "\n", $poem_text);
-                                                $poem_text = str_replace('&lt;br/&gt;', "\n", $poem_text);
-                                                $poem_text = str_replace('&lt;br /&gt;', "\n", $poem_text);
-                                                
-                                                // Highlight common words
-                                                foreach ($connection['common_words'] as $common_word) {
-                                                    $poem_text = preg_replace('/\b' . preg_quote($common_word, '/') . '\b/i', '<span style="background: #ffff00; color: #000; padding: 2px 4px; border-radius: 3px; font-weight: bold;">' . $common_word . '</span>', $poem_text);
-                                                }
-                                                
-                                                echo nl2br($poem_text);
-                                            ?>
+                                <div class="poems-grid">
+                                    <?php foreach ($connection['poems'] as $poem): ?>
+                                        <div class="poem-card">
+                                            <div class="poem-text">
+                                                <?php 
+                                                    $poem_text = htmlspecialchars($poem['text']);
+                                                    $poem_text = str_replace('&lt;br&gt;', "\n", $poem_text);
+                                                    $poem_text = str_replace('&lt;br/&gt;', "\n", $poem_text);
+                                                    $poem_text = str_replace('&lt;br /&gt;', "\n", $poem_text);
+                                                    
+                                                    // Highlight common words
+                                                    foreach ($connection['common_words'] as $common_word) {
+                                                        $poem_text = preg_replace('/\b' . preg_quote($common_word, '/') . '\b/i', '<span style="background: #ffff00; color: #000; padding: 2px 4px; border-radius: 3px; font-weight: bold;">' . $common_word . '</span>', $poem_text);
+                                                    }
+                                                    
+                                                    echo nl2br($poem_text);
+                                                ?>
+                                            </div>
+                                            <div class="poem-meta">
+                                                <span class="author">by <?php echo htmlspecialchars(strtolower($poem['author'])); ?></span>
+                                            </div>
                                         </div>
-                                        <div class="poem-meta">
-                                            <span class="author">by <?php echo htmlspecialchars(strtolower($connection['poem1_author'])); ?></span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="poem-card">
-                                        <div class="poem-text">
-                                            <?php 
-                                                $poem_text = htmlspecialchars($connection['poem2_text']);
-                                                $poem_text = str_replace('&lt;br&gt;', "\n", $poem_text);
-                                                $poem_text = str_replace('&lt;br/&gt;', "\n", $poem_text);
-                                                $poem_text = str_replace('&lt;br /&gt;', "\n", $poem_text);
-                                                
-                                                // Highlight common words
-                                                foreach ($connection['common_words'] as $common_word) {
-                                                    $poem_text = preg_replace('/\b' . preg_quote($common_word, '/') . '\b/i', '<span style="background: #ffff00; color: #000; padding: 2px 4px; border-radius: 3px; font-weight: bold;">' . $common_word . '</span>', $poem_text);
-                                                }
-                                                
-                                                echo nl2br($poem_text);
-                                            ?>
-                                        </div>
-                                        <div class="poem-meta">
-                                            <span class="author">by <?php echo htmlspecialchars(strtolower($connection['poem2_author'])); ?></span>
-                                        </div>
-                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
