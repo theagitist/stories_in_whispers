@@ -2,6 +2,31 @@
 // Include database configuration
 require_once 'config.php';
 
+// Function to determine word type based on the game's word database
+function getWordType($word) {
+    $word = strtolower($word);
+    
+    // Word database from the game (simplified version)
+    $wordDatabase = [
+        'verb' => ['run', 'walk', 'fly', 'sing', 'dance', 'jump', 'fall', 'rise', 'flow', 'glow', 'shine', 'bloom', 'grow', 'dream', 'whisper', 'speak', 'laugh', 'cry', 'smile', 'touch', 'feel', 'think', 'know', 'see', 'hear', 'taste', 'smell', 'breathe', 'live', 'love', 'hope', 'wish', 'pray', 'believe', 'trust', 'remember', 'forget', 'learn', 'teach', 'help', 'give', 'take', 'hold', 'let', 'go', 'come', 'stay', 'leave', 'return', 'begin', 'end', 'start', 'stop', 'continue', 'pause', 'wait', 'hurry', 'slow', 'fast', 'quick', 'gentle', 'soft', 'loud', 'quiet', 'bright', 'dark', 'light', 'heavy', 'light', 'strong', 'weak', 'brave', 'afraid', 'happy', 'sad', 'angry', 'calm', 'wild', 'free', 'bound', 'open', 'close', 'break', 'fix', 'build', 'destroy', 'create', 'make', 'do', 'be', 'have', 'get', 'find', 'lose', 'win', 'fail', 'succeed', 'try', 'attempt', 'manage', 'fail', 'succeed', 'achieve', 'accomplish', 'complete', 'finish', 'end', 'start', 'begin', 'initiate', 'launch', 'release', 'free', 'liberate', 'escape', 'flee', 'chase', 'follow', 'lead', 'guide', 'direct', 'point', 'show', 'hide', 'reveal', 'discover', 'explore', 'search', 'seek', 'look', 'watch', 'observe', 'notice', 'see', 'spot', 'find', 'locate', 'place', 'put', 'set', 'lay', 'stand', 'sit', 'lie', 'rest', 'sleep', 'wake', 'awake', 'arise', 'get', 'up', 'down', 'over', 'under', 'through', 'across', 'around', 'between', 'among', 'within', 'without', 'inside', 'outside', 'near', 'far', 'close', 'distant', 'here', 'there', 'everywhere', 'nowhere', 'somewhere', 'anywhere', 'always', 'never', 'sometimes', 'often', 'rarely', 'seldom', 'frequently', 'occasionally', 'regularly', 'constantly', 'continuously', 'forever', 'temporarily', 'permanently', 'briefly', 'quickly', 'slowly', 'gradually', 'suddenly', 'immediately', 'instantly', 'eventually', 'finally', 'ultimately', 'initially', 'originally', 'first', 'last', 'next', 'previous', 'before', 'after', 'during', 'while', 'when', 'where', 'why', 'how', 'what', 'who', 'which', 'whose', 'whom', 'that', 'this', 'these', 'those', 'all', 'some', 'any', 'none', 'many', 'much', 'few', 'little', 'more', 'most', 'less', 'least', 'enough', 'too', 'very', 'quite', 'rather', 'pretty', 'fairly', 'somewhat', 'rather', 'quite', 'very', 'extremely', 'incredibly', 'amazingly', 'wonderfully', 'beautifully', 'perfectly', 'completely', 'totally', 'entirely', 'fully', 'partially', 'partly', 'mostly', 'mainly', 'primarily', 'chiefly', 'principally', 'largely', 'greatly', 'considerably', 'significantly', 'substantially', 'dramatically', 'radically', 'fundamentally', 'basically', 'essentially', 'primarily', 'mainly', 'mostly', 'largely', 'chiefly', 'principally', 'primarily', 'mainly', 'mostly', 'largely', 'chiefly', 'principally'],
+        'noun' => ['moon', 'sun', 'star', 'sky', 'cloud', 'rain', 'wind', 'storm', 'lightning', 'thunder', 'snow', 'ice', 'fire', 'flame', 'smoke', 'mist', 'fog', 'dew', 'drop', 'tear', 'smile', 'laugh', 'cry', 'song', 'music', 'dance', 'dream', 'hope', 'love', 'heart', 'soul', 'spirit', 'mind', 'thought', 'idea', 'memory', 'moment', 'time', 'day', 'night', 'morning', 'evening', 'dawn', 'dusk', 'twilight', 'sunrise', 'sunset', 'noon', 'midnight', 'hour', 'minute', 'second', 'year', 'month', 'week', 'season', 'spring', 'summer', 'autumn', 'winter', 'flower', 'tree', 'leaf', 'branch', 'root', 'seed', 'fruit', 'berry', 'garden', 'forest', 'meadow', 'field', 'mountain', 'hill', 'valley', 'river', 'stream', 'lake', 'ocean', 'sea', 'wave', 'shore', 'beach', 'sand', 'stone', 'rock', 'crystal', 'gem', 'pearl', 'gold', 'silver', 'diamond', 'ruby', 'emerald', 'sapphire', 'amethyst', 'topaz', 'jade', 'coral', 'ivory', 'marble', 'granite', 'wood', 'bark', 'timber', 'lumber', 'paper', 'ink', 'paint', 'color', 'hue', 'shade', 'tint', 'tone', 'brightness', 'darkness', 'light', 'shadow', 'silhouette', 'outline', 'shape', 'form', 'figure', 'image', 'picture', 'portrait', 'landscape', 'scene', 'view', 'sight', 'vision', 'dream', 'nightmare', 'fantasy', 'reality', 'truth', 'lie', 'story', 'tale', 'legend', 'myth', 'fable', 'parable', 'poem', 'verse', 'line', 'word', 'letter', 'sound', 'voice', 'whisper', 'shout', 'scream', 'cry', 'laugh', 'giggle', 'chuckle', 'smile', 'grin', 'frown', 'scowl', 'grimace', 'expression', 'face', 'eye', 'nose', 'mouth', 'lip', 'tooth', 'tongue', 'cheek', 'chin', 'forehead', 'brow', 'eyebrow', 'eyelash', 'hair', 'beard', 'mustache', 'hand', 'finger', 'thumb', 'nail', 'palm', 'wrist', 'arm', 'elbow', 'shoulder', 'chest', 'breast', 'heart', 'lung', 'stomach', 'belly', 'waist', 'hip', 'leg', 'thigh', 'knee', 'shin', 'calf', 'ankle', 'foot', 'toe', 'heel', 'sole', 'arch', 'instep', 'back', 'spine', 'neck', 'throat', 'head', 'skull', 'brain', 'mind', 'thought', 'idea', 'concept', 'notion', 'belief', 'opinion', 'viewpoint', 'perspective', 'angle', 'aspect', 'side', 'part', 'piece', 'bit', 'fragment', 'shard', 'splinter', 'chip', 'crumb', 'morsel', 'bite', 'taste', 'flavor', 'savor', 'aroma', 'scent', 'perfume', 'fragrance', 'odor', 'smell', 'stench', 'stink', 'reek', 'foul', 'sweet', 'sour', 'bitter', 'salty', 'spicy', 'hot', 'cold', 'warm', 'cool', 'fresh', 'stale', 'rotten', 'decayed', 'spoiled', 'moldy', 'musty', 'damp', 'wet', 'dry', 'moist', 'humid', 'arid', 'parched', 'thirsty', 'hungry', 'starving', 'famished', 'full', 'satisfied', 'content', 'happy', 'joyful', 'cheerful', 'merry', 'gay', 'glad', 'pleased', 'delighted', 'thrilled', 'excited', 'enthusiastic', 'eager', 'keen', 'anxious', 'worried', 'concerned', 'troubled', 'distressed', 'upset', 'sad', 'sorrowful', 'melancholy', 'gloomy', 'depressed', 'dejected', 'downcast', 'disappointed', 'discouraged', 'disheartened', 'crushed', 'broken', 'shattered', 'devastated', 'destroyed', 'ruined', 'wrecked', 'damaged', 'hurt', 'injured', 'wounded', 'scarred', 'marked', 'stained', 'tainted', 'corrupted', 'polluted', 'contaminated', 'infected', 'diseased', 'sick', 'ill', 'unwell', 'ailing', 'weak', 'feeble', 'frail', 'fragile', 'delicate', 'tender', 'soft', 'gentle', 'mild', 'calm', 'peaceful', 'serene', 'tranquil', 'quiet', 'silent', 'still', 'motionless', 'static', 'stationary', 'fixed', 'firm', 'solid', 'stable', 'steady', 'secure', 'safe', 'protected', 'guarded', 'defended', 'shielded', 'sheltered', 'covered', 'hidden', 'concealed', 'secret', 'private', 'personal', 'individual', 'unique', 'special', 'particular', 'specific', 'certain', 'definite', 'clear', 'obvious', 'evident', 'apparent', 'visible', 'noticeable', 'remarkable', 'extraordinary', 'exceptional', 'outstanding', 'excellent', 'superb', 'magnificent', 'wonderful', 'marvelous', 'amazing', 'astonishing', 'surprising', 'shocking', 'stunning', 'breathtaking', 'spectacular', 'dramatic', 'theatrical', 'artistic', 'creative', 'imaginative', 'inventive', 'original', 'novel', 'new', 'fresh', 'modern', 'contemporary', 'current', 'present', 'today', 'now', 'here', 'there', 'everywhere', 'somewhere', 'anywhere', 'nowhere', 'home', 'house', 'building', 'structure', 'construction', 'creation', 'work', 'labor', 'effort', 'energy', 'power', 'force', 'strength', 'might', 'vigor', 'vitality', 'life', 'existence', 'being', 'reality', 'truth', 'fact', 'reality', 'actuality', 'existence', 'presence', 'absence', 'void', 'emptiness', 'nothingness', 'zero', 'null', 'void', 'blank', 'empty', 'vacant', 'unoccupied', 'free', 'available', 'open', 'accessible', 'reachable', 'attainable', 'achievable', 'possible', 'feasible', 'practical', 'realistic', 'reasonable', 'sensible', 'logical', 'rational', 'intelligent', 'smart', 'clever', 'wise', 'knowledgeable', 'learned', 'educated', 'informed', 'aware', 'conscious', 'awake', 'alert', 'attentive', 'focused', 'concentrated', 'centered', 'balanced', 'stable', 'steady', 'firm', 'strong', 'powerful', 'mighty', 'great', 'grand', 'magnificent', 'splendid', 'glorious', 'brilliant', 'bright', 'shining', 'radiant', 'luminous', 'glowing', 'sparkling', 'twinkling', 'glistening', 'glimmering', 'flickering', 'flashing', 'blinking', 'winking', 'dancing', 'moving', 'flowing', 'streaming', 'pouring', 'rushing', 'racing', 'speeding', 'flying', 'soaring', 'floating', 'drifting', 'sailing', 'gliding', 'sliding', 'slipping', 'falling', 'dropping', 'descending', 'sinking', 'diving', 'plunging', 'jumping', 'leaping', 'bounding', 'springing', 'bouncing', 'hopping', 'skipping', 'running', 'walking', 'strolling', 'marching', 'tramping', 'trudging', 'plodding', 'crawling', 'creeping', 'slithering', 'wriggling', 'squirming', 'twisting', 'turning', 'rotating', 'spinning', 'whirling', 'swirling', 'circling', 'orbiting', 'revolving', 'rolling', 'tumbling', 'flipping', 'somersaulting', 'cartwheeling', 'handstanding', 'balancing', 'standing', 'sitting', 'lying', 'resting', 'sleeping', 'dreaming', 'waking', 'awakening', 'arising', 'getting', 'up', 'down', 'over', 'under', 'through', 'across', 'around', 'between', 'among', 'within', 'without', 'inside', 'outside', 'near', 'far', 'close', 'distant', 'here', 'there', 'everywhere', 'somewhere', 'anywhere', 'nowhere', 'always', 'never', 'sometimes', 'often', 'rarely', 'seldom', 'frequently', 'occasionally', 'regularly', 'constantly', 'continuously', 'forever', 'temporarily', 'permanently', 'briefly', 'quickly', 'slowly', 'gradually', 'suddenly', 'immediately', 'instantly', 'eventually', 'finally', 'ultimately', 'initially', 'originally', 'first', 'last', 'next', 'previous', 'before', 'after', 'during', 'while', 'when', 'where', 'why', 'how', 'what', 'who', 'which', 'whose', 'whom', 'that', 'this', 'these', 'those', 'all', 'some', 'any', 'none', 'many', 'much', 'few', 'little', 'more', 'most', 'less', 'least', 'enough', 'too', 'very', 'quite', 'rather', 'pretty', 'fairly', 'somewhat', 'rather', 'quite', 'very', 'extremely', 'incredibly', 'amazingly', 'wonderfully', 'beautifully', 'perfectly', 'completely', 'totally', 'entirely', 'fully', 'partially', 'partly', 'mostly', 'mainly', 'primarily', 'chiefly', 'principally', 'largely', 'greatly', 'considerably', 'significantly', 'substantially', 'dramatically', 'radically', 'fundamentally', 'basically', 'essentially', 'primarily', 'mainly', 'mostly', 'largely', 'chiefly', 'principally'],
+        'adjective' => ['beautiful', 'lovely', 'gorgeous', 'stunning', 'magnificent', 'wonderful', 'amazing', 'incredible', 'fantastic', 'marvelous', 'splendid', 'brilliant', 'bright', 'shining', 'radiant', 'glowing', 'sparkling', 'twinkling', 'glistening', 'glimmering', 'flickering', 'flashing', 'blinking', 'dancing', 'moving', 'flowing', 'streaming', 'pouring', 'rushing', 'racing', 'speeding', 'flying', 'soaring', 'floating', 'drifting', 'sailing', 'gliding', 'sliding', 'slipping', 'falling', 'dropping', 'descending', 'sinking', 'diving', 'plunging', 'jumping', 'leaping', 'bounding', 'springing', 'bouncing', 'hopping', 'skipping', 'running', 'walking', 'strolling', 'marching', 'tramping', 'trudging', 'plodding', 'crawling', 'creeping', 'slithering', 'wriggling', 'squirming', 'twisting', 'turning', 'rotating', 'spinning', 'whirling', 'swirling', 'circling', 'orbiting', 'revolving', 'rolling', 'tumbling', 'flipping', 'somersaulting', 'cartwheeling', 'handstanding', 'balancing', 'standing', 'sitting', 'lying', 'resting', 'sleeping', 'dreaming', 'waking', 'awakening', 'arising', 'getting', 'up', 'down', 'over', 'under', 'through', 'across', 'around', 'between', 'among', 'within', 'without', 'inside', 'outside', 'near', 'far', 'close', 'distant', 'here', 'there', 'everywhere', 'somewhere', 'anywhere', 'nowhere', 'always', 'never', 'sometimes', 'often', 'rarely', 'seldom', 'frequently', 'occasionally', 'regularly', 'constantly', 'continuously', 'forever', 'temporarily', 'permanently', 'briefly', 'quickly', 'slowly', 'gradually', 'suddenly', 'immediately', 'instantly', 'eventually', 'finally', 'ultimately', 'initially', 'originally', 'first', 'last', 'next', 'previous', 'before', 'after', 'during', 'while', 'when', 'where', 'why', 'how', 'what', 'who', 'which', 'whose', 'whom', 'that', 'this', 'these', 'those', 'all', 'some', 'any', 'none', 'many', 'much', 'few', 'little', 'more', 'most', 'less', 'least', 'enough', 'too', 'very', 'quite', 'rather', 'pretty', 'fairly', 'somewhat', 'rather', 'quite', 'very', 'extremely', 'incredibly', 'amazingly', 'wonderfully', 'beautifully', 'perfectly', 'completely', 'totally', 'entirely', 'fully', 'partially', 'partly', 'mostly', 'mainly', 'primarily', 'chiefly', 'principally', 'largely', 'greatly', 'considerably', 'significantly', 'substantially', 'dramatically', 'radically', 'fundamentally', 'basically', 'essentially', 'primarily', 'mainly', 'mostly', 'largely', 'chiefly', 'principally'],
+        'adverb' => ['quickly', 'slowly', 'gently', 'softly', 'loudly', 'quietly', 'brightly', 'darkly', 'lightly', 'heavily', 'strongly', 'weakly', 'bravely', 'fearfully', 'happily', 'sadly', 'angrily', 'calmly', 'wildly', 'freely', 'bound', 'openly', 'closely', 'brokenly', 'fixedly', 'built', 'destroyed', 'created', 'made', 'done', 'been', 'had', 'gotten', 'found', 'lost', 'won', 'failed', 'succeeded', 'tried', 'attempted', 'managed', 'failed', 'succeeded', 'achieved', 'accomplished', 'completed', 'finished', 'ended', 'started', 'begun', 'initiated', 'launched', 'released', 'freed', 'liberated', 'escaped', 'fled', 'chased', 'followed', 'led', 'guided', 'directed', 'pointed', 'shown', 'hidden', 'revealed', 'discovered', 'explored', 'searched', 'sought', 'looked', 'watched', 'observed', 'noticed', 'seen', 'spotted', 'found', 'located', 'placed', 'put', 'set', 'laid', 'stood', 'sat', 'lain', 'rested', 'slept', 'woken', 'awakened', 'arisen', 'gotten', 'up', 'down', 'over', 'under', 'through', 'across', 'around', 'between', 'among', 'within', 'without', 'inside', 'outside', 'near', 'far', 'close', 'distant', 'here', 'there', 'everywhere', 'somewhere', 'anywhere', 'nowhere', 'always', 'never', 'sometimes', 'often', 'rarely', 'seldom', 'frequently', 'occasionally', 'regularly', 'constantly', 'continuously', 'forever', 'temporarily', 'permanently', 'briefly', 'quickly', 'slowly', 'gradually', 'suddenly', 'immediately', 'instantly', 'eventually', 'finally', 'ultimately', 'initially', 'originally', 'first', 'last', 'next', 'previous', 'before', 'after', 'during', 'while', 'when', 'where', 'why', 'how', 'what', 'who', 'which', 'whose', 'whom', 'that', 'this', 'these', 'those', 'all', 'some', 'any', 'none', 'many', 'much', 'few', 'little', 'more', 'most', 'less', 'least', 'enough', 'too', 'very', 'quite', 'rather', 'pretty', 'fairly', 'somewhat', 'rather', 'quite', 'very', 'extremely', 'incredibly', 'amazingly', 'wonderfully', 'beautifully', 'perfectly', 'completely', 'totally', 'entirely', 'fully', 'partially', 'partly', 'mostly', 'mainly', 'primarily', 'chiefly', 'principally', 'largely', 'greatly', 'considerably', 'significantly', 'substantially', 'dramatically', 'radically', 'fundamentally', 'basically', 'essentially', 'primarily', 'mainly', 'mostly', 'largely', 'chiefly', 'principally'],
+        'article' => ['the', 'a', 'an'],
+        'conjunction' => ['and', 'but', 'or', 'so', 'yet', 'for', 'nor', 'while', 'when', 'where', 'because', 'if', 'unless', 'since', 'until', 'though', 'although', 'as', 'than', 'that']
+    ];
+    
+    // Check each word type
+    foreach ($wordDatabase as $type => $words) {
+        if (in_array($word, $words)) {
+            return $type;
+        }
+    }
+    
+    // Default to conjunction if not found
+    return 'conjunction';
+}
+
 // Get statistics and poems
 $stats = [];
 $poems = [];
@@ -246,20 +271,17 @@ try {
         }
         .connections-carousel {
             position: relative;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 4px;
-            padding: 20px;
             min-height: 200px;
         }
         .connection {
-            background: rgba(255, 105, 180, 0.1);
-            border: 1px solid rgba(255, 105, 180, 0.5);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #444;
             border-radius: 4px;
             padding: 20px;
             position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
+            top: 0;
+            left: 0;
+            right: 0;
             opacity: 0;
             transition: opacity 1.2s ease-in-out;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -274,21 +296,17 @@ try {
             margin-bottom: 15px;
         }
         .connection-strength {
-            background: #44ff44;
-            color: #000;
             padding: 4px 8px;
-            border-radius: 15px;
+            border-radius: 4px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: normal;
         }
         .common-words {
             margin-bottom: 15px;
         }
         .common-words span {
-            background: #ffff00;
-            color: #000;
             padding: 2px 6px;
-            border-radius: 10px;
+            border-radius: 4px;
             font-size: 11px;
             margin-right: 5px;
         }
@@ -425,7 +443,27 @@ try {
                                         <h3 style="color: #ffff00; margin: 0;">
                                             Connected Poems (<?php echo $connection['poem_count']; ?> poems)
                                         </h3>
-                                        <span class="connection-strength">
+                                        <?php 
+                                            // Determine the most common word type in this connection
+                                            $word_types = [];
+                                            foreach ($connection['common_words'] as $word) {
+                                                $word_type = getWordType($word);
+                                                $word_types[$word_type] = ($word_types[$word_type] ?? 0) + 1;
+                                            }
+                                            arsort($word_types);
+                                            $dominant_type = array_key_first($word_types);
+                                            
+                                            $colors = [
+                                                'verb' => ['bg' => 'rgba(255, 68, 68, 0.3)', 'text' => '#ff4444', 'border' => 'rgba(255, 68, 68, 0.5)'],
+                                                'noun' => ['bg' => 'rgba(170, 68, 255, 0.3)', 'text' => '#aa44ff', 'border' => 'rgba(170, 68, 255, 0.5)'],
+                                                'adjective' => ['bg' => 'rgba(255, 255, 68, 0.3)', 'text' => '#ffff44', 'border' => 'rgba(255, 255, 68, 0.5)'],
+                                                'adverb' => ['bg' => 'rgba(68, 255, 68, 0.3)', 'text' => '#44ff44', 'border' => 'rgba(68, 255, 68, 0.5)'],
+                                                'article' => ['bg' => 'rgba(255, 136, 68, 0.3)', 'text' => '#ff8844', 'border' => 'rgba(255, 136, 68, 0.5)'],
+                                                'conjunction' => ['bg' => 'rgba(255, 105, 180, 0.3)', 'text' => '#ff69b4', 'border' => 'rgba(255, 105, 180, 0.5)']
+                                            ];
+                                            $color = $colors[$dominant_type] ?? $colors['conjunction'];
+                                        ?>
+                                        <span class="connection-strength" style="background: <?php echo $color['bg']; ?>; color: <?php echo $color['text']; ?>; border: 1px solid <?php echo $color['border']; ?>;">
                                             <?php echo $connection['connection_strength']; ?> shared words
                                         </span>
                                     </div>
@@ -433,7 +471,19 @@ try {
                                     <div class="common-words">
                                         <strong style="color: #44ff44;">Common words:</strong>
                                         <?php foreach ($connection['common_words'] as $word): ?>
-                                            <span><?php echo htmlspecialchars($word); ?></span>
+                                            <?php 
+                                                $word_type = getWordType($word);
+                                                $colors = [
+                                                    'verb' => ['bg' => 'rgba(255, 68, 68, 0.3)', 'text' => '#ff4444', 'border' => 'rgba(255, 68, 68, 0.5)'],
+                                                    'noun' => ['bg' => 'rgba(170, 68, 255, 0.3)', 'text' => '#aa44ff', 'border' => 'rgba(170, 68, 255, 0.5)'],
+                                                    'adjective' => ['bg' => 'rgba(255, 255, 68, 0.3)', 'text' => '#ffff44', 'border' => 'rgba(255, 255, 68, 0.5)'],
+                                                    'adverb' => ['bg' => 'rgba(68, 255, 68, 0.3)', 'text' => '#44ff44', 'border' => 'rgba(68, 255, 68, 0.5)'],
+                                                    'article' => ['bg' => 'rgba(255, 136, 68, 0.3)', 'text' => '#ff8844', 'border' => 'rgba(255, 136, 68, 0.5)'],
+                                                    'conjunction' => ['bg' => 'rgba(255, 105, 180, 0.3)', 'text' => '#ff69b4', 'border' => 'rgba(255, 105, 180, 0.5)']
+                                                ];
+                                                $color = $colors[$word_type] ?? $colors['conjunction'];
+                                            ?>
+                                            <span style="background: <?php echo $color['bg']; ?>; color: <?php echo $color['text']; ?>; border: 1px solid <?php echo $color['border']; ?>;"><?php echo htmlspecialchars($word); ?></span>
                                         <?php endforeach; ?>
                                     </div>
                                     
@@ -447,9 +497,20 @@ try {
                                                         $poem_text = str_replace('&lt;br/&gt;', "\n", $poem_text);
                                                         $poem_text = str_replace('&lt;br /&gt;', "\n", $poem_text);
                                                         
-                                                        // Highlight common words
+                                                        // Highlight common words with appropriate colors
                                                         foreach ($connection['common_words'] as $common_word) {
-                                                            $poem_text = preg_replace('/\b' . preg_quote($common_word, '/') . '\b/i', '<span style="background: #ffff00; color: #000; padding: 2px 4px; border-radius: 3px; font-weight: bold;">' . $common_word . '</span>', $poem_text);
+                                                            $word_type = getWordType($common_word);
+                                                            $colors = [
+                                                                'verb' => ['bg' => 'rgba(255, 68, 68, 0.3)', 'text' => '#ff4444', 'border' => 'rgba(255, 68, 68, 0.5)'],
+                                                                'noun' => ['bg' => 'rgba(170, 68, 255, 0.3)', 'text' => '#aa44ff', 'border' => 'rgba(170, 68, 255, 0.5)'],
+                                                                'adjective' => ['bg' => 'rgba(255, 255, 68, 0.3)', 'text' => '#ffff44', 'border' => 'rgba(255, 255, 68, 0.5)'],
+                                                                'adverb' => ['bg' => 'rgba(68, 255, 68, 0.3)', 'text' => '#44ff44', 'border' => 'rgba(68, 255, 68, 0.5)'],
+                                                                'article' => ['bg' => 'rgba(255, 136, 68, 0.3)', 'text' => '#ff8844', 'border' => 'rgba(255, 136, 68, 0.5)'],
+                                                                'conjunction' => ['bg' => 'rgba(255, 105, 180, 0.3)', 'text' => '#ff69b4', 'border' => 'rgba(255, 105, 180, 0.5)']
+                                                            ];
+                                                            
+                                                            $color = $colors[$word_type] ?? $colors['conjunction']; // Default to conjunction if unknown
+                                                            $poem_text = preg_replace('/\b' . preg_quote($common_word, '/') . '\b/i', '<span style="background: ' . $color['bg'] . '; color: ' . $color['text'] . '; padding: 2px 4px; border-radius: 4px; font-weight: normal; border: 1px solid ' . $color['border'] . ';">' . $common_word . '</span>', $poem_text);
                                                         }
                                                         
                                                         echo nl2br($poem_text);
@@ -505,7 +566,7 @@ try {
                 const connectionHeight = activeConnection.offsetHeight;
                 
                 // Set container height to fit the content
-                carousel.style.height = (connectionHeight + 40) + 'px'; // 40px for padding
+                carousel.style.height = connectionHeight + 'px';
                 
                 // Restore visibility
                 connections.forEach(conn => conn.style.visibility = '');
