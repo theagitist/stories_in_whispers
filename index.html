@@ -282,6 +282,7 @@
         let controlsInverted = false;
         let screenUpsideDown = false;
         let upsideDownTimeout = null;
+        let spawnMultiplier = 1; // Multiplier for islet spawn rate
         
         // Star animation
         let starTimer = 0;
@@ -904,7 +905,8 @@
                 'inverted',
                 'ultra_speed',
                 'exploding_islets',
-                'upside_down'
+                'upside_down',
+                'islet_rain'
             ];
             
             currentPower = powers[Math.floor(Math.random() * powers.length)];
@@ -920,12 +922,13 @@
 
         function showPowerMessage(power) {
             const messages = {
-                'wider': 'WIDER CHARACTER!',
-                'narrower': 'NARROWER CHARACTER!',
+                'wider': 'WIDE PADDLE!',
+                'narrower': 'NARROW PADDLE!',
                 'inverted': 'INVERTED CONTROLS!',
                 'ultra_speed': 'ULTRA SPEED!',
                 'exploding_islets': 'EXPLODING ISLETS!',
-                'upside_down': 'UPSIDE DOWN!'
+                'upside_down': 'UPSIDE DOWN!',
+                'islet_rain': 'ISLET RAIN!'
             };
             
             const messageDiv = document.createElement('div');
@@ -999,6 +1002,9 @@
                         upsideDownTimeout = null;
                     }, 5000);
                     break;
+                case 'islet_rain':
+                    spawnMultiplier = 5; // 5x spawn rate
+                    break;
             }
         }
 
@@ -1019,6 +1025,9 @@
                 paddle.speed = originalPaddleSpeed;
                 controlsInverted = false;
                 screenUpsideDown = false;
+                
+                // Reset spawn multiplier
+                spawnMultiplier = 1;
                 
                 // Clear upside down timeout if it exists
                 if (upsideDownTimeout) {
@@ -1342,7 +1351,9 @@
         function spawnIslets() {
             if (!gamePaused) {
                 const now = Date.now();
-                if (now - lastSpawnTime > currentSpawnInterval) {
+                // Apply spawn multiplier for islet rain power
+                const effectiveSpawnInterval = currentSpawnInterval / spawnMultiplier;
+                if (now - lastSpawnTime > effectiveSpawnInterval) {
                     // Spawn 2-5 islets at a time (more challenging)
                     const numIslets = Math.floor(Math.random() * 4) + 2;
                     
@@ -1596,6 +1607,9 @@
             
             // Reset exploding islets animation timer
             explodingIsletsTimer = 0;
+            
+            // Reset spawn multiplier
+            spawnMultiplier = 1;
             
             // Reset game speed to initial values
             currentSpawnInterval = baseSpawnInterval;
