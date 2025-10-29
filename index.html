@@ -295,6 +295,10 @@
         let haikuCompleted = false;
         let gameStarted = false;
         let score = 0;
+
+        // Word fade animation
+        let wordFadeStates = new Map(); // Track fade state for each word
+        let fadeDuration = 1000; // 1 second fade duration
         
         // Poetry building system
         let caughtWords = [];
@@ -728,6 +732,16 @@
             if (currentHaiku.length > 0) {
                 const removedWord = currentHaiku.pop();
                 caughtWords.pop(); // Also remove from caught words
+                
+                // Start fade-out animation for the removed word
+                const wordId = `${removedWord.word}_${removedWord.type}_${Date.now()}`;
+                wordFadeStates.set(wordId, {
+                    word: removedWord,
+                    startTime: Date.now(),
+                    fadeType: 'out', // 'in' or 'out'
+                    alpha: 1
+                });
+                
                 updatePoetryProgress();
                 
                 // Show removal message
@@ -880,6 +894,15 @@
             
             currentHaiku.push(wordData);
             caughtWords.push(wordData);
+            
+            // Start fade-in animation for the new word
+            const wordId = `${wordData.word}_${wordData.type}_${Date.now()}`;
+            wordFadeStates.set(wordId, {
+                word: wordData,
+                startTime: Date.now(),
+                fadeType: 'in', // 'in' or 'out'
+                alpha: 0
+            });
             
             // Update progress display
             updatePoetryProgress();
@@ -1622,7 +1645,7 @@
             ctx.font = '16px monospace';
             ctx.textAlign = 'center';
             
-            // Draw haiku lines
+            // Draw haiku lines with fade animation
             let y = canvas.height / 2 - 20;
             let line1 = '';
             let line2 = '';
@@ -1630,6 +1653,7 @@
             let currentLine = 1;
             let currentSyllables = 0;
             
+            // Build the current poem lines
             for (let i = 0; i < currentHaiku.length; i++) {
                 const word = currentHaiku[i];
                 const nextWord = i + 1 < currentHaiku.length ? currentHaiku[i + 1] : null;
@@ -1679,28 +1703,88 @@
                 }
             }
             
-            // Draw the lines with proper capitalization
+            // Draw the lines with fade animation
             if (line1) {
                 const capitalizedLine1 = line1.charAt(0).toUpperCase() + line1.slice(1);
-                ctx.strokeText(capitalizedLine1, canvas.width / 2, y);
-                ctx.fillText(capitalizedLine1, canvas.width / 2, y);
+                drawFadedText(capitalizedLine1, canvas.width / 2, y);
                 y += 25;
             }
             if (line2) {
                 const capitalizedLine2 = line2.charAt(0).toUpperCase() + line2.slice(1);
-                ctx.strokeText(capitalizedLine2, canvas.width / 2, y);
-                ctx.fillText(capitalizedLine2, canvas.width / 2, y);
+                drawFadedText(capitalizedLine2, canvas.width / 2, y);
                 y += 25;
             }
             if (line3) {
                 const capitalizedLine3 = line3.charAt(0).toUpperCase() + line3.slice(1);
-                ctx.strokeText(capitalizedLine3, canvas.width / 2, y);
-                ctx.fillText(capitalizedLine3, canvas.width / 2, y);
+                drawFadedText(capitalizedLine3, canvas.width / 2, y);
             }
             
+            // Update and clean up fade states
+            updateFadeStates();
             
             // Reset text alignment
             ctx.textAlign = 'left';
+        }
+
+        // Helper function to draw text with fade animation
+        function drawFadedText(text, x, y) {
+            const now = Date.now();
+            let alpha = 1; // Default alpha for current words
+            
+            // Check if this text has any fading words
+            const words = text.split(' ');
+            let hasFadingWord = false;
+            
+            for (let word of words) {
+                for (let [wordId, fadeState] of wordFadeStates) {
+                    if (fadeState.word.word.toLowerCase() === word.toLowerCase()) {
+                        hasFadingWord = true;
+                        const elapsed = now - fadeState.startTime;
+                        const progress = Math.min(elapsed / fadeDuration, 1);
+                        
+                        if (fadeState.fadeType === 'in') {
+                            alpha = Math.min(alpha, progress);
+                        } else if (fadeState.fadeType === 'out') {
+                            alpha = Math.min(alpha, 1 - progress);
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            // Apply alpha to the text
+            ctx.globalAlpha = alpha;
+            ctx.strokeText(text, x, y);
+            ctx.fillText(text, x, y);
+            ctx.globalAlpha = 1; // Reset alpha
+        }
+
+        // Update fade states and clean up completed animations
+        function updateFadeStates() {
+            const now = Date.now();
+            const toDelete = [];
+            
+            for (let [wordId, fadeState] of wordFadeStates) {
+                const elapsed = now - fadeState.startTime;
+                const progress = Math.min(elapsed / fadeDuration, 1);
+                
+                if (fadeState.fadeType === 'in') {
+                    fadeState.alpha = progress;
+                    if (progress >= 1) {
+                        toDelete.push(wordId);
+                    }
+                } else if (fadeState.fadeType === 'out') {
+                    fadeState.alpha = 1 - progress;
+                    if (progress >= 1) {
+                        toDelete.push(wordId);
+                    }
+                }
+            }
+            
+            // Clean up completed animations
+            for (let wordId of toDelete) {
+                wordFadeStates.delete(wordId);
+            }
         }
 
         // Game over
