@@ -198,7 +198,7 @@
             <button class="start-button" onclick="startGame()">Press SPACE to start</button>
         </div>
         
-        <div id="haikuProgress"><span id="playerNameDisplay"></span>'s story so far: Poetry Progress: 0/17 syllables | Poems: 0</div>
+        <div id="haikuProgress">A <span id="playerNameDisplay" style="color: #ff69b4; font-weight: bold;"></span><span style="color: #ff69b4; font-weight: bold;">'s</span> story so far: Poetry Progress: 0/17 syllables | Poems: 0</div>
         <div id="currentHaiku">Building your poem...</div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         <div id="instructions">
@@ -288,7 +288,8 @@
             
             if (greetingElement) {
                 const locale = generatePoeticLocale();
-                greetingElement.innerHTML = `Welcome, you have arrived to ${locale}.<br>Your name is <span style="color: #ff69b4; font-weight: bold;">${playerNameElement ? playerNameElement.textContent : generatePlayerName()}</span>.`;
+                const playerName = playerNameElement ? playerNameElement.textContent : generatePlayerName();
+                greetingElement.innerHTML = `Welcome, you have arrived to ${locale}.<br>I see you are a <span style="color: #ff69b4; font-weight: bold;">${playerName.toLowerCase()}</span>.`;
             }
         }
 
@@ -1221,7 +1222,7 @@
                     }
                 }
                 
-                progressElement.innerHTML = `<span id="playerNameDisplay">${playerName}</span>'s story so far: Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
+                progressElement.innerHTML = `A <span id="playerNameDisplay" style="color: #ff69b4; font-weight: bold;">${playerName.toLowerCase()}</span><span style="color: #ff69b4; font-weight: bold;">'s</span> story so far: Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
             } catch (error) {
                 // Error in updatePoetryProgress - continue game
             }
@@ -1427,7 +1428,7 @@
                 haikuDisplay.innerHTML = `
                     <h3>Poem Complete!</h3>
                     <div style="font-style: italic; margin: 10px 0; line-height: 1.5; color: #ffffff;">${formattedPoem}</div>
-                    <div style="margin: 10px 0; color: #ff69b4; font-weight: bold;">by ${playerName}</div>
+                    <div style="margin: 10px 0; color: #ff69b4; font-weight: bold;">by a ${playerName.toLowerCase()}</div>
                     <p style="color: #ffffff;">Poems completed: ${haikuCount}</p>
                     <p>Press SPACE or P to continue</p>
                 `;
