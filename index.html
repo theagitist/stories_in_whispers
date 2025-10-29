@@ -674,10 +674,10 @@
         }
 
         function playCatchSound() {
-            // Happy ascending sound for catching whisper
-            playSound(440, 0.2, 'sine', 0.2);
-            setTimeout(() => playSound(554, 0.15, 'sine', 0.15), 50);
-            setTimeout(() => playSound(659, 0.1, 'sine', 0.1), 100);
+            // Subtle whisper-like sound for catching whisper
+            playSound(220, 0.08, 'sine', 0.1); // Low, soft base tone
+            setTimeout(() => playSound(330, 0.06, 'sine', 0.08), 30); // Gentle rise
+            setTimeout(() => playSound(440, 0.04, 'sine', 0.06), 60); // Soft completion
         }
 
         function playMissSound() {
@@ -716,11 +716,10 @@
         }
 
         function playPowerWhisperCatchSound() {
-            // Different sound for catching power whisper
-            playSound(1000, 0.2, 'sawtooth', 0.4);
-            setTimeout(() => playSound(1200, 0.2, 'sawtooth', 0.4), 100);
-            setTimeout(() => playSound(1400, 0.3, 'sawtooth', 0.4), 200);
-            setTimeout(() => playSound(1600, 0.4, 'sawtooth', 0.3), 300);
+            // Subtle chime for catching power whisper
+            playSound(440, 0.1, 'sine', 0.15); // Soft, gentle chime
+            setTimeout(() => playSound(660, 0.08, 'sine', 0.12), 50); // Gentle harmony
+            setTimeout(() => playSound(880, 0.06, 'sine', 0.1), 100); // Soft completion
         }
 
         // Poetry building functions
@@ -1522,10 +1521,7 @@
                         const isBomb = !isSpecial && Math.random() < 0.05;
                         fallingShapes.push(new Whisper(isSpecial, isBomb));
 
-                        // Play sound when power whisper appears
-                        if (isSpecial) {
-                            playPowerWhisperAppearSound();
-                        }
+                        // Power whisper appears silently
                     }
                     lastSpawnTime = now;
                 }
@@ -1570,7 +1566,6 @@
                     } else if (whisper.isOffScreen()) {
                         // Whisper fell off screen
                         fallingShapes.splice(i, 1);
-                        playMissSound(); // Play miss sound effect
                     }
                 }
             }
