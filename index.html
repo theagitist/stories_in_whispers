@@ -371,6 +371,12 @@
         let fadeAlpha = 1; // 1 = fully visible, 0 = invisible
         let fadeSpeed = 0.01; // How fast elements fade out/in (slower)
         
+        // Quote display system
+        let showQuote = false;
+        let quoteAlpha = 0; // 0 = invisible, 1 = visible
+        let quoteFadeSpeed = 0.02; // How fast quote fades in/out
+        const quoteText = "Stand still, and you cannot see very far. But start moving, and the world manifests around you. - Kawika Guillermo";
+        
         // Audio context for sound effects
         let audioContext;
         let paddle = {
@@ -1560,6 +1566,10 @@
             isFadingOut = false;
             fadeAlpha = 1;
             
+            // Initialize quote system
+            showQuote = false;
+            quoteAlpha = 0;
+            
             // Start the game
             gameRunning = true;
             gameStarted = true;
@@ -1657,6 +1667,41 @@
             }
         }
 
+        // Draw the inspirational quote
+        function drawQuote() {
+            if (quoteAlpha <= 0) return;
+            
+            // Set up text styling for the quote
+            ctx.save();
+            ctx.globalAlpha = quoteAlpha;
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.font = 'italic 16px serif';
+            ctx.textAlign = 'center';
+            
+            // Split quote into multiple lines for better readability
+            const lines = [
+                "Stand still, and you cannot see very far.",
+                "But start moving, and the world manifests around you.",
+                "- Kawika Guillermo"
+            ];
+            
+            // Calculate text position (center of screen)
+            const x = canvas.width / 2;
+            const startY = canvas.height / 2 - 30;
+            const lineHeight = 25;
+            
+            // Draw each line with outline for better readability
+            lines.forEach((line, index) => {
+                const y = startY + (index * lineHeight);
+                ctx.strokeText(line, x, y);
+                ctx.fillText(line, x, y);
+            });
+            
+            ctx.restore();
+        }
+
         // Paddle movement
         function updatePaddle() {
             if (!gamePaused) {
@@ -1695,8 +1740,25 @@
                 // Update fade alpha
                 if (isFadingOut) {
                     fadeAlpha = Math.max(0, fadeAlpha - fadeSpeed);
+                    
+                    // Show quote when fade is halfway (alpha <= 0.5)
+                    if (fadeAlpha <= 0.5 && !showQuote) {
+                        showQuote = true;
+                    }
                 } else {
                     fadeAlpha = Math.min(1, fadeAlpha + fadeSpeed);
+                    
+                    // Hide quote when paddle moves again
+                    if (showQuote) {
+                        showQuote = false;
+                    }
+                }
+                
+                // Update quote alpha
+                if (showQuote) {
+                    quoteAlpha = Math.min(1, quoteAlpha + quoteFadeSpeed);
+                } else {
+                    quoteAlpha = Math.max(0, quoteAlpha - quoteFadeSpeed);
                 }
                 
                 // Apply fade effect to HTML elements
@@ -2036,6 +2098,10 @@
             isFadingOut = false;
             fadeAlpha = 1;
             
+            // Reset quote system
+            showQuote = false;
+            quoteAlpha = 0;
+            
             // Reset special powers
             specialPowerActive = false;
             currentPower = null;
@@ -2118,6 +2184,10 @@
             lastPaddleMovement = Date.now();
             isFadingOut = false;
             fadeAlpha = 1;
+            
+            // Reset quote system
+            showQuote = false;
+            quoteAlpha = 0;
             
             // Reset special powers
             specialPowerActive = false;
@@ -2249,6 +2319,9 @@
             
             // Draw whispers in the foreground
             drawWhispers();
+            
+            // Draw inspirational quote if visible
+            drawQuote();
             
             // Draw paddle on top (always visible, no fade effect)
             drawPaddle();
