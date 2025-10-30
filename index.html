@@ -365,6 +365,8 @@
         let showQuote = false;
         let quoteAlpha = 0; // 0 = invisible, 1 = visible
         let quoteFadeSpeed = 0.02; // How fast quote fades in/out
+        let quoteDelayTimer = 0; // Timer for 1 second delay after elements disappear
+        let elementsFullyHidden = false; // Track when elements are completely hidden
         const quoteText = "Stand still, and you cannot see very far. But start moving, and the world manifests around you. - Kawika Guillermo";
         
         // Audio context for sound effects
@@ -1559,6 +1561,8 @@
             // Initialize quote system
             showQuote = false;
             quoteAlpha = 0;
+            quoteDelayTimer = 0;
+            elementsFullyHidden = false;
             
             // Start the game
             gameRunning = true;
@@ -1731,17 +1735,25 @@
                 if (isFadingOut) {
                     fadeAlpha = Math.max(0, fadeAlpha - fadeSpeed);
                     
-                    // Show quote when fade is halfway (alpha <= 0.5)
-                    if (fadeAlpha <= 0.5 && !showQuote) {
+                    // Check if elements are fully hidden
+                    if (fadeAlpha <= 0 && !elementsFullyHidden) {
+                        elementsFullyHidden = true;
+                        quoteDelayTimer = Date.now(); // Start the 1 second delay timer
+                    }
+                    
+                    // Show quote 1 second after elements are fully hidden
+                    if (elementsFullyHidden && !showQuote && Date.now() - quoteDelayTimer >= 1000) {
                         showQuote = true;
                     }
                 } else {
                     fadeAlpha = Math.min(1, fadeAlpha + fadeSpeed);
                     
-                    // Hide quote when paddle moves again
+                    // Reset quote state when paddle moves again
                     if (showQuote) {
                         showQuote = false;
                     }
+                    elementsFullyHidden = false;
+                    quoteDelayTimer = 0;
                 }
                 
                 // Update quote alpha
@@ -2091,6 +2103,8 @@
             // Reset quote system
             showQuote = false;
             quoteAlpha = 0;
+            quoteDelayTimer = 0;
+            elementsFullyHidden = false;
             
             // Reset special powers
             specialPowerActive = false;
@@ -2178,6 +2192,8 @@
             // Reset quote system
             showQuote = false;
             quoteAlpha = 0;
+            quoteDelayTimer = 0;
+            elementsFullyHidden = false;
             
             // Reset special powers
             specialPowerActive = false;
