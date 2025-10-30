@@ -1,58 +1,78 @@
-# Falling Islets - Poetry Building Game
+# Stories in Whispers - Poetry Building Game
 
-A colorful HTML5 video game where players control a paddle at the bottom of the screen to catch falling islets (colored text blocks) representing different parts of speech, with the objective of building poetry (5-7-5 syllable poems).
+A mystical HTML5 video game where players control a paddle to catch falling whispers (colored text blocks) representing different parts of speech, with the objective of building poetry (5-7-5 syllable poems). Experience a contemplative journey through floating verses and whispered dreams.
+
+**Version 2.0.0** - Enhanced with fade-out mechanics and inspirational quotes
 
 ## How to Play
 
 - Use the **left** and **right** arrow keys or **A/D** keys to move your paddle
 - Press **SPACE** to start the game
 - Press **SPACE** or **P** to pause/resume the game
-- **Catch falling islets to build poetry!** Collect words to create 5-7-5 syllable poems
-- Multiple islets fall simultaneously at different speeds
-- Each islet displays a word representing a different part of speech with color coding:
+- **Catch falling whispers to build poetry!** Collect words to create 5-7-5 syllable poems
+- Multiple whispers fall simultaneously at different speeds
+- Each whisper displays a word representing a different part of speech with color coding:
   - 🔴 **Red** = Verbs
   - 🟣 **Purple** = Nouns  
   - 🟡 **Yellow** = Adjectives
   - 🟢 **Green** = Adverbs
   - 🟠 **Orange** = Articles
   - 🩷 **Pink** = Conjunctions
-  - ⚪ **White** = Special Power Islets (POW!)
+  - ⚪ **White** = Special Power Whispers (POW!)
+  - 🔵 **Light Blue** = Bomb Whispers (BOOM!) - Remove your last word
 
 ## Special Features
 
-### Special Power Islets
-- **White POW! islets**: Activate special powers when caught
+### Special Power Whispers
+- **White POW! whispers**: Activate special powers when caught
+- **Light Blue BOOM! whispers**: Remove your last collected word when caught
 
 ### Special Powers
 - **Wide Paddle**: Makes your paddle wider for easier catching
 - **Narrow Paddle**: Makes your paddle narrower for more challenge
 - **Inverted Controls**: Reverses left/right movement controls
 - **Ultra Speed**: Increases paddle movement speed
-- **Exploding Islets**: All regular islets become dangerous and remove your last word
+- **Exploding Whispers**: All regular whispers become dangerous and remove your last word
 - **Upside Down**: Flips the entire screen upside down for 5 seconds
-- **Islet Rain**: Spawns many more islets at once for intense gameplay
+- **Whisper Rain**: Spawns many more whispers at once for intense gameplay
 - **Hidden Words**: All words appear as "xxxxx" in dark gray for 5 seconds
-- **Respite**: Clears screen and spawns only one islet at a time for 5 seconds
+- **Respite**: Clears screen and spawns only one whisper at a time for 5 seconds
 
 ### Visual Effects
-- **Blinking animations**: Special islets (POW!) blink to draw attention
-- **Exploding islets power**: All regular islets blink light blue and show "BOOM!" when the power is active
+- **Blinking animations**: Special whispers (POW!) blink to draw attention
+- **Exploding whispers power**: All regular whispers blink light blue and show "BOOM!" when the power is active
 - **Screen effects**: Special powers create visual feedback with border animations
 - **Animated background**: Twinkling stars create a dynamic backdrop
 - **Paddle design**: Clean underscore-based paddle design
+- **Fade-out system**: Elements gradually disappear after 5 seconds of inactivity
+- **Inspirational quotes**: Kawika Guillermo quote appears 1 second after elements fade out
+
+## Contemplative Features
+
+### Fade-Out System
+- **5-second timer**: Elements start fading after 5 seconds of paddle inactivity
+- **Gradual fade**: All game elements (stars, whispers, poem text) slowly disappear
+- **Paddle remains**: Only the paddle stays visible during fade-out
+- **UI preserved**: Story panel and instructions remain visible for reference
+
+### Inspirational Moments
+- **Kawika Guillermo quote**: "Stand still, and you cannot see very far. But start moving, and the world manifests around you."
+- **1-second delay**: Quote appears 1 second after elements are fully hidden
+- **Contemplative pause**: Creates a moment of reflection and inspiration
+- **Immediate response**: Moving the paddle instantly fades out the quote and restores elements
 
 ## Game Mechanics
 
 ### Poetry Building
 - **5-7-5 Structure**: First line has loosely 5 syllables, second line has 7, third line has 5
 - **Real-time display**: Current poem is shown in the center of the screen
-- **Word removal**: Exploding islets remove your last collected word
+- **Word removal**: Bomb whispers and exploding whispers remove your last collected word
 - **Automatic line breaks**: Words automatically move to the next line when syllable limits are reached
 
 ### Movement System
 - **Acceleration**: Hold movement keys longer to move faster
 - **Smooth controls**: Responsive paddle movement with momentum
-- **Collision detection**: Precise hit detection for catching islets
+- **Collision detection**: Precise hit detection for catching whispers
 
 ### Scoring System
 - **Base points**: Earn points for each word caught
@@ -65,16 +85,18 @@ A colorful HTML5 video game where players control a paddle at the bottom of the 
 - **Built with**: HTML5 Canvas and JavaScript
 - **No external dependencies**: Pure vanilla JavaScript
 - **Responsive design**: Works on different screen sizes
-- **Monospace font**: Consistent text rendering for islets
+- **Monospace font**: Consistent text rendering for whispers
 - **Local storage**: Game state persistence
 
 ## Game Rules
 
-1. **Catch words**: Use your paddle to catch falling word islets
+1. **Catch whispers**: Use your paddle to catch falling word whispers
 2. **Build poetry**: Collect words to create 5-7-5 syllable poems
-3. **Use special powers**: White POW! islets give you temporary abilities
-4. **Complete poems**: Finish poems to earn bonus points and continue playing
-5. **Don't let words fall**: Missed words are lost forever
+3. **Use special powers**: White POW! whispers give you temporary abilities
+4. **Avoid bombs**: Light blue BOOM! whispers remove your last word
+5. **Complete poems**: Finish poems to earn bonus points and continue playing
+6. **Don't let words fall**: Missed words are lost forever
+7. **Take breaks**: Stop moving for 5 seconds to see elements fade and inspirational quotes appear
 
 ## Controls
 
@@ -88,5 +110,23 @@ A colorful HTML5 video game where players control a paddle at the bottom of the 
 - **Use special powers wisely**: Some powers help, others add challenge
 - **Build momentum**: Hold movement keys for faster paddle speed
 - **Practice**: The more you play, the better you'll get at poetry building
+- **Take contemplative breaks**: Stop moving for 5 seconds to experience the fade-out and inspirational quotes
+- **Avoid bomb whispers**: Light blue BOOM! whispers will remove your last word
+- **Embrace the journey**: The game rewards both active play and thoughtful pauses
+
+## Version History
+
+### Version 2.0.0
+- Added fade-out system after 5 seconds of inactivity
+- Implemented Kawika Guillermo inspirational quote
+- Added bomb whispers (BOOM!) that remove words
+- Updated terminology from "islets" to "whispers" for better thematic consistency
+- Enhanced contemplative gameplay experience
+- Cleaned up codebase and removed unused files
+
+### Version 1.0.0
+- Initial release with basic poetry building mechanics
+- Special power system
+- Progressive difficulty scaling
 
 Enjoy the game and improve your parts of speech recognition and poetry writing skills!
