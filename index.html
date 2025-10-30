@@ -1671,13 +1671,13 @@
         function drawQuote() {
             if (quoteAlpha <= 0) return;
             
-            // Set up text styling for the quote
+            // Set up text styling to match other game messages
             ctx.save();
             ctx.globalAlpha = quoteAlpha;
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#ffff00'; // Yellow text like other messages
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 2;
-            ctx.font = 'italic 16px serif';
+            ctx.font = 'bold 16px monospace'; // Match game font style
             ctx.textAlign = 'center';
             
             // Split quote into multiple lines for better readability
