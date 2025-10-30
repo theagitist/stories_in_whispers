@@ -209,6 +209,7 @@
         <div id="pauseOverlay">
             <h2>GAME PAUSED</h2>
             <p>Press SPACE or P to resume</p>
+            <button id="leaveLocaleButton" onclick="leaveLocale()" style="margin-top: 15px; padding: 8px 15px; background: transparent; color: #ff69b4; border: 1px solid #ff69b4; cursor: pointer; font-family: 'Courier New', monospace; font-size: 14px; transition: all 0.3s;" onmouseover="this.style.background='#ff69b4'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#ff69b4';">Or leave (Press L)</button>
         </div>
         <div id="gameOver">
             <h2>Game Over!</h2>
@@ -276,8 +277,18 @@
             const playerNameDisplayElement = document.getElementById('playerNameDisplay');
             const greetingElement = document.getElementById('poeticGreeting');
             
+            // Check if player name exists in session storage
+            let playerName = sessionStorage.getItem('playerName');
+            
+            // Validate that the player name is in the correct format (verb adjective noun)
+            // If it's not in the correct format, generate a new one
+            if (!playerName || playerName.split(' ').length !== 3) {
+                // Generate new player name if none exists or format is incorrect
+                playerName = generatePlayerName();
+                sessionStorage.setItem('playerName', playerName);
+            }
+            
             if (playerNameElement) {
-                const playerName = generatePlayerName();
                 playerNameElement.textContent = playerName;
                 
                 // Also set the display name for the story panel
@@ -287,8 +298,12 @@
             }
             
             if (greetingElement) {
-                const locale = generatePoeticLocale();
-                const playerName = playerNameElement ? playerNameElement.textContent : generatePlayerName();
+                // Get locale from session storage or generate new one
+                let locale = sessionStorage.getItem('currentLocale');
+                if (!locale) {
+                    locale = generatePoeticLocale();
+                    sessionStorage.setItem('currentLocale', locale);
+                }
                 greetingElement.innerHTML = `Welcome, you have arrived to ${locale}.<br>I see you are a <span style="color: #ff69b4; font-weight: bold;">${playerName.toLowerCase()}</span>.`;
             }
         }
@@ -306,7 +321,7 @@
         // Poetry building system
         let caughtWords = [];
         let currentHaiku = [];
-        let haikuCount = 0;
+        let haikuCount = parseInt(sessionStorage.getItem('haikuCount')) || 0;
         let maxWordsPerHaiku = 17; // 5 + 7 + 5 syllables max
         
         // Article explosion system
@@ -1209,17 +1224,22 @@
                 const playerNameElement = document.getElementById('playerNameDisplay');
                 const speedMultiplier = (baseSpawnInterval / currentSpawnInterval).toFixed(1);
                 
-                // Get player name from the hidden element or generate one
-                let playerName = 'Wanderer';
-                if (playerNameElement && playerNameElement.textContent) {
-                    playerName = playerNameElement.textContent;
-                } else {
-                    // Try to get from the greeting element
-                    const greetingElement = document.getElementById('playerName');
-                    if (greetingElement && greetingElement.textContent) {
-                        playerName = greetingElement.textContent;
-                        playerNameElement.textContent = playerName;
-                    }
+                // Get player name from session storage or fallback to elements
+                let playerName = sessionStorage.getItem('playerName');
+                
+                // Validate that the player name is in the correct format (verb adjective noun)
+                if (!playerName || playerName.split(' ').length !== 3) {
+                    playerName = generatePlayerName();
+                    sessionStorage.setItem('playerName', playerName);
+                }
+                
+                // Update display elements if they exist
+                if (playerNameElement) {
+                    playerNameElement.textContent = playerName;
+                }
+                const greetingElement = document.getElementById('playerName');
+                if (greetingElement) {
+                    greetingElement.textContent = playerName;
                 }
                 
                 progressElement.innerHTML = `A <span id="playerNameDisplay" style="color: #ff69b4; font-weight: bold;">${playerName.toLowerCase()}</span><span style="color: #ff69b4; font-weight: bold;">'s</span> story so far: Syllables: ${totalSyllables}/17 | Poems: ${haikuCount} | Speed: ${speedMultiplier}x`;
@@ -1354,6 +1374,7 @@
         function completePoem() {
             try {
                 haikuCount++;
+                sessionStorage.setItem('haikuCount', haikuCount.toString());
                 
                 // Increase game speed for next poem
                 increaseGameSpeed();
@@ -1377,9 +1398,14 @@
 
         function savePoemToDatabase() {
             try {
-                // Get player name
-                const playerNameElement = document.getElementById('playerNameDisplay');
-                const playerName = playerNameElement ? playerNameElement.textContent : 'Wanderer';
+                // Get player name from session storage
+                let playerName = sessionStorage.getItem('playerName');
+                
+                // Validate that the player name is in the correct format (verb adjective noun)
+                if (!playerName || playerName.split(' ').length !== 3) {
+                    playerName = generatePlayerName();
+                    sessionStorage.setItem('playerName', playerName);
+                }
                 
                 // Format poem text
                 const formattedPoem = formatPoemLines(currentHaiku);
@@ -1459,7 +1485,13 @@
                 
                 // Get player name
                 const playerNameElement = document.getElementById('playerNameDisplay');
-                const playerName = playerNameElement ? playerNameElement.textContent : 'Wanderer';
+                let playerName = playerNameElement ? playerNameElement.textContent : generatePlayerName();
+                
+                // Validate that the player name is in the correct format (verb adjective noun)
+                if (!playerName || playerName.split(' ').length !== 3) {
+                    playerName = generatePlayerName();
+                    sessionStorage.setItem('playerName', playerName);
+                }
                 
                 // Show poem completion message
                 const haikuDisplay = document.createElement('div');
@@ -1533,10 +1565,38 @@
                 }
             }
             
+            // Handle G key to go to gallery
+            if (e.key === 'g' || e.key === 'G') {
+                e.preventDefault();
+                let playerName = sessionStorage.getItem('playerName');
+                
+                // Validate that the player name is in the correct format (verb adjective noun)
+                if (!playerName || playerName.split(' ').length !== 3) {
+                    playerName = generatePlayerName();
+                    sessionStorage.setItem('playerName', playerName);
+                }
+                
+                window.location.href = `poem_gallery.php?player=${encodeURIComponent(playerName)}`;
+            }
+            
             // Handle E key to go to gallery when poem is completed
             if ((e.key === 'e' || e.key === 'E') && haikuCompleted) {
                 e.preventDefault();
-                window.location.href = 'poem_gallery.php';
+                let playerName = sessionStorage.getItem('playerName');
+                
+                // Validate that the player name is in the correct format (verb adjective noun)
+                if (!playerName || playerName.split(' ').length !== 3) {
+                    playerName = generatePlayerName();
+                    sessionStorage.setItem('playerName', playerName);
+                }
+                
+                window.location.href = `poem_gallery.php?player=${encodeURIComponent(playerName)}`;
+            }
+            
+            // Handle L key to leave the locale when game is paused
+            if ((e.key === 'l' || e.key === 'L') && gamePaused) {
+                e.preventDefault();
+                leaveLocale();
             }
         });
         document.addEventListener('keyup', (e) => {
@@ -1548,7 +1608,15 @@
             if (gameRunning && !haikuCompleted) {
                 gamePaused = !gamePaused;
                 if (gamePaused) {
-                    pauseOverlayElement.innerHTML = '<h2>GAME PAUSED</h2><p>Press SPACE or P to resume</p>';
+                    // Get current locale name for the button
+                    const currentLocale = sessionStorage.getItem('currentLocale') || 'locale';
+                    const localeName = currentLocale.split(' ')[1] || 'locale'; // Get the second word (e.g., "realm" from "the ethereal realm")
+                    
+                    pauseOverlayElement.innerHTML = `
+                        <h2>GAME PAUSED</h2>
+                        <p>Press SPACE or P to resume</p>
+                        <button id="leaveLocaleButton" onclick="leaveLocale()" style="margin-top: 15px; padding: 8px 15px; background: transparent; color: #ff69b4; border: 1px solid #ff69b4; cursor: pointer; font-family: 'Courier New', monospace; font-size: 14px; transition: all 0.3s;" onmouseover="this.style.background='#ff69b4'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#ff69b4';">Or leave (Press L)</button>
+                    `;
                     pauseOverlayElement.style.display = 'block';
                 } else {
                     pauseOverlayElement.style.display = 'none';
@@ -1872,6 +1940,91 @@
             gameOverElement.style.display = 'block';
         }
 
+        // Leave the current locale and start fresh
+        function leaveLocale() {
+            // Clear all session storage
+            sessionStorage.removeItem('playerName');
+            sessionStorage.removeItem('haikuCount');
+            sessionStorage.removeItem('currentLocale');
+            
+            // Reset all game state
+            gameRunning = false;
+            gamePaused = false;
+            haikuCompleted = false;
+            gameStarted = false;
+            haikuCount = 0;
+            currentHaiku = [];
+            caughtWords = [];
+            lastCaughtType = null;
+            consecutiveArticles = 0;
+            paddle.x = canvas.width / 2 - 40;
+            fallingShapes = [];
+            lastSpawnTime = 0;
+            currentSpawnInterval = baseSpawnInterval;
+            wordFadeStates.clear();
+            
+            // Reset special powers
+            specialPowerActive = false;
+            currentPower = null;
+            powerEndTime = 0;
+            controlsInverted = false;
+            screenUpsideDown = false;
+            paddle.width = originalPaddleWidth;
+            paddle.speed = originalPaddleSpeed;
+            
+            // Clear upside down timeout if it exists
+            if (upsideDownTimeout) {
+                clearTimeout(upsideDownTimeout);
+                upsideDownTimeout = null;
+            }
+            
+            // Reset player acceleration
+            playerAcceleration = 0;
+            
+            // Remove power-active class from canvas
+            canvas.classList.remove('power-active');
+            
+            // Reset exploding whispers animation timer
+            explodingWhispersTimer = 0;
+            
+            // Reset spawn multiplier
+            spawnMultiplier = 1;
+            
+            // Reset max whispers
+            maxWhispersAtOnce = 6;
+            
+            // Reset hidden words
+            wordsHidden = false;
+            
+            // Reset respite
+            respiteActive = false;
+            
+            // Reset game speed to initial values
+            currentSpawnInterval = baseSpawnInterval;
+            currentWhisperSpeed = baseWhisperSpeed;
+            
+            // Hide all overlays
+            gameOverElement.style.display = 'none';
+            pauseOverlayElement.style.display = 'none';
+            
+            // Show start screen
+            const startScreen = document.getElementById('startScreen');
+            startScreen.style.display = 'block';
+            
+            // Hide story panel
+            const storyPanel = document.getElementById('haikuProgress');
+            storyPanel.style.display = 'none';
+            
+            // Remove any poem completion displays
+            const haikuDisplay = document.querySelector('.haiku-completion-display');
+            if (haikuDisplay) {
+                document.body.removeChild(haikuDisplay);
+            }
+            
+            // Reinitialize everything with new values
+            initializePlayerName();
+        }
+
         // Restart game
         function restartGame() {
             gameRunning = true;
@@ -1879,6 +2032,7 @@
             haikuCompleted = false;
             gameStarted = true;
             haikuCount = 0;
+            sessionStorage.setItem('haikuCount', '0');
             currentHaiku = [];
             caughtWords = [];
             lastCaughtType = null;
@@ -2028,8 +2182,57 @@
             }
         }
 
+        // Check if returning from gallery and start game in paused mode
+        function checkReturnFromGallery() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('returnFromGallery') === '1') {
+                // Player is returning from gallery, start game in paused mode
+                startGameFromGallery();
+            }
+        }
+        
+        // Start game directly in paused mode when returning from gallery
+        function startGameFromGallery() {
+            // Hide start screen
+            const startScreen = document.getElementById('startScreen');
+            startScreen.style.display = 'none';
+            
+            // Show story panel
+            const storyPanel = document.getElementById('haikuProgress');
+            storyPanel.style.display = 'block';
+            
+            // Start the game in paused mode
+            gameRunning = true;
+            gameStarted = true;
+            gamePaused = true;
+            
+            // Initialize audio
+            initAudio();
+            
+            // Start game loop
+            gameLoop();
+            
+            // Show pause overlay to indicate the game is paused
+            const pauseOverlay = document.getElementById('pauseOverlay');
+            if (pauseOverlay) {
+                // Get current locale name for the button
+                const currentLocale = sessionStorage.getItem('currentLocale') || 'locale';
+                const localeName = currentLocale.split(' ')[1] || 'locale'; // Get the second word (e.g., "realm" from "the ethereal realm")
+                
+                pauseOverlay.innerHTML = `
+                    <h2>GAME PAUSED</h2>
+                    <p>Press SPACE or P to resume</p>
+                    <button id="leaveLocaleButton" onclick="leaveLocale()" style="margin-top: 15px; padding: 8px 15px; background: transparent; color: #ff69b4; border: 1px solid #ff69b4; cursor: pointer; font-family: 'Courier New', monospace; font-size: 14px; transition: all 0.3s;" onmouseover="this.style.background='#ff69b4'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#ff69b4';">Or leave (Press L)</button>
+                `;
+                pauseOverlay.style.display = 'block';
+            }
+        }
+
         // Initialize player name when page loads
         initializePlayerName();
+        
+        // Check if returning from gallery and start game in paused mode
+        checkReturnFromGallery();
 
         // Game starts with instruction screen - no auto-start
     </script>

@@ -2,6 +2,33 @@
 // Include database configuration
 require_once 'config.php';
 
+// Handle player name from URL parameter and store in session
+if (isset($_GET['player'])) {
+    $player_name = htmlspecialchars($_GET['player']);
+    session_start();
+    
+    // Validate that the player name is in the correct format (verb adjective noun)
+    // If it's not in the correct format, generate a new one
+    $name_parts = explode(' ', $player_name);
+    if (count($name_parts) !== 3) {
+        // Generate a proper player name if the format is incorrect
+        $verbs = ['Dancing', 'Singing', 'Whispering', 'Dreaming', 'Floating', 'Glowing', 'Shining', 'Drifting', 'Soaring', 'Sparkling'];
+        $adjectives = ['Mystical', 'Ethereal', 'Luminous', 'Gentle', 'Radiant', 'Serene', 'Magical', 'Peaceful', 'Graceful', 'Enchanting'];
+        $nouns = ['Poet', 'Dreamer', 'Wanderer', 'Storyteller', 'Soul', 'Spirit', 'Heart', 'Mind', 'Voice', 'Whisper'];
+        
+        $random_verb = $verbs[array_rand($verbs)];
+        $random_adjective = $adjectives[array_rand($adjectives)];
+        $random_noun = $nouns[array_rand($nouns)];
+        
+        $player_name = "$random_verb $random_adjective $random_noun";
+    }
+    
+    $_SESSION['playerName'] = $player_name;
+} else {
+    session_start();
+    $player_name = $_SESSION['playerName'] ?? 'Dancing Mystical Poet';
+}
+
 // Function to determine word type based on the game's word database
 function getWordType($word) {
     $word = strtolower($word);
@@ -374,11 +401,16 @@ try {
     <div class="container">
         <div class="header">
                 <h1>Poem Gallery</h1>
-                <p>Discover connections between poems through shared words</p>
+                <p>Discover connections between poems through shared words.</p>
+                <?php if (isset($player_name)): ?>
+                <p style="color: #ff69b4; font-style: italic; margin-top: 10px;">
+                    A <span style="font-weight: bold;"><?php echo strtolower(htmlspecialchars($player_name)); ?></span> is exploring the gallery.
+                </p>
+                <?php endif; ?>
             </div>
             
         <div class="nav-links">
-            <a href="index.html" id="backToGameLink">← Back to Game (Press B)</a>
+            <a href="index.html?returnFromGallery=1" id="backToGameLink">← Back to the Floating Isle (Press B)</a>
         </div>
         
         <?php if (empty($poems)): ?>
@@ -532,11 +564,16 @@ try {
     </div>
 
     <script>
+        // Store player name in session storage for consistency
+        <?php if (isset($player_name)): ?>
+        sessionStorage.setItem('playerName', '<?php echo addslashes($player_name); ?>');
+        <?php endif; ?>
+        
         // Handle B key to go back to game
         document.addEventListener('keydown', (e) => {
             if (e.key === 'b' || e.key === 'B') {
                 e.preventDefault();
-                window.location.href = 'index.html';
+                window.location.href = 'index.html?returnFromGallery=1';
             }
         });
 
