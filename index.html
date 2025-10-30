@@ -177,6 +177,17 @@
             background: #00aaaa;
             color: #fff;
         }
+        
+        /* Fade effect for UI elements when paddle is idle */
+        .fade-out {
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .fade-in {
+            opacity: 1;
+            transition: opacity 0.5s ease-in;
+        }
     </style>
 </head>
 <body>
@@ -352,6 +363,13 @@
         let maxAcceleration = 3; // Maximum speed multiplier
         let accelerationRate = 0.1; // How fast acceleration increases
         let decelerationRate = 0.15; // How fast acceleration decreases
+        
+        // Fade-out system for idle paddle
+        let lastPaddleMovement = 0;
+        let fadeOutTimer = 1000; // 1 second before fade starts
+        let isFadingOut = false;
+        let fadeAlpha = 1; // 1 = fully visible, 0 = invisible
+        let fadeSpeed = 0.01; // How fast elements fade out/in (slower)
         
         // Audio context for sound effects
         let audioContext;
@@ -1537,6 +1555,11 @@
             const storyPanel = document.getElementById('haikuProgress');
             storyPanel.style.display = 'block';
             
+            // Initialize fade system
+            lastPaddleMovement = Date.now();
+            isFadingOut = false;
+            fadeAlpha = 1;
+            
             // Start the game
             gameRunning = true;
             gameStarted = true;
@@ -1624,6 +1647,16 @@
             }
         }
 
+        // Update UI fade effect for HTML elements
+        function updateUIFadeEffect() {
+            // Only fade the current haiku display, keep story panel and instructions visible
+            const currentHaikuDiv = document.getElementById('currentHaiku');
+            
+            if (currentHaikuDiv) {
+                currentHaikuDiv.style.opacity = fadeAlpha;
+            }
+        }
+
         // Paddle movement
         function updatePaddle() {
             if (!gamePaused) {
@@ -1635,14 +1668,39 @@
                     [moveLeft, moveRight] = [moveRight, moveLeft];
                 }
                 
+                // Check if paddle is moving
+                const isMoving = moveLeft || moveRight;
+                
                 // Handle acceleration
-                if (moveLeft || moveRight) {
+                if (isMoving) {
                     // Increase acceleration when moving
                     playerAcceleration = Math.min(playerAcceleration + accelerationRate, maxAcceleration);
+                    // Update last movement time
+                    lastPaddleMovement = Date.now();
+                    
+                    // If we were fading out, start fading back in
+                    if (isFadingOut) {
+                        isFadingOut = false;
+                    }
                 } else {
                     // Decrease acceleration when not moving
                     playerAcceleration = Math.max(playerAcceleration - decelerationRate, 0);
                 }
+                
+                // Check if we should start fading out
+                if (!isMoving && !isFadingOut && Date.now() - lastPaddleMovement > fadeOutTimer) {
+                    isFadingOut = true;
+                }
+                
+                // Update fade alpha
+                if (isFadingOut) {
+                    fadeAlpha = Math.max(0, fadeAlpha - fadeSpeed);
+                } else {
+                    fadeAlpha = Math.min(1, fadeAlpha + fadeSpeed);
+                }
+                
+                // Apply fade effect to HTML elements
+                updateUIFadeEffect();
                 
                 // Calculate current speed with acceleration
                 const currentSpeed = paddle.speed * (1 + playerAcceleration);
@@ -1749,6 +1807,9 @@
                 explodingWhispersTimer += 0.1;
             }
             
+            // Apply fade effect to all whispers
+            ctx.globalAlpha = fadeAlpha;
+            
             fallingShapes.forEach(whisper => {
                 // Apply exploding whispers power visual if active
                 if (specialPowerActive && currentPower === 'exploding_whispers' && !whisper.isSpecial) {
@@ -1770,6 +1831,9 @@
                     whisper.draw();
                 }
             });
+            
+            // Reset alpha after drawing whispers
+            ctx.globalAlpha = 1;
         }
 
         // Draw current poem in the middle of the screen
@@ -1784,6 +1848,9 @@
             
             // Only show if we have some words
             if (totalSyllables === 0) return;
+            
+            // Apply fade effect to poem text
+            ctx.globalAlpha = fadeAlpha;
             
             // Set up text styling (transparent background)
             ctx.strokeStyle = '#ffff00';
@@ -1869,8 +1936,9 @@
             // Update and clean up fade states
             updateFadeStates();
             
-            // Reset text alignment
+            // Reset text alignment and alpha
             ctx.textAlign = 'left';
+            ctx.globalAlpha = 1;
         }
 
         // Helper function to draw text with fade animation
@@ -1899,8 +1967,8 @@
                 }
             }
             
-            // Apply alpha to the text
-            ctx.globalAlpha = alpha;
+            // Apply alpha to the text, but also respect the global fade alpha
+            ctx.globalAlpha = alpha * fadeAlpha;
             ctx.strokeText(text, x, y);
             ctx.fillText(text, x, y);
             ctx.globalAlpha = 1; // Reset alpha
@@ -1962,6 +2030,11 @@
             lastSpawnTime = 0;
             currentSpawnInterval = baseSpawnInterval;
             wordFadeStates.clear();
+            
+            // Reset fade system
+            lastPaddleMovement = Date.now();
+            isFadingOut = false;
+            fadeAlpha = 1;
             
             // Reset special powers
             specialPowerActive = false;
@@ -2040,6 +2113,11 @@
             paddle.x = canvas.width / 2 - 40;
             fallingShapes = [];
             lastSpawnTime = 0;
+            
+            // Reset fade system
+            lastPaddleMovement = Date.now();
+            isFadingOut = false;
+            fadeAlpha = 1;
             
             // Reset special powers
             specialPowerActive = false;
@@ -2141,8 +2219,11 @@
                     const g = Math.min(255, 200 + starVariation * 20);
                     const b = Math.min(255, 255 + starVariation * 10);
                     
+                    // Apply fade effect to stars
+                    ctx.globalAlpha = fadeAlpha;
                     ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
                     ctx.fillRect(x, y, 1, 1);
+                    ctx.globalAlpha = 1; // Reset alpha
                 }
             }
             
@@ -2155,8 +2236,11 @@
                 const alpha = Math.sin(blinkPhase) * 0.2 + 0.1; // Very subtle
                 
                 if (alpha > 0.05) {
+                    // Apply fade effect to distant stars
+                    ctx.globalAlpha = fadeAlpha;
                     ctx.fillStyle = `rgba(150, 150, 200, ${alpha})`;
                     ctx.fillRect(x, y, 1, 1);
+                    ctx.globalAlpha = 1; // Reset alpha
                 }
             }
             
@@ -2166,7 +2250,7 @@
             // Draw whispers in the foreground
             drawWhispers();
             
-            // Draw paddle on top
+            // Draw paddle on top (always visible, no fade effect)
             drawPaddle();
 
             // Restore transformation if upside down was applied

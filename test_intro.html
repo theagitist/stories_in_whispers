@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Intro Screen</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+        #testResults {
+            background: #333;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #666;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <h1>Intro Screen Test</h1>
+    <div id="testResults">
+        <h2>Test Results:</h2>
+        <div id="results"></div>
+    </div>
+    
+    <div id="startScreen" style="position: relative; background: rgba(0, 0, 0, 0.95); color: #fff; padding: 15px; border: 3px solid #00ffff; font-family: 'Courier New', monospace; font-size: 12px; text-align: center; max-width: 900px; margin: 20px auto;">
+        <h1>STORIES IN WHISPERS</h1>
+        <h2>A floating isle by Adri M.</h2>
+        
+        <div id="playerGreeting" style="margin: 20px 0; font-size: 16px; color: #00ffff;">
+            <p id="poeticGreeting" style="font-size: 14px; color: #88ccff; font-style: italic; margin-bottom: 10px;"></p>
+            <span id="playerName" style="display: none;"></span>
+            <p style="font-size: 14px; color: #cccccc; margin-top: 10px;">
+                Catch falling whispers to create poetry.<br>
+                Create loosely 5-7-5 syllable poems and watch your stories come alive.<br><br>
+                Use ← → arrows or A/D keys to move your paddle.
+            </p>
+        </div>
+        
+        <button class="start-button" onclick="testStartGame()" style="background: #00ffff; color: #000; border: 2px solid #00aaaa; padding: 10px 20px; font-family: 'Courier New', monospace; font-size: 14px; cursor: pointer; margin-top: 10px;">Press SPACE to start</button>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function generatePlayerName() {
+            const verbs = ['dancing', 'singing', 'whispering', 'dreaming', 'floating', 'glowing', 'shining', 'drifting', 'soaring', 'sparkling'];
+            const adjectives = ['mystical', 'ethereal', 'luminous', 'gentle', 'radiant', 'serene', 'magical', 'peaceful', 'graceful', 'enchanting'];
+            const nouns = ['poet', 'dreamer', 'wanderer', 'storyteller', 'soul', 'spirit', 'heart', 'mind', 'voice', 'whisper'];
+            
+            const randomVerb = verbs[Math.floor(Math.random() * verbs.length)];
+            const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+            
+            const capitalizedVerb = randomVerb.charAt(0).toUpperCase() + randomVerb.slice(1);
+            const capitalizedAdjective = randomAdjective.charAt(0).toUpperCase() + randomAdjective.slice(1);
+            const capitalizedNoun = randomNoun.charAt(0).toUpperCase() + randomNoun.slice(1);
+            
+            return `${capitalizedVerb} ${capitalizedAdjective} ${capitalizedNoun}`;
+        }
+
+        function generatePoeticLocale() {
+            const locales = [
+                "the ethereal realm of floating verses",
+                "the mystical sanctuary of drifting whispers",
+                "the enchanted cathedral of falling poetry"
+            ];
+            return locales[Math.floor(Math.random() * locales.length)];
+        }
+
+        function initializePlayerName() {
+            log('initializePlayerName called');
+            
+            const playerNameElement = document.getElementById('playerName');
+            const playerNameDisplayElement = document.getElementById('playerNameDisplay');
+            const greetingElement = document.getElementById('poeticGreeting');
+            
+            log('Elements found: playerName=' + !!playerNameElement + ', playerNameDisplay=' + !!playerNameDisplayElement + ', greeting=' + !!greetingElement);
+            
+            let playerName = sessionStorage.getItem('playerName');
+            log('Player name from storage: ' + playerName);
+            
+            if (!playerName || playerName.split(' ').length !== 3) {
+                playerName = generatePlayerName();
+                sessionStorage.setItem('playerName', playerName);
+                log('Generated new player name: ' + playerName, 'success');
+            }
+            
+            if (playerNameElement) {
+                playerNameElement.textContent = playerName;
+                if (playerNameDisplayElement) {
+                    playerNameDisplayElement.textContent = playerName;
+                }
+            }
+            
+            if (greetingElement) {
+                let locale = sessionStorage.getItem('currentLocale');
+                if (!locale) {
+                    locale = generatePoeticLocale();
+                    sessionStorage.setItem('currentLocale', locale);
+                }
+                log('Locale: ' + locale);
+                
+                const greetingText = `Welcome, you have arrived to ${locale}.<br>I see you are a <span style="color: #ff69b4; font-weight: bold;">${playerName.toLowerCase()}</span>.`;
+                greetingElement.innerHTML = greetingText;
+                log('Set greeting text: ' + greetingText, 'success');
+            } else {
+                log('Greeting element not found!', 'error');
+            }
+        }
+
+        function testStartGame() {
+            log('Start game button clicked', 'success');
+        }
+
+        // Test initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOMContentLoaded fired');
+            initializePlayerName();
+        });
+
+        // Test spacebar
+        document.addEventListener('keydown', function(e) {
+            if (e.key === ' ') {
+                e.preventDefault();
+                log('Spacebar pressed', 'success');
+                testStartGame();
+            }
+        });
+
+        log('Test page loaded');
+    </script>
+</body>
+</html>
+
