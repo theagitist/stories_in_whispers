@@ -2,7 +2,7 @@
 
 A mystical HTML5 video game where players control a paddle to catch falling whispers (colored text blocks) representing different parts of speech, with the objective of building poetry (5-7-5 syllable poems). Experience a contemplative journey through floating verses and whispered dreams.
 
-**Version 2.0.0** - Enhanced with fade-out mechanics and inspirational quotes
+**Version 2.0.2** - Enhanced with fade-out mechanics, inspirational quotes, and gallery navigation
 
 ## How to Play
 
@@ -98,11 +98,40 @@ A mystical HTML5 video game where players control a paddle to catch falling whis
 6. **Don't let words fall**: Missed words are lost forever
 7. **Take breaks**: Stop moving for 5 seconds to see elements fade and inspirational quotes appear
 
+## Intro Screen
+
+The game greets players with a personalized welcome message:
+- **Personalized greeting**: Each player receives a unique poetic name (verb + adjective + noun)
+- **Locale arrival**: Welcome message includes arrival to a mystical locale
+- **Player identity**: "I see you are a [poetic name]. Let go of your mun and join this ethereal conversation."
+
+## Poem Gallery
+
+Discover connections between poems through shared words. Access the gallery by pressing **G** during gameplay or **E** after completing a poem.
+
+### Gallery Features
+- **Word Connections**: View poems that share common words, grouped by connection strength
+- **Statistics**: See overall stats, most used words, and player statistics
+- **Random Poems**: Discover random poems from the collection
+- **Visual Highlighting**: Common words between connected poems are highlighted with color-coded word types
+- **Carousel Navigation**: Browse through poem connections with smooth transitions
+
+### Gallery Controls
+- **W** or **↑ Arrow**: Scroll up
+- **S** or **↓ Arrow**: Scroll down
+- **A** or **← Arrow**: Navigate to previous poem connection
+- **D** or **→ Arrow**: Navigate to next poem connection
+- **B**: Return to the Floating Isle (game)
+
 ## Controls
 
+### In-Game Controls
 - **Arrow Keys** or **A/D**: Move paddle left/right
 - **SPACE**: Start game / Pause/Resume
 - **P**: Pause/Resume (alternative)
+- **G**: Go to Poem Gallery
+- **E**: Go to Poem Gallery (when poem is completed)
+- **L**: Leave locale (when game is paused)
 
 ## Tips for Success
 
@@ -116,6 +145,18 @@ A mystical HTML5 video game where players control a paddle to catch falling whis
 
 ## Version History
 
+### Version 2.0.2
+- Added keyboard navigation to Poem Gallery
+- **Gallery scrolling**: W/S keys or Arrow Up/Down to scroll the gallery page
+- **Carousel navigation**: A/D keys or Left/Right arrows to navigate poem connections
+- **Navigation instructions**: Added on-screen instructions for gallery navigation
+- Auto-rotate pauses when manually navigating connections
+
+### Version 2.0.1
+- Enhanced intro screen with personalized greeting
+- Added "Let go of your mun and join this ethereal conversation" message
+- Improved line breaks and formatting in intro screen
+
 ### Version 2.0.0
 - Added fade-out system after 5 seconds of inactivity
 - Implemented Kawika Guillermo inspirational quote
@@ -123,6 +164,7 @@ A mystical HTML5 video game where players control a paddle to catch falling whis
 - Updated terminology from "islets" to "whispers" for better thematic consistency
 - Enhanced contemplative gameplay experience
 - Cleaned up codebase and removed unused files
+- Added Poem Gallery with word connection discovery
 
 ### Version 1.0.0
 - Initial release with basic poetry building mechanics
