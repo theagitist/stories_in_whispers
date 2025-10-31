@@ -402,6 +402,7 @@ try {
         <div class="header">
                 <h1>Poem Gallery</h1>
                 <p>Discover connections between poems through shared words.</p>
+                <p style="font-size: 14px; color: #cccccc; margin-top: 5px;">Navigate using WASD or arrow keys.</p>
                 <?php if (isset($player_name)): ?>
                 <p style="color: #ff69b4; font-style: italic; margin-top: 10px;">
                     A <span style="font-weight: bold;"><?php echo strtolower(htmlspecialchars($player_name)); ?></span> is exploring the gallery.
@@ -569,12 +570,41 @@ try {
         sessionStorage.setItem('playerName', '<?php echo addslashes($player_name); ?>');
         <?php endif; ?>
         
-        // Handle B key to go back to game
+        // Handle keyboard controls
         document.addEventListener('keydown', (e) => {
+            // Handle B key to go back to game
             if (e.key === 'b' || e.key === 'B') {
                 e.preventDefault();
                 window.location.href = 'index.html?returnFromGallery=1';
             }
+            
+            // Handle W key to scroll up
+            if (e.key === 'w' || e.key === 'W') {
+                e.preventDefault();
+                window.scrollBy({ top: -100, behavior: 'smooth' });
+            }
+            
+            // Handle S key to scroll down
+            if (e.key === 's' || e.key === 'S') {
+                e.preventDefault();
+                window.scrollBy({ top: 100, behavior: 'smooth' });
+            }
+            
+            // Handle D or right arrow to show next connection
+            if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                stopAutoRotate(); // Stop auto-rotate when user manually navigates
+                nextConnection();
+            }
+            
+            // Handle A or left arrow to show previous connection
+            if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                stopAutoRotate(); // Stop auto-rotate when user manually navigates
+                previousConnection();
+            }
+            
+            // Arrow Up and Arrow Down work by default for scrolling
         });
 
         // Carousel functionality
@@ -612,6 +642,11 @@ try {
 
         function nextConnection() {
             currentConnectionIndex = (currentConnectionIndex + 1) % totalConnections;
+            updateCarousel();
+        }
+
+        function previousConnection() {
+            currentConnectionIndex = (currentConnectionIndex - 1 + totalConnections) % totalConnections;
             updateCarousel();
         }
 
