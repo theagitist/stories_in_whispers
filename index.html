@@ -190,7 +190,7 @@
                 <p id="poeticGreeting" style="font-size: 14px; color: #88ccff; font-style: italic; margin-bottom: 10px;"></p>
                 <span id="playerName" style="display: none;"></span>
                 <p style="font-size: 14px; color: #cccccc; margin-top: 10px;">
-                    Catch falling whispers to create poetry.<br>
+                    <br>Catch falling whispers to create poetry.<br>
                     Create loosely 5-7-5 syllable poems and watch your stories come alive.<br><br>
                     Use ← → arrows or A/D keys to move your paddle.
                 </p>
@@ -305,7 +305,7 @@
                     locale = generatePoeticLocale();
                     sessionStorage.setItem('currentLocale', locale);
                 }
-                greetingElement.innerHTML = `Welcome, you have arrived to ${locale}.<br>I see you are a <span style="color: #ff69b4; font-weight: bold;">${playerName.toLowerCase()}</span>.`;
+                greetingElement.innerHTML = `Welcome, you have arrived to ${locale}.<br><br>I see you are a <span style="color: #ff69b4; font-weight: bold;">${playerName.toLowerCase()}</span>. Let go of your mun and join this ethereal conversation.`;
             }
         }
 
