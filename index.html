@@ -178,11 +178,65 @@
             color: #fff;
         }
         
+        #prelude {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+        
+        #prelude.hidden {
+            display: none;
+        }
+        
+        #preludeContent {
+            max-width: 800px;
+            text-align: center;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #cccccc;
+        }
+        
+        #preludeContent h1 {
+            color: #00ffff;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        
+        #preludeContent p {
+            margin: 20px 0;
+        }
+        
+        #preludeContent .instruction {
+            margin-top: 40px;
+            color: #888;
+            font-size: 14px;
+            font-style: italic;
+        }
+        
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <div id="startScreen">
+        <div id="prelude">
+            <div id="preludeContent">
+                <h1>Prelude</h1>
+                <p>This is not a game, it is a Floating Isle. It's inspired by Kawika Guillermo's book <a href="https://arsenalpulp.com/Books/O/Of-Floating-Isles" target="_blank" style="color: #00ffff; text-decoration: underline;">Of Floating Isles</a> and created by Adri M. as commentary for an university course. Most elements refer directly to the book. <span style="color: #ffff00; font-weight: bold;">At any time, you can press C to see those references.</span></p>
+                <p class="instruction">Press any key to continue</p>
+            </div>
+        </div>
+        
+        <div id="startScreen" style="display: none;">
             <h1>STORIES IN WHISPERS</h1>
             <h2>A floating isle by Adri M.</h2>
             
@@ -1578,6 +1632,19 @@
         // Input handling
         const keys = {};
         document.addEventListener('keydown', (e) => {
+            // Check if prelude is visible - if so, block spacebar completely
+            const prelude = document.getElementById('prelude');
+            if (prelude && !prelude.classList.contains('hidden')) {
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return; // Do nothing with spacebar while prelude is visible
+                }
+                // For other keys, allow them to pass through (S key handled by prelude handler)
+                // Don't update keys object or process game actions while prelude is visible
+                return;
+            }
+            
             keys[e.key] = true;
             
             // Handle pause/resume, poem completion continue, or start screen
@@ -2356,6 +2423,12 @@
         
         // Start game directly in paused mode when returning from gallery
         function startGameFromGallery() {
+            // Hide prelude if visible
+            const prelude = document.getElementById('prelude');
+            if (prelude) {
+                prelude.classList.add('hidden');
+            }
+            
             // Hide start screen
             const startScreen = document.getElementById('startScreen');
             startScreen.style.display = 'none';
@@ -2391,6 +2464,35 @@
             }
         }
 
+        // Handle Prelude window
+        function closePrelude() {
+            const prelude = document.getElementById('prelude');
+            const startScreen = document.getElementById('startScreen');
+            
+            if (prelude && !prelude.classList.contains('hidden')) {
+                prelude.classList.add('hidden');
+                if (startScreen) {
+                    startScreen.style.display = 'block';
+                }
+            }
+        }
+        
+        // Listen for any keypress to close prelude and show intro screen
+        function handlePreludeKeydown(e) {
+            const prelude = document.getElementById('prelude');
+            if (prelude && !prelude.classList.contains('hidden')) {
+                // Any key (including spacebar) closes the prelude and shows intro screen
+                e.preventDefault();
+                e.stopPropagation(); // Prevent the main handler from processing this key
+                closePrelude();
+                // Remove this listener after prelude is closed
+                document.removeEventListener('keydown', handlePreludeKeydown);
+                // Don't start the game - just show the intro screen
+            }
+        }
+        
+        document.addEventListener('keydown', handlePreludeKeydown);
+        
         // Initialize player name when page loads
         initializePlayerName();
         
