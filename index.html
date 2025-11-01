@@ -224,6 +224,169 @@
             font-style: italic;
         }
         
+        #referencesScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 4000;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+        
+        #referencesScreen.visible {
+            display: flex;
+        }
+        
+        #referencesContent {
+            max-width: 900px;
+            text-align: left;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #cccccc;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+        }
+        
+        #referencesContent h2 {
+            color: #00ffff;
+            font-size: 22px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        #referencesContent p {
+            margin: 20px 0;
+            text-align: justify;
+        }
+        
+        #referencesContent .instruction {
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        #introReferencesScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 4000;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+        
+        #introReferencesScreen.visible {
+            display: flex;
+        }
+        
+        #introReferencesContent {
+            max-width: 900px;
+            text-align: left;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #cccccc;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        #introReferencesContent h2 {
+            color: #00ffff;
+            font-size: 22px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        #introReferencesContent ul li p {
+            margin: 0;
+            text-align: justify;
+        }
+        
+        #introReferencesContent .instruction {
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        #gameReferencesScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+        
+        #gameReferencesScreen.visible {
+            display: flex;
+        }
+        
+        #gameReferencesContent {
+            max-width: 900px;
+            text-align: left;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #cccccc;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        #gameReferencesContent h2 {
+            color: #00ffff;
+            font-size: 22px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        #gameReferencesContent ul li p {
+            margin: 0;
+            text-align: justify;
+        }
+        
+        #gameReferencesContent .instruction {
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+            font-style: italic;
+            text-align: center;
+        }
+        
     </style>
 </head>
 <body>
@@ -231,8 +394,16 @@
         <div id="prelude">
             <div id="preludeContent">
                 <h1>Prelude</h1>
-                <p>This is not a game, it is a Floating Isle. It's inspired by Kawika Guillermo's book <a href="https://arsenalpulp.com/Books/O/Of-Floating-Isles" target="_blank" style="color: #00ffff; text-decoration: underline;">Of Floating Isles</a> and created by Adri M. as commentary for an university course. Most elements refer directly to the book. <span style="color: #ffff00; font-weight: bold;">At any time, you can press C to see those references.</span></p>
+                <p>This is not a game, it's a tiny isle floating in the ether. It's inspired by Kawika Guillermo's book <a href="https://arsenalpulp.com/Books/O/Of-Floating-Isles" target="_blank" style="color: #00ffff; text-decoration: underline;">Of Floating Isles</a> and created by Adri M. as a way to reflect on it. Concept, mechanics and other ideas refer directly to the book. <span style="color: #ffff00; font-weight: bold;">At any time, you can press R to see them for the current context.</span></p>
                 <p class="instruction">Press any key to continue</p>
+            </div>
+        </div>
+        
+        <div id="referencesScreen">
+            <div id="referencesContent">
+                <h2>References</h2>
+                <p>The tiny floating ile concept was directly taken from page 15: "Games might appear as isolated islands from afar, but they are less like islands of utopian literature and more like literature's "isles": imaginary, mist-covered lands that invoke myth, legend, and imagination, as well as fear, violence, and power." These ideas permeate the whole design of this tiny floating isle.</p>
+                <p class="instruction">Press any key to return</p>
             </div>
         </div>
         
@@ -246,11 +417,30 @@
                 <p style="font-size: 14px; color: #cccccc; margin-top: 10px;">
                     <br>Catch falling whispers to create poetry.<br>
                     Create loosely 5-7-5 syllable poems and watch your stories come alive.<br><br>
-                    Use ← → arrows or A/D keys to move your paddle.
+                    Use ← → arrows or A/D keys to move your paddle.<br>
+                    <span style="color: #ffff00; font-weight: bold;">Press R to see references for the current context.</span>
                 </p>
             </div>
             
             <button class="start-button" onclick="startGame()">Press SPACE to start</button>
+        </div>
+        
+        <div id="introReferencesScreen">
+            <div id="introReferencesContent">
+                <h2>References</h2>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 30px;">
+                        <p>The name "Stories in Whispers" is directly inspired by page 34: "'IT'S THREE IN THE MORNING! WE HAVE TO WORK TOMORROW!' After a minute of silence, we would continue our stories in whispers."</p>
+                    </li>
+                    <li style="margin-bottom: 30px;">
+                        <p>The idea of a poetry building game was inspired by pages 14 and 15 and how they compare games to poetry: "Games, in contrast, are the poetry of the digital age. They offer emotion, stimulation, and art, and they confront us with the realities of our world." and: "Like poetry, games claim to have no essence of truth. Thus they allow deeper unspeakable truths to be told - or, in this case, to ble played."</p>
+                    </li>
+                    <li style="margin-bottom: 30px;">
+                        <p>Having a name assigned to the player, grants players anonymity, but at the sime time an identity to explore. From page 16: "In games, we become anonymous, untethered to the roles that once enclosed us in little boxes."</p>
+                    </li>
+                </ul>
+                <p class="instruction">Press any key to return</p>
+            </div>
         </div>
         
         <div id="haikuProgress">A <span id="playerNameDisplay" style="color: #ff69b4; font-weight: bold;"></span><span style="color: #ff69b4; font-weight: bold;">'s</span> story so far: Poetry Progress: 0/17 syllables | Poems: 0</div>
@@ -265,6 +455,24 @@
             <h2>GAME PAUSED</h2>
             <p>Press SPACE or P to resume</p>
             <button id="leaveLocaleButton" onclick="leaveLocale()" style="margin-top: 15px; padding: 8px 15px; background: transparent; color: #ff69b4; border: 1px solid #ff69b4; cursor: pointer; font-family: 'Courier New', monospace; font-size: 14px; transition: all 0.3s;" onmouseover="this.style.background='#ff69b4'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#ff69b4';">Or leave (Press L)</button>
+        </div>
+        
+        <div id="gameReferencesScreen">
+            <div id="gameReferencesContent">
+                <h2>References</h2>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 30px;">
+                        <p>The idea of building poetry is taken from different parts of the book. On page 23: "Games do not dictate stories to us but, like poems, speak in metaphors, images, similes, allusions, and allegory."</p>
+                    </li>
+                    <li style="margin-bottom: 30px;">
+                        <p>I've always liked to play with language, and the concept of dialogue, be it solo or multiplayer. From page 37: "Conversagion need not be direct or instant or even between two people." The idea of adding a Poem Gallery came from that passage; finding a way to make poems dialogue with each other, even if not created at the same time, by the same people.</p>
+                    </li>
+                    <li style="margin-bottom: 30px;">
+                        <p>There is an Easter Egg if you stop moving for more than 5 seconds, inspired by page 45. Why I don't quote here will become self explanatory.</p>
+                    </li>
+                </ul>
+                <p class="instruction">Press any key to return</p>
+            </div>
         </div>
         <div id="gameOver">
             <h2>Game Over!</h2>
@@ -368,6 +576,7 @@
         let gamePaused = false;
         let haikuCompleted = false;
         let gameStarted = false;
+        let wasPausedBeforeReferences = false;
 
         // Word fade animation
         let wordFadeStates = new Map(); // Track fade state for each word
@@ -1632,6 +1841,30 @@
         // Input handling
         const keys = {};
         document.addEventListener('keydown', (e) => {
+            // Check if game references screen is visible - if so, any key closes it
+            const gameReferencesScreen = document.getElementById('gameReferencesScreen');
+            if (gameReferencesScreen && gameReferencesScreen.classList.contains('visible')) {
+                e.preventDefault();
+                e.stopPropagation();
+                hideGameReferencesScreen();
+                return; // Don't process game actions while game references screen is visible
+            }
+            
+            // Check if intro references screen is visible - if so, any key closes it
+            const introReferencesScreen = document.getElementById('introReferencesScreen');
+            if (introReferencesScreen && introReferencesScreen.classList.contains('visible')) {
+                e.preventDefault();
+                e.stopPropagation();
+                hideIntroReferencesScreen();
+                return; // Don't process game actions while intro references screen is visible
+            }
+            
+            // Check if references screen is visible - if so, let prelude handler deal with it
+            const referencesScreen = document.getElementById('referencesScreen');
+            if (referencesScreen && referencesScreen.classList.contains('visible')) {
+                return; // Don't process game actions while references screen is visible
+            }
+            
             // Check if prelude is visible - if so, block spacebar completely
             const prelude = document.getElementById('prelude');
             if (prelude && !prelude.classList.contains('hidden')) {
@@ -1640,8 +1873,27 @@
                     e.stopPropagation();
                     return; // Do nothing with spacebar while prelude is visible
                 }
-                // For other keys, allow them to pass through (S key handled by prelude handler)
+                // For other keys, allow them to pass through (R key handled by prelude handler)
                 // Don't update keys object or process game actions while prelude is visible
+                return;
+            }
+            
+            // Check if start screen is visible - handle R key to show intro references
+            const startScreen = document.getElementById('startScreen');
+            if (startScreen && startScreen.style.display !== 'none') {
+                if (e.key === 'r' || e.key === 'R') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showIntroReferencesScreen();
+                    return;
+                }
+            }
+            
+            // Handle R key during gameplay to show game references
+            if (gameStarted && gameRunning && !haikuCompleted && (e.key === 'r' || e.key === 'R')) {
+                e.preventDefault();
+                e.stopPropagation();
+                showGameReferencesScreen();
                 return;
             }
             
@@ -2477,17 +2729,110 @@
             }
         }
         
+        // Handle References screen (for prelude)
+        function showReferencesScreen() {
+            const referencesScreen = document.getElementById('referencesScreen');
+            if (referencesScreen) {
+                referencesScreen.classList.add('visible');
+            }
+        }
+        
+        function hideReferencesScreen() {
+            const referencesScreen = document.getElementById('referencesScreen');
+            if (referencesScreen) {
+                referencesScreen.classList.remove('visible');
+            }
+        }
+        
+        // Handle Intro References screen (for start screen)
+        function showIntroReferencesScreen() {
+            const introReferencesScreen = document.getElementById('introReferencesScreen');
+            if (introReferencesScreen) {
+                introReferencesScreen.classList.add('visible');
+            }
+        }
+        
+        function hideIntroReferencesScreen() {
+            const introReferencesScreen = document.getElementById('introReferencesScreen');
+            if (introReferencesScreen) {
+                introReferencesScreen.classList.remove('visible');
+            }
+        }
+        
+        // Handle Game References screen (during gameplay)
+        function showGameReferencesScreen() {
+            const gameReferencesScreen = document.getElementById('gameReferencesScreen');
+            if (gameReferencesScreen) {
+                gameReferencesScreen.classList.add('visible');
+                // Pause the game when showing references (remember if it was already paused)
+                if (gameRunning) {
+                    wasPausedBeforeReferences = gamePaused;
+                    if (!gamePaused) {
+                        gamePaused = true;
+                    }
+                }
+            }
+        }
+        
+        function hideGameReferencesScreen() {
+            const gameReferencesScreen = document.getElementById('gameReferencesScreen');
+            if (gameReferencesScreen) {
+                gameReferencesScreen.classList.remove('visible');
+                // Unpause the game when closing references, but only if it wasn't paused before
+                if (gameRunning && !wasPausedBeforeReferences) {
+                    gamePaused = false;
+                    pauseOverlayElement.style.display = 'none';
+                }
+                wasPausedBeforeReferences = false;
+            }
+        }
+        
         // Listen for any keypress to close prelude and show intro screen
         function handlePreludeKeydown(e) {
             const prelude = document.getElementById('prelude');
+            const referencesScreen = document.getElementById('referencesScreen');
+            const introReferencesScreen = document.getElementById('introReferencesScreen');
+            const gameReferencesScreen = document.getElementById('gameReferencesScreen');
+            
+            // If game references screen is visible, any key closes it and unpauses
+            if (gameReferencesScreen && gameReferencesScreen.classList.contains('visible')) {
+                e.preventDefault();
+                e.stopPropagation();
+                hideGameReferencesScreen();
+                return;
+            }
+            
+            // If intro references screen is visible, any key closes it
+            if (introReferencesScreen && introReferencesScreen.classList.contains('visible')) {
+                e.preventDefault();
+                e.stopPropagation();
+                hideIntroReferencesScreen();
+                return;
+            }
+            
+            // If prelude references screen is visible, any key closes it
+            if (referencesScreen && referencesScreen.classList.contains('visible')) {
+                e.preventDefault();
+                e.stopPropagation();
+                hideReferencesScreen();
+                return;
+            }
+            
+            // If prelude is visible, handle R key specially
             if (prelude && !prelude.classList.contains('hidden')) {
-                // Any key (including spacebar) closes the prelude and shows intro screen
                 e.preventDefault();
                 e.stopPropagation(); // Prevent the main handler from processing this key
-                closePrelude();
-                // Remove this listener after prelude is closed
-                document.removeEventListener('keydown', handlePreludeKeydown);
-                // Don't start the game - just show the intro screen
+                
+                // If R key is pressed, show references screen
+                if (e.key === 'r' || e.key === 'R') {
+                    showReferencesScreen();
+                } else {
+                    // Any other key closes the prelude and shows intro screen
+                    closePrelude();
+                    // Remove this listener after prelude is closed
+                    document.removeEventListener('keydown', handlePreludeKeydown);
+                    // Don't start the game - just show the intro screen
+                }
             }
         }
         

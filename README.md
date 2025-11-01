@@ -2,7 +2,7 @@
 
 A mystical HTML5 video game where players control a paddle to catch falling whispers (colored text blocks) representing different parts of speech, with the objective of building poetry (5-7-5 syllable poems). Experience a contemplative journey through floating verses and whispered dreams.
 
-**Version 2.0.2** - Enhanced with fade-out mechanics, inspirational quotes, and gallery navigation
+**Version 2.1.1** - Added references screens accessible via R key, updated prelude text, and removed config.php from repository
 
 ## How to Play
 
@@ -104,6 +104,16 @@ The game greets players with a personalized welcome message:
 - **Personalized greeting**: Each player receives a unique poetic name (verb + adjective + noun)
 - **Locale arrival**: Welcome message includes arrival to a mystical locale
 - **Player identity**: "I see you are a [poetic name]. Let go of your mun and join this ethereal conversation."
+- **References**: Press **R** to view references from Kawika Guillermo's book "Of Floating Isles" that inspired the game
+
+## References Feature
+
+Press **R** at any time to view references from the book that inspired this game:
+- **Prelude screen**: View reference about the floating isle concept (page 15)
+- **Intro screen**: View references about the game name, poetry concept, and player identity (pages 14-16, 34)
+- **During gameplay**: View references about poetry building, dialogue concept, and Poem Gallery (pages 23, 37, 45)
+
+All references are contextual and explain the inspiration behind different game elements.
 
 ## Poem Gallery
 
@@ -129,6 +139,7 @@ Discover connections between poems through shared words. Access the gallery by p
 - **Arrow Keys** or **A/D**: Move paddle left/right
 - **SPACE**: Start game / Pause/Resume
 - **P**: Pause/Resume (alternative)
+- **R**: View references for current context (available in prelude, intro screen, and during gameplay)
 - **G**: Go to Poem Gallery
 - **E**: Go to Poem Gallery (when poem is completed)
 - **L**: Leave locale (when game is paused)
@@ -144,6 +155,15 @@ Discover connections between poems through shared words. Access the gallery by p
 - **Embrace the journey**: The game rewards both active play and thoughtful pauses
 
 ## Version History
+
+### Version 2.1.1
+- Added R key references feature accessible from prelude, intro screen, and during gameplay
+- Updated prelude text: Changed "Floating Isle" to "tiny isle floating in the ether"
+- Updated prelude: Changed description from "commentary for an university course" to "a way to reflect on it"
+- Updated prelude: Changed "Most elements refer" to "Concept, mechanics and other ideas refer"
+- Changed references key from C to R throughout the game
+- Removed config.php from repository (added to .gitignore)
+- Created config_blank.php as a template for database configuration
 
 ### Version 2.0.2
 - Added keyboard navigation to Poem Gallery
