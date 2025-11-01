@@ -2,6 +2,8 @@
 
 A mystical HTML5 video game where players control a paddle to catch falling whispers (colored text blocks) representing different parts of speech, with the objective of building poetry (5-7-5 syllable poems). Experience a contemplative journey through floating verses and whispered dreams.
 
+**Version 2.2.0** - Added animated celebration when finding all 4 reference windows
+
 **Version 2.1.1** - Added references screens accessible via R key, updated prelude text, and removed config.php from repository
 
 ## How to Play
@@ -158,6 +160,10 @@ Discover connections between poems through shared words. Access the gallery by p
 - **Embrace the journey**: The game rewards both active play and thoughtful pauses
 
 ## Version History
+
+### Version 2.2.0
+- Added animated text effect to "(Found 4 out of 4)" counter when all references are discovered
+- Animation shows colorful pulsing and scaling effect for 2 seconds
 
 ### Version 2.1.1
 - Added R key references feature accessible from prelude, intro screen, during gameplay, and in gallery
