@@ -179,6 +179,7 @@ Discover connections between poems through shared words. Access the gallery by p
 - Fixed prelude not closing after X key restart (re-registered keydown handler)
 - Added reference counter showing "(Found X out of 4)" on all reference screens
 - Added fireworks animation and celebratory sound effect when finding all 4 reference windows
+- Added animated text effect to "(Found 4 out of 4)" counter when all references are discovered (2 second animation)
 
 ### Version 2.0.2
 - Added keyboard navigation to Poem Gallery

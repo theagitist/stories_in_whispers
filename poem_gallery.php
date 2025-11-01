@@ -450,6 +450,32 @@ try {
             font-style: italic;
             text-align: center;
         }
+        
+        /* Animation for "Found 4 out of 4" text */
+        @keyframes celebrateFoundAll {
+            0%, 100% {
+                transform: scale(1);
+                color: #ffff00;
+            }
+            25% {
+                transform: scale(1.15);
+                color: #00ffff;
+            }
+            50% {
+                transform: scale(1.2);
+                color: #ff69b4;
+            }
+            75% {
+                transform: scale(1.15);
+                color: #44ff44;
+            }
+        }
+        
+        .found-all-animated {
+            animation: celebrateFoundAll 2s ease-in-out 1;
+            font-weight: bold !important;
+            text-shadow: 0 0 10px currentColor;
+        }
     </style>
 </head>
 <body>
@@ -858,7 +884,19 @@ try {
             
             // Update gallery reference screen subtitle
             const gallerySubtitle = document.getElementById('galleryReferenceSubtitle');
-            if (gallerySubtitle) gallerySubtitle.textContent = subtitle;
+            if (gallerySubtitle) {
+                gallerySubtitle.textContent = subtitle;
+                // Add animation if all found
+                if (count === 4) {
+                    gallerySubtitle.classList.add('found-all-animated');
+                    // Remove animation after 2 seconds
+                    setTimeout(() => {
+                        gallerySubtitle.classList.remove('found-all-animated');
+                    }, 2000);
+                } else {
+                    gallerySubtitle.classList.remove('found-all-animated');
+                }
+            }
             
             // Check if all 4 references have been found
             if (count === 4 && !allReferencesFoundCelebrated) {
