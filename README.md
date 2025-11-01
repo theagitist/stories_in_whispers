@@ -2,6 +2,8 @@
 
 A mystical HTML5 video game where players control a paddle to catch falling whispers (colored text blocks) representing different parts of speech, with the objective of building poetry (5-7-5 syllable poems). Experience a contemplative journey through floating verses and whispered dreams.
 
+**Version 2.2.2** - Added gameplay sound effects and optimized audio latency
+
 **Version 2.2.1** - Removed gameplay sound effects, kept only fireworks celebration sound
 
 **Version 2.2.0** - Added animated celebration when finding all 4 reference windows
@@ -162,6 +164,14 @@ Discover connections between poems through shared words. Access the gallery by p
 - **Embrace the journey**: The game rewards both active play and thoughtful pauses
 
 ## Version History
+
+### Version 2.2.2
+- Added subtle catch sound effect when catching whispers (A4 note, 440Hz)
+- Added explosion sound effect when catching bomb whispers (descending low frequencies)
+- Added subtle chime sound effect when catching POW whispers (ascending C-E-G chord)
+- Added explosion sound effect for exploding whispers special power
+- Optimized audio scheduling for minimal latency (zero lookahead when audio context is running)
+- Sound effects now play immediately on collision detection
 
 ### Version 2.2.1
 - Removed all gameplay sound effects (catch sounds, miss sounds, haiku completion sounds, explosion sounds, special power sounds)

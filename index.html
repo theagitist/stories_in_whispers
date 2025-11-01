@@ -1217,36 +1217,88 @@
             
             if (!audioContext) return;
             
-            // Ensure audio context is running (critical for low latency)
-            // Don't wait for resume - schedule sound immediately
+            // CRITICAL: Force resume immediately - don't wait for promise
             if (audioContext.state === 'suspended') {
-                audioContext.resume().catch(() => {
-                    // Ignore resume errors - sound will play when context is ready
-                });
+                audioContext.resume();
             }
             
-            // Create new nodes for each sound - simpler and avoids pooling overhead
+            // Get current time - use it directly for immediate scheduling
+            const now = audioContext.currentTime;
+            
+            // Create nodes as quickly as possible
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
+            
+            // Connect immediately
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
-            // Use currentTime for immediate scheduling
-            const now = audioContext.currentTime;
+            // Set frequency directly (instant, no scheduling delay)
             oscillator.frequency.setValueAtTime(frequency, now);
             oscillator.type = type;
             
-            // Set gain envelope - start at full volume immediately (no attack delay)
+            // Set gain envelope - start at full volume with zero attack
+            // Cancel any existing scheduled values first
             gainNode.gain.cancelScheduledValues(now);
-            gainNode.gain.setValueAtTime(volume, now); // Start at full volume for instant sound
+            gainNode.gain.setValueAtTime(volume, now); // Start at volume immediately
             gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
             
-            // Start immediately
+            // Start and stop - schedule immediately
             oscillator.start(now);
             oscillator.stop(now + duration);
         }
 
-        // Gameplay sound functions removed - only fireworks sound remains
+        // Subtle sound for catching whispers - optimized for minimal latency
+        function playCatchSound() {
+            // Fast path: if context is running, skip all checks
+            if (!audioContext || audioContext.state !== 'running') {
+                if (!audioContext) initAudio();
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume(); // Fire and forget
+                }
+            }
+            // Direct call - playSound handles the rest
+            playSound(440, 0.1, 'sine', 0.2); // A4 note, more audible but still subtle
+        }
+
+        // Explosion sound for catching bomb whispers - optimized for immediate playback
+        function playExplosionSound() {
+            // Fast path: if context is running, skip all checks
+            if (!audioContext || audioContext.state !== 'running') {
+                if (!audioContext) initAudio();
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume(); // Fire and forget
+                }
+            }
+            // Play explosion sound - descending low frequencies with more presence
+            // Use sawtooth wave for a more aggressive, explosive sound
+            if (!audioContext) return;
+            
+            playSound(180, 0.2, 'sawtooth', 0.3); // Initial burst
+            // Use setTimeout for staggered sounds (already in the function)
+            setTimeout(() => {
+                if (audioContext) playSound(120, 0.18, 'sawtooth', 0.25); // Deeper rumble
+            }, 40);
+            setTimeout(() => {
+                if (audioContext) playSound(80, 0.15, 'sawtooth', 0.2); // Deepest follow-up
+            }, 80);
+        }
+
+        // Subtle chime for catching special power whispers (POW)
+        function playPowerChime() {
+            // Ensure audio context is ready for immediate playback
+            if (!audioContext) {
+                initAudio();
+            }
+            if (audioContext && audioContext.state === 'suspended') {
+                // Resume immediately without waiting
+                audioContext.resume();
+            }
+            // Play subtle, pleasant chime - ascending notes for a magical feel
+            playSound(523.25, 0.12, 'sine', 0.18); // C5
+            setTimeout(() => playSound(659.25, 0.1, 'sine', 0.15), 50); // E5
+            setTimeout(() => playSound(783.99, 0.08, 'sine', 0.12), 100); // G5
+        }
 
         // Poetry building functions
         function removeLastWordFromPoem() {
@@ -1364,6 +1416,7 @@
                 // Check if it's a special power whisper
                 if (whisper.isSpecial) {
                     activateSpecialPower();
+                    playPowerChime(); // Subtle chime sound
                     return; // Don't add to haiku, just activate power
                 }
             
@@ -2051,10 +2104,11 @@
             
             // Initialize and resume audio context immediately for low latency
             initAudio();
-            // Force resume audio context when game starts
+            // Force resume audio context when game starts - CRITICAL for immediate sound playback
             if (audioContext) {
                 audioContext.resume().then(() => {
                     // Pre-warm audio by playing a silent tone to reduce latency
+                    // This ensures the audio context is fully ready for immediate playback
                     const now = audioContext.currentTime;
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
@@ -2064,6 +2118,13 @@
                     oscillator.frequency.setValueAtTime(440, now);
                     oscillator.start(now);
                     oscillator.stop(now + 0.001);
+                    
+                    // Also pre-warm with a catch sound at near-zero volume to prime the system
+                    setTimeout(() => {
+                        if (audioContext && audioContext.state === 'running') {
+                            playSound(440, 0.05, 'sine', 0.01); // Ultra-quiet pre-warm
+                        }
+                    }, 10);
                 }).catch(() => {
                     // Ignore errors - will resume on next sound play
                 });
@@ -2351,10 +2412,24 @@
                 e.preventDefault(); // Prevent page scroll on spacebar
                 if (!gameStarted) {
                     // Resume audio context when starting game (user interaction)
-                    if (audioContext && audioContext.state === 'suspended') {
-                        audioContext.resume();
+                    // Ensure audio context is running before game starts for immediate sound playback
+                    if (audioContext) {
+                        if (audioContext.state === 'suspended') {
+                            audioContext.resume().then(() => {
+                                // Wait one frame to ensure audio is fully ready
+                                requestAnimationFrame(() => {
+                                    startGame();
+                                });
+                            }).catch(() => {
+                                startGame(); // Fallback if resume fails
+                            });
+                        } else {
+                            startGame();
+                        }
+                    } else {
+                        startGame();
                     }
-                    startGame();
+                    return; // Exit early if we're waiting for audio resume
                 } else if (haikuCompleted) {
                     continueAfterPoem();
                 } else {
@@ -2599,17 +2674,21 @@
                         if (whisper.isBomb) {
                             // Bomb explodes when caught - remove last word
                             showPaddleExplosionEffect();
+                            playExplosionSound(); // Subtle explosion sound
                             fallingShapes.splice(i, 1);
                             // Remove last word from haiku
                             removeLastWordFromPoem();
                         } else if (specialPowerActive && currentPower === 'exploding_whispers') {
                             // Paddle explodes when catching any whisper - remove last word
                             showPaddleExplosionEffect();
+                            playExplosionSound(); // Same explosion sound as bomb
                             fallingShapes.splice(i, 1);
                             // Remove last word from haiku
                             removeLastWordFromPoem();
                         } else {
-                            // Paddle caught the whisper - add to haiku
+                            // Paddle caught the whisper - play sound immediately on collision
+                            playCatchSound();
+                            // Then add to haiku
                             addWordToPoem(whisper);
                             fallingShapes.splice(i, 1);
                         }
