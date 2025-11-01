@@ -394,7 +394,8 @@
         <div id="prelude">
             <div id="preludeContent">
                 <h1>Prelude</h1>
-                <p>This is not a game, it's a tiny isle floating in the ether. It's inspired by Kawika Guillermo's book <a href="https://arsenalpulp.com/Books/O/Of-Floating-Isles" target="_blank" style="color: #00ffff; text-decoration: underline;">Of Floating Isles</a> and created by Adri M. as a way to reflect on it. Concept, mechanics and other ideas refer directly to the book. <span style="color: #ffff00; font-weight: bold;">At any time, you can press R to see them for the current context.</span></p>
+                <p>This is not a game, it's a tiny isle floating in the ether. It's inspired by Kawika Guillermo's book <a href="https://arsenalpulp.com/Books/O/Of-Floating-Isles" target="_blank" style="color: #00ffff; text-decoration: underline;">Of Floating Isles</a> and created by Adri M. as a way to reflect on it. Concept, mechanics and other ideas refer directly to the book. <span style="color: #ffff00; font-weight: bold;">At any time, you can press R to see them for the current context. Try to find all four!</span></p>
+                <p>You can also press X at any time to restart the game.</p>
                 <p class="instruction">Press any key to continue</p>
             </div>
         </div>
@@ -1974,6 +1975,89 @@
                 return;
             }
             
+            // Handle R key FIRST - before any other checks to ensure it always works
+            // This is critical for reliability after page reload
+            if (e.key === 'r' || e.key === 'R') {
+                // First check if any references screen is already visible - if so, let the closing handler deal with it
+                const gameReferencesScreen = document.getElementById('gameReferencesScreen');
+                const introReferencesScreen = document.getElementById('introReferencesScreen');
+                const referencesScreen = document.getElementById('referencesScreen');
+                
+                if ((gameReferencesScreen && gameReferencesScreen.classList.contains('visible')) ||
+                    (introReferencesScreen && introReferencesScreen.classList.contains('visible')) ||
+                    (referencesScreen && referencesScreen.classList.contains('visible'))) {
+                    // References screen is visible, let the closing handler process this
+                    return;
+                }
+                
+                const prelude = document.getElementById('prelude');
+                const startScreen = document.getElementById('startScreen');
+                const pauseOverlayCheck = document.getElementById('pauseOverlay');
+                
+                // Check if prelude is visible - if so, let handlePreludeKeydown handle it
+                // BUT only if handlePreludeKeydown actually handled it (it will stopPropagation)
+                // So we check if prelude is visible, and if not, continue processing
+                const isPreludeVisible = prelude && !prelude.classList.contains('hidden');
+                if (isPreludeVisible) {
+                    // Prelude is visible, handlePreludeKeydown will handle R key for prelude
+                    // If it didn't stop propagation, continue here
+                    // But actually, if prelude is visible, handlePreludeKeydown WILL handle it and stopPropagation
+                    // So we can return early only if prelude is visible
+                    return;
+                }
+                // Prelude is NOT visible, continue processing R key for intro/game screens
+                
+                // Check if pause overlay is blocking - if so, don't show references
+                let isPauseOverlayHidden = true;
+                if (pauseOverlayCheck) {
+                    const pauseComputedStyle = window.getComputedStyle(pauseOverlayCheck);
+                    const pauseComputedDisplay = pauseComputedStyle.display;
+                    const pauseInlineDisplay = pauseOverlayCheck.style.display || '';
+                    isPauseOverlayHidden = (pauseComputedDisplay === 'none') && (pauseInlineDisplay === 'none' || pauseInlineDisplay === '');
+                }
+                
+                // Check if start screen is visible (intro screen) - multiple checks for reliability
+                // After reload, if prelude is hidden and game hasn't started, we're on intro screen
+                const computedStyle = startScreen ? window.getComputedStyle(startScreen) : null;
+                const computedDisplay = computedStyle ? computedStyle.display : 'none';
+                const inlineDisplay = startScreen ? (startScreen.style.display || '') : '';
+                
+                // Start screen is visible if computed style is not 'none' OR inline style is 'block'
+                const isStartScreenVisible = computedDisplay !== 'none' || inlineDisplay === 'block';
+                
+                // Critical check: if game hasn't started and prelude is hidden, we're on intro screen
+                // This handles cases where the page loads without showing the prelude
+                // (e.g., after reload, returning from gallery, or other edge cases)
+                const isLikelyIntroScreen = !gameStarted && (!prelude || prelude.classList.contains('hidden'));
+                
+                // If we're likely on intro screen but startScreen isn't visible, make it visible first
+                // This ensures the intro screen is properly displayed after reload
+                if (isLikelyIntroScreen && !isStartScreenVisible && startScreen) {
+                    startScreen.style.display = 'block';
+                    // After making it visible, update the visibility check
+                    isStartScreenVisible = true;
+                }
+                
+                // Show intro references if:
+                // 1. Start screen is actually visible AND pause overlay is hidden, OR
+                // 2. We're likely on intro screen (prelude hidden, game not started) AND pause overlay is hidden
+                // The second condition is critical for when the page loads without showing the prelude
+                if (isPauseOverlayHidden && (isStartScreenVisible || isLikelyIntroScreen)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showIntroReferencesScreen();
+                    return;
+                }
+                
+                // Check if game is running (during gameplay) - handle R key to show game references
+                if (gameStarted && gameRunning && !haikuCompleted) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showGameReferencesScreen();
+                    return;
+                }
+            }
+            
             // Check if game references screen is visible - if so, any key closes it
             const gameReferencesScreen = document.getElementById('gameReferencesScreen');
             if (gameReferencesScreen && gameReferencesScreen.classList.contains('visible')) {
@@ -1999,6 +2083,7 @@
             }
             
             // Check if prelude is visible - if so, block spacebar completely
+            // R key is already handled above, so it will work regardless
             const prelude = document.getElementById('prelude');
             if (prelude && !prelude.classList.contains('hidden')) {
                 if (e.key === ' ') {
@@ -2006,27 +2091,8 @@
                     e.stopPropagation();
                     return; // Do nothing with spacebar while prelude is visible
                 }
-                // For other keys, allow them to pass through (R key handled by prelude handler)
+                // For other keys, allow them to pass through (R key already handled above)
                 // Don't update keys object or process game actions while prelude is visible
-                return;
-            }
-            
-            // Check if start screen is visible - handle R key to show intro references
-            const startScreen = document.getElementById('startScreen');
-            if (startScreen && startScreen.style.display !== 'none') {
-                if (e.key === 'r' || e.key === 'R') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showIntroReferencesScreen();
-                    return;
-                }
-            }
-            
-            // Handle R key during gameplay to show game references
-            if (gameStarted && gameRunning && !haikuCompleted && (e.key === 'r' || e.key === 'R')) {
-                e.preventDefault();
-                e.stopPropagation();
-                showGameReferencesScreen();
                 return;
             }
             
@@ -2601,9 +2667,23 @@
             currentSpawnInterval = baseSpawnInterval;
             currentWhisperSpeed = baseWhisperSpeed;
             
-            // Hide all overlays
+            // Hide all overlays and references screens
             gameOverElement.style.display = 'none';
             pauseOverlayElement.style.display = 'none';
+            
+            // Hide any references screens that might be visible
+            const referencesScreen = document.getElementById('referencesScreen');
+            const introReferencesScreen = document.getElementById('introReferencesScreen');
+            const gameReferencesScreen = document.getElementById('gameReferencesScreen');
+            if (referencesScreen) {
+                referencesScreen.classList.remove('visible');
+            }
+            if (introReferencesScreen) {
+                introReferencesScreen.classList.remove('visible');
+            }
+            if (gameReferencesScreen) {
+                gameReferencesScreen.classList.remove('visible');
+            }
             
             // Show start screen
             const startScreen = document.getElementById('startScreen');
@@ -2869,7 +2949,19 @@
         function showReferencesScreen() {
             const referencesScreen = document.getElementById('referencesScreen');
             if (referencesScreen) {
+                // Explicitly hide other reference screens first
+                const introReferencesScreen = document.getElementById('introReferencesScreen');
+                const gameReferencesScreen = document.getElementById('gameReferencesScreen');
+                if (introReferencesScreen) {
+                    introReferencesScreen.classList.remove('visible');
+                }
+                if (gameReferencesScreen) {
+                    gameReferencesScreen.classList.remove('visible');
+                }
+                // Show prelude references screen
                 referencesScreen.classList.add('visible');
+                // Force a reflow to ensure it's displayed
+                referencesScreen.offsetHeight;
             }
         }
         
@@ -2877,6 +2969,8 @@
             const referencesScreen = document.getElementById('referencesScreen');
             if (referencesScreen) {
                 referencesScreen.classList.remove('visible');
+                // Force a reflow to ensure it's hidden
+                referencesScreen.offsetHeight;
             }
         }
         
@@ -2884,7 +2978,19 @@
         function showIntroReferencesScreen() {
             const introReferencesScreen = document.getElementById('introReferencesScreen');
             if (introReferencesScreen) {
+                // Explicitly hide other reference screens first
+                const referencesScreen = document.getElementById('referencesScreen');
+                const gameReferencesScreen = document.getElementById('gameReferencesScreen');
+                if (referencesScreen) {
+                    referencesScreen.classList.remove('visible');
+                }
+                if (gameReferencesScreen) {
+                    gameReferencesScreen.classList.remove('visible');
+                }
+                // Show intro references screen
                 introReferencesScreen.classList.add('visible');
+                // Force a reflow to ensure it's displayed
+                introReferencesScreen.offsetHeight;
             }
         }
         
@@ -2892,6 +2998,8 @@
             const introReferencesScreen = document.getElementById('introReferencesScreen');
             if (introReferencesScreen) {
                 introReferencesScreen.classList.remove('visible');
+                // Force a reflow to ensure it's hidden
+                introReferencesScreen.offsetHeight;
             }
         }
         
@@ -2899,7 +3007,19 @@
         function showGameReferencesScreen() {
             const gameReferencesScreen = document.getElementById('gameReferencesScreen');
             if (gameReferencesScreen) {
+                // Explicitly hide other reference screens first
+                const referencesScreen = document.getElementById('referencesScreen');
+                const introReferencesScreen = document.getElementById('introReferencesScreen');
+                if (referencesScreen) {
+                    referencesScreen.classList.remove('visible');
+                }
+                if (introReferencesScreen) {
+                    introReferencesScreen.classList.remove('visible');
+                }
+                // Show game references screen
                 gameReferencesScreen.classList.add('visible');
+                // Force a reflow to ensure it's displayed
+                gameReferencesScreen.offsetHeight;
                 // Pause the game when showing references (remember if it was already paused)
                 if (gameRunning) {
                     wasPausedBeforeReferences = gamePaused;
@@ -2914,6 +3034,8 @@
             const gameReferencesScreen = document.getElementById('gameReferencesScreen');
             if (gameReferencesScreen) {
                 gameReferencesScreen.classList.remove('visible');
+                // Force a reflow to ensure it's hidden
+                gameReferencesScreen.offsetHeight;
                 // Unpause the game when closing references, but only if it wasn't paused before
                 if (gameRunning && !wasPausedBeforeReferences) {
                     gamePaused = false;
@@ -2963,41 +3085,47 @@
                 return;
             }
             
-            // If start screen is visible, handle R key to show intro references
-            if (startScreen && startScreen.style.display !== 'none' && (!prelude || prelude.classList.contains('hidden'))) {
-                if (e.key === 'r' || e.key === 'R') {
+            // Handle R key ONLY when prelude is visible
+            // For start screen and gameplay, let the main handler process it
+            if (e.key === 'r' || e.key === 'R') {
+                if (prelude && !prelude.classList.contains('hidden')) {
+                    // Prelude is visible, handle R for prelude references
                     e.preventDefault();
                     e.stopPropagation();
-                    showIntroReferencesScreen();
+                    showReferencesScreen();
+                    return;
+                } else {
+                    // Prelude is NOT visible, let the main handler process R key
+                    // Don't prevent default or stop propagation - let it bubble to main handler
                     return;
                 }
             }
             
-            // If prelude is visible, handle R key specially
+            // If prelude is visible, handle other keys
             if (prelude && !prelude.classList.contains('hidden')) {
                 e.preventDefault();
                 e.stopPropagation(); // Prevent the main handler from processing this key
                 
-                // If R key is pressed, show references screen
-                if (e.key === 'r' || e.key === 'R') {
-                    showReferencesScreen();
-                } else {
-                    // Any other key closes the prelude and shows intro screen
-                    closePrelude();
-                    // Remove this listener after prelude is closed
-                    document.removeEventListener('keydown', handlePreludeKeydown);
-                    // Don't start the game - just show the intro screen
-                }
+                // Any key (except R which was handled above) closes the prelude and shows intro screen
+                closePrelude();
+                // Remove this listener after prelude is closed
+                document.removeEventListener('keydown', handlePreludeKeydown);
+                // Don't start the game - just show the intro screen
             }
         }
         
         document.addEventListener('keydown', handlePreludeKeydown);
         
+        // On page load/reload, fully restart the experience (clear session and show prelude)
+        // This ensures a fresh start every time the page loads, always starting from the prelude
+        fullRestart();
+        
         // Initialize player name when page loads
         initializePlayerName();
         
-        // Check if returning from gallery and start game in paused mode
-        checkReturnFromGallery();
+        // Note: We do NOT call checkReturnFromGallery() here because we want
+        // every page load/reload to start fresh from the prelude, even if
+        // navigating from the gallery. The user must manually start the game.
 
         // Game starts with instruction screen - no auto-start
     </script>

@@ -172,6 +172,10 @@ Discover connections between poems through shared words. Access the gallery by p
 - Added X key to fully restart from anywhere (clears session and returns to prelude)
 - Removed config.php from repository (added to .gitignore)
 - Created config_blank.php as a template for database configuration
+- Fixed references windows not working after page reload
+- Added automatic full restart on page load/reload (always starts from prelude)
+- Updated prelude text to include "Try to find all four!" hint about reference screens
+- Added information in prelude about X key to restart the game
 
 ### Version 2.0.2
 - Added keyboard navigation to Poem Gallery
