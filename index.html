@@ -403,6 +403,7 @@
         <div id="referencesScreen">
             <div id="referencesContent">
                 <h2>References</h2>
+                <h3 id="preludeReferenceSubtitle" style="color: #ffff00; font-size: 18px; font-weight: normal; margin-top: -10px; margin-bottom: 25px; text-align: center;">(Found 0 out of 4)</h3>
                 <p>The tiny floating ile concept was directly taken from page 15: "Games might appear as isolated islands from afar, but they are less like islands of utopian literature and more like literature's "isles": imaginary, mist-covered lands that invoke myth, legend, and imagination, as well as fear, violence, and power." These ideas permeate the whole design of this tiny floating isle.</p>
                 <p class="instruction">Press any key to return</p>
             </div>
@@ -429,6 +430,7 @@
         <div id="introReferencesScreen">
             <div id="introReferencesContent">
                 <h2>References</h2>
+                <h3 id="introReferenceSubtitle" style="color: #ffff00; font-size: 18px; font-weight: normal; margin-top: -10px; margin-bottom: 25px; text-align: center;">(Found 0 out of 4)</h3>
                 <ul style="list-style: none; padding: 0;">
                     <li style="margin-bottom: 30px;">
                         <p>The name "Stories in Whispers" is directly inspired by page 34: "'IT'S THREE IN THE MORNING! WE HAVE TO WORK TOMORROW!' After a minute of silence, we would continue our stories in whispers."</p>
@@ -461,6 +463,7 @@
         <div id="gameReferencesScreen">
             <div id="gameReferencesContent">
                 <h2>References</h2>
+                <h3 id="gameReferenceSubtitle" style="color: #ffff00; font-size: 18px; font-weight: normal; margin-top: -10px; margin-bottom: 25px; text-align: center;">(Found 0 out of 4)</h3>
                 <ul style="list-style: none; padding: 0;">
                     <li style="margin-bottom: 30px;">
                         <p>The idea of building poetry is taken from different parts of the book. On page 23, the idea of a "supra story": "Buckles called this the 'supra-story': a story created by the reader in their imagination before they write it down or share it with others.'", "The player joins the game world but also creates it anew, imagining strange, untold stories within it." and "Games do not dictate stories to us but, like poems, speak in metaphors, images, similes, allusions, and allegory."</p>
@@ -575,6 +578,214 @@
         let haikuCompleted = false;
         let gameStarted = false;
         let wasPausedBeforeReferences = false;
+        
+        // Track which reference screens have been viewed
+        let allReferencesFoundCelebrated = false; // Track if we've already celebrated finding all 4
+        
+        function markReferenceSeen(referenceType) {
+            // Reference types: 'prelude', 'intro', 'game', 'gallery'
+            const seenKey = 'referenceSeen_' + referenceType;
+            sessionStorage.setItem(seenKey, 'true');
+            updateReferenceCounter();
+        }
+        
+        function getReferenceCount() {
+            let count = 0;
+            const types = ['prelude', 'intro', 'game', 'gallery'];
+            types.forEach(type => {
+                if (sessionStorage.getItem('referenceSeen_' + type) === 'true') {
+                    count++;
+                }
+            });
+            return count;
+        }
+        
+        // Fireworks system for celebrating all 4 references found
+        let fireworks = [];
+        let fireworksActive = false;
+        
+        class Firework {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.particles = [];
+                this.colors = ['#ff4444', '#ffff44', '#44ff44', '#aa44ff', '#ff69b4', '#00ffff'];
+                this.exploded = false;
+                
+                // Create particles for this firework
+                for (let i = 0; i < 30; i++) {
+                    const angle = (Math.PI * 2 * i) / 30;
+                    const speed = 2 + Math.random() * 3;
+                    const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        life: 1.0,
+                        decay: 0.015 + Math.random() * 0.01,
+                        color: color,
+                        size: 3 + Math.random() * 2
+                    });
+                }
+                this.exploded = true;
+            }
+            
+            update() {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.1; // Gravity
+                    p.life -= p.decay;
+                    
+                    if (p.life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+                return this.particles.length > 0;
+            }
+            
+            draw(ctx) {
+                for (const p of this.particles) {
+                    ctx.save();
+                    ctx.globalAlpha = p.life;
+                    ctx.fillStyle = p.color;
+                    
+                    // Add glow effect
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = p.color;
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+        }
+        
+        function celebrateAllReferencesFound() {
+            if (allReferencesFoundCelebrated) return; // Already celebrated
+            allReferencesFoundCelebrated = true;
+            
+            // Play subtle celebration sound
+            playAllReferencesFoundSound();
+            
+            // Create fireworks
+            fireworks = [];
+            fireworksActive = true;
+            
+            // Create multiple fireworks at different positions
+            const positions = [
+                { x: window.innerWidth * 0.2, y: window.innerHeight * 0.3 },
+                { x: window.innerWidth * 0.5, y: window.innerHeight * 0.25 },
+                { x: window.innerWidth * 0.8, y: window.innerHeight * 0.3 },
+                { x: window.innerWidth * 0.35, y: window.innerHeight * 0.5 },
+                { x: window.innerWidth * 0.65, y: window.innerHeight * 0.5 }
+            ];
+            
+            // Create first firework immediately, then stagger the rest
+            fireworks.push(new Firework(positions[0].x, positions[0].y));
+            
+            positions.slice(1).forEach((pos, index) => {
+                setTimeout(() => {
+                    fireworks.push(new Firework(pos.x, pos.y));
+                }, (index + 1) * 200);
+            });
+            
+            // Stop fireworks after 4 seconds (to allow all fireworks to finish)
+            setTimeout(() => {
+                fireworksActive = false;
+            }, 4000);
+            
+            // Start animation immediately
+            animateFireworks();
+        }
+        
+        function animateFireworks() {
+            // Create a temporary canvas overlay for fireworks if it doesn't exist
+            let fireworksCanvas = document.getElementById('fireworksCanvas');
+            if (!fireworksCanvas) {
+                fireworksCanvas = document.createElement('canvas');
+                fireworksCanvas.id = 'fireworksCanvas';
+                fireworksCanvas.style.position = 'fixed';
+                fireworksCanvas.style.top = '0';
+                fireworksCanvas.style.left = '0';
+                fireworksCanvas.style.width = '100%';
+                fireworksCanvas.style.height = '100%';
+                fireworksCanvas.style.pointerEvents = 'none';
+                fireworksCanvas.style.zIndex = '10000';
+                document.body.appendChild(fireworksCanvas);
+            }
+            
+            // Update canvas size to match window size
+            const rect = fireworksCanvas.getBoundingClientRect();
+            fireworksCanvas.width = rect.width;
+            fireworksCanvas.height = rect.height;
+            
+            const ctx = fireworksCanvas.getContext('2d');
+            ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+            
+            // Update and draw fireworks
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                const firework = fireworks[i];
+                if (!firework.update()) {
+                    fireworks.splice(i, 1);
+                } else {
+                    firework.draw(ctx);
+                }
+            }
+            
+            // Continue animation if active or if there are still fireworks to display
+            if (fireworksActive || fireworks.length > 0) {
+                requestAnimationFrame(animateFireworks);
+            } else {
+                // Clean up canvas when done
+                setTimeout(() => {
+                    const canvas = document.getElementById('fireworksCanvas');
+                    if (canvas && canvas.parentNode) {
+                        canvas.parentNode.removeChild(canvas);
+                    }
+                }, 100);
+            }
+        }
+        
+        function playAllReferencesFoundSound() {
+            if (!audioContext) {
+                initAudio();
+            }
+            if (!audioContext) return;
+            
+            // Subtle, celebratory sound - ascending notes
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (major chord)
+            notes.forEach((freq, i) => {
+                setTimeout(() => {
+                    playSound(freq, 0.4, 'sine', 0.15);
+                }, i * 100);
+            });
+        }
+        
+        function updateReferenceCounter() {
+            const count = getReferenceCount();
+            const subtitle = `(Found ${count} out of 4)`;
+            
+            // Update all reference screen subtitles
+            const preludeSubtitle = document.getElementById('preludeReferenceSubtitle');
+            const introSubtitle = document.getElementById('introReferenceSubtitle');
+            const gameSubtitle = document.getElementById('gameReferenceSubtitle');
+            
+            if (preludeSubtitle) preludeSubtitle.textContent = subtitle;
+            if (introSubtitle) introSubtitle.textContent = subtitle;
+            if (gameSubtitle) gameSubtitle.textContent = subtitle;
+            
+            // Check if all 4 references have been found
+            if (count === 4 && !allReferencesFoundCelebrated) {
+                // Use setTimeout to ensure the reference screen is fully visible first
+                setTimeout(() => {
+                    celebrateAllReferencesFound();
+                }, 100);
+            }
+        }
 
         // Word fade animation
         let wordFadeStates = new Map(); // Track fade state for each word
@@ -1965,6 +2176,12 @@
             // Reinitialize player name (will generate a new one since sessionStorage is cleared)
             initializePlayerName();
             
+            // Reset reference counter display (sessionStorage was cleared above)
+            allReferencesFoundCelebrated = false; // Reset celebration flag
+            fireworks = [];
+            fireworksActive = false;
+            updateReferenceCounter();
+            
             // Re-register the prelude keydown handler so keys work to close the prelude after restart
             // Remove it first to avoid duplicate listeners, then add it again
             document.removeEventListener('keydown', handlePreludeKeydown);
@@ -2954,6 +3171,9 @@
         function showReferencesScreen() {
             const referencesScreen = document.getElementById('referencesScreen');
             if (referencesScreen) {
+                // Track that this reference has been seen
+                markReferenceSeen('prelude');
+                
                 // Explicitly hide other reference screens first
                 const introReferencesScreen = document.getElementById('introReferencesScreen');
                 const gameReferencesScreen = document.getElementById('gameReferencesScreen');
@@ -2983,6 +3203,9 @@
         function showIntroReferencesScreen() {
             const introReferencesScreen = document.getElementById('introReferencesScreen');
             if (introReferencesScreen) {
+                // Track that this reference has been seen
+                markReferenceSeen('intro');
+                
                 // Explicitly hide other reference screens first
                 const referencesScreen = document.getElementById('referencesScreen');
                 const gameReferencesScreen = document.getElementById('gameReferencesScreen');
@@ -3012,6 +3235,9 @@
         function showGameReferencesScreen() {
             const gameReferencesScreen = document.getElementById('gameReferencesScreen');
             if (gameReferencesScreen) {
+                // Track that this reference has been seen
+                markReferenceSeen('game');
+                
                 // Explicitly hide other reference screens first
                 const referencesScreen = document.getElementById('referencesScreen');
                 const introReferencesScreen = document.getElementById('introReferencesScreen');
@@ -3127,6 +3353,9 @@
         
         // Initialize player name when page loads
         initializePlayerName();
+        
+        // Initialize reference counter display
+        updateReferenceCounter();
         
         // Note: We do NOT call checkReturnFromGallery() here because we want
         // every page load/reload to start fresh from the prelude, even if

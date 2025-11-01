@@ -622,6 +622,7 @@ try {
     <div id="galleryReferencesScreen">
         <div id="galleryReferencesContent">
             <h2>References</h2>
+            <h3 id="galleryReferenceSubtitle" style="color: #ffff00; font-size: 18px; font-weight: normal; margin-top: -10px; margin-bottom: 25px; text-align: center;">(Found 0 out of 4)</h3>
             <p>I've always liked to play with language, and the concept of dialogue, be it solo or multiplayer. From page 37: "Conversation need not be direct or instant or even between two people." The idea of adding a Poem Gallery came from that passage; finding a way to make poems dialogue with each other, even if not created at the same time, by the same people.</p>
             <p class="instruction">Press any key to return</p>
         </div>
@@ -633,10 +634,247 @@ try {
         sessionStorage.setItem('playerName', '<?php echo addslashes($player_name); ?>');
         <?php endif; ?>
         
-        // Handle gallery references screen
+        // Audio context for sound effects
+        let audioContext;
+        
+        // Sound effect functions
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                // Web Audio API not supported
+            }
+        }
+
+        function playSound(frequency, duration, type = 'sine', volume = 0.3) {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        
+        // Track which reference screens have been viewed
+        let allReferencesFoundCelebrated = false; // Track if we've already celebrated finding all 4
+        
+        // Fireworks system for celebrating all 4 references found
+        let fireworks = [];
+        let fireworksActive = false;
+        
+        class Firework {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.particles = [];
+                this.colors = ['#ff4444', '#ffff44', '#44ff44', '#aa44ff', '#ff69b4', '#00ffff'];
+                this.exploded = false;
+                
+                // Create particles for this firework
+                for (let i = 0; i < 30; i++) {
+                    const angle = (Math.PI * 2 * i) / 30;
+                    const speed = 2 + Math.random() * 3;
+                    const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        life: 1.0,
+                        decay: 0.015 + Math.random() * 0.01,
+                        color: color,
+                        size: 3 + Math.random() * 2
+                    });
+                }
+                this.exploded = true;
+            }
+            
+            update() {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.1; // Gravity
+                    p.life -= p.decay;
+                    
+                    if (p.life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+                return this.particles.length > 0;
+            }
+            
+            draw(ctx) {
+                for (const p of this.particles) {
+                    ctx.save();
+                    ctx.globalAlpha = p.life;
+                    ctx.fillStyle = p.color;
+                    
+                    // Add glow effect
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = p.color;
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+        }
+        
+        function celebrateAllReferencesFound() {
+            if (allReferencesFoundCelebrated) return; // Already celebrated
+            allReferencesFoundCelebrated = true;
+            
+            // Play subtle celebration sound
+            playAllReferencesFoundSound();
+            
+            // Create fireworks
+            fireworks = [];
+            fireworksActive = true;
+            
+            // Create multiple fireworks at different positions
+            const positions = [
+                { x: window.innerWidth * 0.2, y: window.innerHeight * 0.3 },
+                { x: window.innerWidth * 0.5, y: window.innerHeight * 0.25 },
+                { x: window.innerWidth * 0.8, y: window.innerHeight * 0.3 },
+                { x: window.innerWidth * 0.35, y: window.innerHeight * 0.5 },
+                { x: window.innerWidth * 0.65, y: window.innerHeight * 0.5 }
+            ];
+            
+            // Create first firework immediately, then stagger the rest
+            fireworks.push(new Firework(positions[0].x, positions[0].y));
+            
+            positions.slice(1).forEach((pos, index) => {
+                setTimeout(() => {
+                    fireworks.push(new Firework(pos.x, pos.y));
+                }, (index + 1) * 200);
+            });
+            
+            // Stop fireworks after 4 seconds (to allow all fireworks to finish)
+            setTimeout(() => {
+                fireworksActive = false;
+            }, 4000);
+            
+            // Start animation immediately
+            animateFireworks();
+        }
+        
+        function animateFireworks() {
+            // Create a temporary canvas overlay for fireworks if it doesn't exist
+            let fireworksCanvas = document.getElementById('fireworksCanvas');
+            if (!fireworksCanvas) {
+                fireworksCanvas = document.createElement('canvas');
+                fireworksCanvas.id = 'fireworksCanvas';
+                fireworksCanvas.style.position = 'fixed';
+                fireworksCanvas.style.top = '0';
+                fireworksCanvas.style.left = '0';
+                fireworksCanvas.style.width = '100%';
+                fireworksCanvas.style.height = '100%';
+                fireworksCanvas.style.pointerEvents = 'none';
+                fireworksCanvas.style.zIndex = '10000';
+                document.body.appendChild(fireworksCanvas);
+            }
+            
+            // Update canvas size to match window size
+            const rect = fireworksCanvas.getBoundingClientRect();
+            fireworksCanvas.width = rect.width;
+            fireworksCanvas.height = rect.height;
+            
+            const ctx = fireworksCanvas.getContext('2d');
+            ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+            
+            // Update and draw fireworks
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                const firework = fireworks[i];
+                if (!firework.update()) {
+                    fireworks.splice(i, 1);
+                } else {
+                    firework.draw(ctx);
+                }
+            }
+            
+            // Continue animation if active or if there are still fireworks to display
+            if (fireworksActive || fireworks.length > 0) {
+                requestAnimationFrame(animateFireworks);
+            } else {
+                // Clean up canvas when done
+                setTimeout(() => {
+                    const canvas = document.getElementById('fireworksCanvas');
+                    if (canvas && canvas.parentNode) {
+                        canvas.parentNode.removeChild(canvas);
+                    }
+                }, 100);
+            }
+        }
+        
+        function playAllReferencesFoundSound() {
+            if (!audioContext) {
+                initAudio();
+            }
+            if (!audioContext) return;
+            
+            // Subtle, celebratory sound - ascending notes
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (major chord)
+            notes.forEach((freq, i) => {
+                setTimeout(() => {
+                    playSound(freq, 0.4, 'sine', 0.15);
+                }, i * 100);
+            });
+        }
+        
+        function markReferenceSeen(referenceType) {
+            // Reference types: 'prelude', 'intro', 'game', 'gallery'
+            const seenKey = 'referenceSeen_' + referenceType;
+            sessionStorage.setItem(seenKey, 'true');
+            updateReferenceCounter();
+        }
+        
+        function getReferenceCount() {
+            let count = 0;
+            const types = ['prelude', 'intro', 'game', 'gallery'];
+            types.forEach(type => {
+                if (sessionStorage.getItem('referenceSeen_' + type) === 'true') {
+                    count++;
+                }
+            });
+            return count;
+        }
+        
+        function updateReferenceCounter() {
+            const count = getReferenceCount();
+            const subtitle = `(Found ${count} out of 4)`;
+            
+            // Update gallery reference screen subtitle
+            const gallerySubtitle = document.getElementById('galleryReferenceSubtitle');
+            if (gallerySubtitle) gallerySubtitle.textContent = subtitle;
+            
+            // Check if all 4 references have been found
+            if (count === 4 && !allReferencesFoundCelebrated) {
+                // Use setTimeout to ensure the reference screen is fully visible first
+                setTimeout(() => {
+                    celebrateAllReferencesFound();
+                }, 100);
+            }
+        }
+        
         function showGalleryReferencesScreen() {
             const galleryReferencesScreen = document.getElementById('galleryReferencesScreen');
             if (galleryReferencesScreen) {
+                // Track that this reference has been seen
+                markReferenceSeen('gallery');
+                
                 galleryReferencesScreen.classList.add('visible');
             }
         }
@@ -648,14 +886,21 @@ try {
             }
         }
         
+        // Initialize reference counter display on page load
+        updateReferenceCounter();
+        
         // Handle keyboard controls
         document.addEventListener('keydown', (e) => {
             // Handle X key to fully restart (clear session and go back to prelude)
             if (e.key === 'x' || e.key === 'X') {
                 e.preventDefault();
                 e.stopPropagation();
-                // Clear all session storage
+                // Clear all session storage (including reference tracking)
                 sessionStorage.clear();
+                // Reset celebration flag
+                allReferencesFoundCelebrated = false;
+                fireworks = [];
+                fireworksActive = false;
                 // Redirect to main page (which will show prelude)
                 window.location.href = 'index.html';
                 return;
