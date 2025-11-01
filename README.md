@@ -20,14 +20,14 @@ A mystical HTML5 video game where players control a paddle to catch falling whis
 - **Catch falling whispers to build poetry!** Collect words to create 5-7-5 syllable poems
 - Multiple whispers fall simultaneously at different speeds
 - Each whisper displays a word representing a different part of speech with color coding:
-  - 🔴 **Red** = Verbs
-  - 🟣 **Purple** = Nouns  
-  - 🟡 **Yellow** = Adjectives
-  - 🟢 **Green** = Adverbs
-  - 🟠 **Orange** = Articles
-  - 🩷 **Pink** = Conjunctions
-  - ⚪ **White** = Special Power Whispers (POW!)
-  - 🔵 **Light Blue** = Bomb Whispers (BOOM!) - Remove your last word
+  - **Red** = Verbs
+  - **Purple** = Nouns  
+  - **Yellow** = Adjectives
+  - **Green** = Adverbs
+  - **Orange** = Articles
+  - **Pink** = Conjunctions
+  - **White** = Special Power Whispers (POW!)
+  - **Light Blue** = Bomb Whispers (BOOM!) - Remove your last word
 
 ## Special Features
 
