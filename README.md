@@ -112,6 +112,7 @@ Press **R** at any time to view references from the book that inspired this game
 - **Prelude screen**: View reference about the floating isle concept (page 15)
 - **Intro screen**: View references about the game name, poetry concept, and player identity (pages 14-16, 34)
 - **During gameplay**: View references about poetry building, dialogue concept, and Poem Gallery (pages 23, 37, 45)
+- **Poem Gallery**: View reference about conversation and dialogue concept that inspired the gallery feature (page 37)
 
 All references are contextual and explain the inspiration behind different game elements.
 
@@ -131,6 +132,7 @@ Discover connections between poems through shared words. Access the gallery by p
 - **S** or **↓ Arrow**: Scroll down
 - **A** or **← Arrow**: Navigate to previous poem connection
 - **D** or **→ Arrow**: Navigate to next poem connection
+- **R**: View references for the current context
 - **B**: Return to the Floating Isle (game)
 
 ## Controls
@@ -139,9 +141,9 @@ Discover connections between poems through shared words. Access the gallery by p
 - **Arrow Keys** or **A/D**: Move paddle left/right
 - **SPACE**: Start game / Pause/Resume
 - **P**: Pause/Resume (alternative)
-- **R**: View references for current context (available in prelude, intro screen, and during gameplay)
+- **R**: View references for current context (available in prelude, intro screen, during gameplay, and in gallery)
 - **G**: Go to Poem Gallery
-- **E**: Go to Poem Gallery (when poem is completed)
+- **E**: Go to Poem Gallery (during gameplay)
 - **L**: Leave locale (when game is paused)
 
 ## Tips for Success
@@ -157,11 +159,13 @@ Discover connections between poems through shared words. Access the gallery by p
 ## Version History
 
 ### Version 2.1.1
-- Added R key references feature accessible from prelude, intro screen, and during gameplay
+- Added R key references feature accessible from prelude, intro screen, during gameplay, and in gallery
 - Updated prelude text: Changed "Floating Isle" to "tiny isle floating in the ether"
 - Updated prelude: Changed description from "commentary for an university course" to "a way to reflect on it"
 - Updated prelude: Changed "Most elements refer" to "Concept, mechanics and other ideas refer"
 - Changed references key from C to R throughout the game
+- Added R key references screen to Poem Gallery
+- Enabled E key to open gallery during gameplay (in addition to G key)
 - Removed config.php from repository (added to .gitignore)
 - Created config_blank.php as a template for database configuration
 

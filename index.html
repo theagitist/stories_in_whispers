@@ -462,10 +462,7 @@
                 <h2>References</h2>
                 <ul style="list-style: none; padding: 0;">
                     <li style="margin-bottom: 30px;">
-                        <p>The idea of building poetry is taken from different parts of the book. On page 23: "Games do not dictate stories to us but, like poems, speak in metaphors, images, similes, allusions, and allegory."</p>
-                    </li>
-                    <li style="margin-bottom: 30px;">
-                        <p>I've always liked to play with language, and the concept of dialogue, be it solo or multiplayer. From page 37: "Conversagion need not be direct or instant or even between two people." The idea of adding a Poem Gallery came from that passage; finding a way to make poems dialogue with each other, even if not created at the same time, by the same people.</p>
+                        <p>The idea of building poetry is taken from different parts of the book. On page 23, the idea of a "supra story": "Buckles called this the 'supra-story': a story created by the reader in their imagination before they write it down or share it with others.'", "The player joins the game world but also creates it anew, imagining strange, untold stories within it." and "Games do not dictate stories to us but, like poems, speak in metaphors, images, similes, allusions, and allegory."</p>
                     </li>
                     <li style="margin-bottom: 30px;">
                         <p>There is an Easter Egg if you stop moving for more than 5 seconds, inspired by page 45. Why I don't quote here will become self explanatory.</p>
@@ -1925,18 +1922,21 @@
                 window.location.href = `poem_gallery.php?player=${encodeURIComponent(playerName)}`;
             }
             
-            // Handle E key to go to gallery when poem is completed
-            if ((e.key === 'e' || e.key === 'E') && haikuCompleted) {
-                e.preventDefault();
-                let playerName = sessionStorage.getItem('playerName');
-                
-                // Validate that the player name is in the correct format (verb adjective noun)
-                if (!playerName || playerName.split(' ').length !== 3) {
-                    playerName = generatePlayerName();
-                    sessionStorage.setItem('playerName', playerName);
+            // Handle E key to go to gallery during gameplay
+            if (e.key === 'e' || e.key === 'E') {
+                // Navigate if game is started and running (during active gameplay)
+                if (gameStarted && gameRunning) {
+                    e.preventDefault();
+                    let playerName = sessionStorage.getItem('playerName');
+                    
+                    // Validate that the player name is in the correct format (verb adjective noun)
+                    if (!playerName || playerName.split(' ').length !== 3) {
+                        playerName = generatePlayerName();
+                        sessionStorage.setItem('playerName', playerName);
+                    }
+                    
+                    window.location.href = `poem_gallery.php?player=${encodeURIComponent(playerName)}`;
                 }
-                
-                window.location.href = `poem_gallery.php?player=${encodeURIComponent(playerName)}`;
             }
             
             // Handle L key to leave the locale when game is paused

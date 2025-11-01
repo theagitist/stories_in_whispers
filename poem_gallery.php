@@ -395,6 +395,61 @@ try {
         .random-poem .author {
             font-weight: bold;
         }
+        
+        #galleryReferencesScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+        
+        #galleryReferencesScreen.visible {
+            display: flex;
+        }
+        
+        #galleryReferencesContent {
+            max-width: 900px;
+            text-align: left;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #cccccc;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        #galleryReferencesContent h2 {
+            color: #00ffff;
+            font-size: 22px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        #galleryReferencesContent p {
+            margin: 20px 0;
+            text-align: justify;
+        }
+        
+        #galleryReferencesContent .instruction {
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+            font-style: italic;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -402,7 +457,7 @@ try {
         <div class="header">
                 <h1>Poem Gallery</h1>
                 <p>Discover connections between poems through shared words.</p>
-                <p style="font-size: 14px; color: #cccccc; margin-top: 5px;">Navigate using WASD or arrow keys.</p>
+                <p style="font-size: 14px; color: #cccccc; margin-top: 5px;">Navigate using WASD or arrow keys. <span style="color: #ffff00; font-weight: bold;">Press R to see references for the current context.</span></p>
                 <?php if (isset($player_name)): ?>
                 <p style="color: #ff69b4; font-style: italic; margin-top: 10px;">
                     A <span style="font-weight: bold;"><?php echo strtolower(htmlspecialchars($player_name)); ?></span> is exploring the gallery.
@@ -563,6 +618,14 @@ try {
                 </div>
         <?php endif; ?>
     </div>
+    
+    <div id="galleryReferencesScreen">
+        <div id="galleryReferencesContent">
+            <h2>References</h2>
+            <p>I've always liked to play with language, and the concept of dialogue, be it solo or multiplayer. From page 37: "Conversation need not be direct or instant or even between two people." The idea of adding a Poem Gallery came from that passage; finding a way to make poems dialogue with each other, even if not created at the same time, by the same people.</p>
+            <p class="instruction">Press any key to return</p>
+        </div>
+    </div>
 
     <script>
         // Store player name in session storage for consistency
@@ -570,8 +633,41 @@ try {
         sessionStorage.setItem('playerName', '<?php echo addslashes($player_name); ?>');
         <?php endif; ?>
         
+        // Handle gallery references screen
+        function showGalleryReferencesScreen() {
+            const galleryReferencesScreen = document.getElementById('galleryReferencesScreen');
+            if (galleryReferencesScreen) {
+                galleryReferencesScreen.classList.add('visible');
+            }
+        }
+        
+        function hideGalleryReferencesScreen() {
+            const galleryReferencesScreen = document.getElementById('galleryReferencesScreen');
+            if (galleryReferencesScreen) {
+                galleryReferencesScreen.classList.remove('visible');
+            }
+        }
+        
         // Handle keyboard controls
         document.addEventListener('keydown', (e) => {
+            const galleryReferencesScreen = document.getElementById('galleryReferencesScreen');
+            
+            // If gallery references screen is visible, any key closes it
+            if (galleryReferencesScreen && galleryReferencesScreen.classList.contains('visible')) {
+                e.preventDefault();
+                e.stopPropagation();
+                hideGalleryReferencesScreen();
+                return;
+            }
+            
+            // Handle R key to show references
+            if (e.key === 'r' || e.key === 'R') {
+                e.preventDefault();
+                e.stopPropagation();
+                showGalleryReferencesScreen();
+                return;
+            }
+            
             // Handle B key to go back to game
             if (e.key === 'b' || e.key === 'B') {
                 e.preventDefault();
