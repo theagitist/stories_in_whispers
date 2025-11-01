@@ -2,6 +2,8 @@
 
 A mystical HTML5 video game where players control a paddle to catch falling whispers (colored text blocks) representing different parts of speech, with the objective of building poetry (5-7-5 syllable poems). Experience a contemplative journey through floating verses and whispered dreams.
 
+**Version 2.3.1** - Added victory chime sound effect when completing a poem
+
 **Version 2.3.0** - Added GitHub repository link to Prelude
 
 **Version 2.2.2** - Added gameplay sound effects and optimized audio latency
@@ -166,6 +168,10 @@ Discover connections between poems through shared words. Access the gallery by p
 - **Embrace the journey**: The game rewards both active play and thoughtful pauses
 
 ## Version History
+
+### Version 2.3.1
+- Added subtle victory chime sound effect when completing a poem
+- Victory chime plays a gentle ascending C major chord (C5-E5-G5-C6) to celebrate poem completion
 
 ### Version 2.3.0
 - Added GitHub repository link to Prelude screen

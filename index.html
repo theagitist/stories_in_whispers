@@ -1301,6 +1301,23 @@
             setTimeout(() => playSound(783.99, 0.08, 'sine', 0.12), 100); // G5
         }
 
+        // Subtle victory chime for completing a poem
+        function playVictoryChime() {
+            // Ensure audio context is ready for immediate playback
+            if (!audioContext) {
+                initAudio();
+            }
+            if (audioContext && audioContext.state === 'suspended') {
+                // Resume immediately without waiting
+                audioContext.resume();
+            }
+            // Play subtle, pleasant victory chime - a gentle ascending chord progression
+            playSound(523.25, 0.15, 'sine', 0.2); // C5
+            setTimeout(() => playSound(659.25, 0.13, 'sine', 0.18), 60); // E5
+            setTimeout(() => playSound(783.99, 0.11, 'sine', 0.16), 120); // G5
+            setTimeout(() => playSound(1046.50, 0.09, 'sine', 0.14), 180); // C6 - completing the chord
+        }
+
         // Poetry building functions
         function removeLastWordFromPoem() {
             if (currentHaiku.length > 0) {
@@ -1929,6 +1946,9 @@
             try {
                 haikuCount++;
                 sessionStorage.setItem('haikuCount', haikuCount.toString());
+                
+                // Play victory chime
+                playVictoryChime();
                 
                 // Increase game speed for next poem
                 increaseGameSpeed();
