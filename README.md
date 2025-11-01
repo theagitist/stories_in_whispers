@@ -176,6 +176,7 @@ Discover connections between poems through shared words. Access the gallery by p
 - Added automatic full restart on page load/reload (always starts from prelude)
 - Updated prelude text to include "Try to find all four!" hint about reference screens
 - Added information in prelude about X key to restart the game
+- Fixed prelude not closing after X key restart (re-registered keydown handler)
 
 ### Version 2.0.2
 - Added keyboard navigation to Poem Gallery
