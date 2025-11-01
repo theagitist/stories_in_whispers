@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stories in Whispers - A floating isle by Adri M.</title>
+    <title>Stories in Whispers - A tiny isle floating in the ether by Adri M.</title>
     <style>
         body {
             margin: 0;
@@ -409,7 +409,7 @@
         
         <div id="startScreen" style="display: none;">
             <h1>STORIES IN WHISPERS</h1>
-            <h2>A floating isle by Adri M.</h2>
+            <h2>A tiny isle floating in the ether by Adri M.</h2>
             
             <div id="playerGreeting" style="margin: 20px 0; font-size: 16px; color: #00ffff;">
                 <p id="poeticGreeting" style="font-size: 14px; color: #88ccff; font-style: italic; margin-bottom: 10px;"></p>
@@ -1837,7 +1837,143 @@
 
         // Input handling
         const keys = {};
+        // Function to completely restart everything and return to prelude
+        function fullRestart() {
+            // Clear all session storage
+            sessionStorage.clear();
+            
+            // Stop the game
+            gameRunning = false;
+            gameStarted = false;
+            gamePaused = false;
+            haikuCompleted = false;
+            
+            // Reset all game state variables
+            currentHaiku = [];
+            caughtWords = [];
+            lastCaughtType = null;
+            consecutiveArticles = 0;
+            haikuCount = 0;
+            fallingShapes = [];
+            lastSpawnTime = 0;
+            
+            // Reset fade system
+            lastPaddleMovement = Date.now();
+            isFadingOut = false;
+            fadeAlpha = 1;
+            
+            // Reset quote system
+            showQuote = false;
+            quoteAlpha = 0;
+            quoteDelayTimer = 0;
+            elementsFullyHidden = false;
+            
+            // Reset special powers
+            specialPowerActive = false;
+            currentPower = null;
+            powerEndTime = 0;
+            controlsInverted = false;
+            screenUpsideDown = false;
+            if (paddle) {
+                paddle.x = canvas.width / 2 - 40;
+                paddle.width = originalPaddleWidth;
+                paddle.speed = originalPaddleSpeed;
+            }
+            
+            // Clear upside down timeout if it exists
+            if (upsideDownTimeout) {
+                clearTimeout(upsideDownTimeout);
+                upsideDownTimeout = null;
+            }
+            
+            // Reset player acceleration
+            playerAcceleration = 0;
+            
+            // Remove power-active class from canvas
+            if (canvas) {
+                canvas.classList.remove('power-active');
+            }
+            
+            // Reset exploding whispers animation timer
+            explodingWhispersTimer = 0;
+            
+            // Reset spawn multiplier
+            spawnMultiplier = 1;
+            
+            // Reset max whispers
+            maxWhispersAtOnce = 6;
+            
+            // Reset hidden words
+            wordsHidden = false;
+            
+            // Reset respite
+            respiteActive = false;
+            
+            // Reset game speed to initial values
+            if (typeof baseSpawnInterval !== 'undefined') {
+                currentSpawnInterval = baseSpawnInterval;
+            }
+            if (typeof baseWhisperSpeed !== 'undefined') {
+                currentWhisperSpeed = baseWhisperSpeed;
+            }
+            
+            // Hide all screens and overlays
+            const prelude = document.getElementById('prelude');
+            const startScreen = document.getElementById('startScreen');
+            const referencesScreen = document.getElementById('referencesScreen');
+            const introReferencesScreen = document.getElementById('introReferencesScreen');
+            const gameReferencesScreen = document.getElementById('gameReferencesScreen');
+            const gameOverElement = document.getElementById('gameOver');
+            const pauseOverlayElement = document.getElementById('pauseOverlay');
+            const storyPanel = document.getElementById('haikuProgress');
+            const haikuDisplay = document.querySelector('.haiku-completion-display');
+            
+            if (prelude) {
+                prelude.classList.remove('hidden');
+            }
+            if (startScreen) {
+                startScreen.style.display = 'none';
+            }
+            if (referencesScreen) {
+                referencesScreen.classList.remove('visible');
+            }
+            if (introReferencesScreen) {
+                introReferencesScreen.classList.remove('visible');
+            }
+            if (gameReferencesScreen) {
+                gameReferencesScreen.classList.remove('visible');
+            }
+            if (gameOverElement) {
+                gameOverElement.style.display = 'none';
+            }
+            if (pauseOverlayElement) {
+                pauseOverlayElement.style.display = 'none';
+            }
+            if (storyPanel) {
+                storyPanel.style.display = 'none';
+            }
+            if (haikuDisplay) {
+                haikuDisplay.remove();
+            }
+            
+            // Clear keys object
+            Object.keys(keys).forEach(key => {
+                keys[key] = false;
+            });
+            
+            // Reinitialize player name (will generate a new one since sessionStorage is cleared)
+            initializePlayerName();
+        }
+        
         document.addEventListener('keydown', (e) => {
+            // Handle X key at any point to fully restart
+            if (e.key === 'x' || e.key === 'X') {
+                e.preventDefault();
+                e.stopPropagation();
+                fullRestart();
+                return;
+            }
+            
             // Check if game references screen is visible - if so, any key closes it
             const gameReferencesScreen = document.getElementById('gameReferencesScreen');
             if (gameReferencesScreen && gameReferencesScreen.classList.contains('visible')) {
@@ -2789,10 +2925,19 @@
         
         // Listen for any keypress to close prelude and show intro screen
         function handlePreludeKeydown(e) {
+            // Handle X key at any point to fully restart
+            if (e.key === 'x' || e.key === 'X') {
+                e.preventDefault();
+                e.stopPropagation();
+                fullRestart();
+                return;
+            }
+            
             const prelude = document.getElementById('prelude');
             const referencesScreen = document.getElementById('referencesScreen');
             const introReferencesScreen = document.getElementById('introReferencesScreen');
             const gameReferencesScreen = document.getElementById('gameReferencesScreen');
+            const startScreen = document.getElementById('startScreen');
             
             // If game references screen is visible, any key closes it and unpauses
             if (gameReferencesScreen && gameReferencesScreen.classList.contains('visible')) {
@@ -2816,6 +2961,16 @@
                 e.stopPropagation();
                 hideReferencesScreen();
                 return;
+            }
+            
+            // If start screen is visible, handle R key to show intro references
+            if (startScreen && startScreen.style.display !== 'none' && (!prelude || prelude.classList.contains('hidden'))) {
+                if (e.key === 'r' || e.key === 'R') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showIntroReferencesScreen();
+                    return;
+                }
             }
             
             // If prelude is visible, handle R key specially

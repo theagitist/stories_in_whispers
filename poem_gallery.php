@@ -650,6 +650,17 @@ try {
         
         // Handle keyboard controls
         document.addEventListener('keydown', (e) => {
+            // Handle X key to fully restart (clear session and go back to prelude)
+            if (e.key === 'x' || e.key === 'X') {
+                e.preventDefault();
+                e.stopPropagation();
+                // Clear all session storage
+                sessionStorage.clear();
+                // Redirect to main page (which will show prelude)
+                window.location.href = 'index.html';
+                return;
+            }
+            
             const galleryReferencesScreen = document.getElementById('galleryReferencesScreen');
             
             // If gallery references screen is visible, any key closes it

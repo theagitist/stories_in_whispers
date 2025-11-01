@@ -145,6 +145,7 @@ Discover connections between poems through shared words. Access the gallery by p
 - **G**: Go to Poem Gallery
 - **E**: Go to Poem Gallery (during gameplay)
 - **L**: Leave locale (when game is paused)
+- **X**: Fully restart (clears session and returns to prelude) - works at any point
 
 ## Tips for Success
 
@@ -163,9 +164,12 @@ Discover connections between poems through shared words. Access the gallery by p
 - Updated prelude text: Changed "Floating Isle" to "tiny isle floating in the ether"
 - Updated prelude: Changed description from "commentary for an university course" to "a way to reflect on it"
 - Updated prelude: Changed "Most elements refer" to "Concept, mechanics and other ideas refer"
+- Updated intro screen text: Changed "A floating isle" to "A tiny isle floating in the ether"
 - Changed references key from C to R throughout the game
 - Added R key references screen to Poem Gallery
 - Enabled E key to open gallery during gameplay (in addition to G key)
+- Fixed R key handling on intro screen to work reliably
+- Added X key to fully restart from anywhere (clears session and returns to prelude)
 - Removed config.php from repository (added to .gitignore)
 - Created config_blank.php as a template for database configuration
 
