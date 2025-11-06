@@ -2,6 +2,8 @@
 
 A mystical HTML5 video game where players control a paddle to catch falling whispers (colored text blocks) representing different parts of speech, with the objective of building poetry (5-7-5 syllable poems). Experience a contemplative journey through floating verses and whispered dreams.
 
+**Version 2.3.2** - Added Instagram link to creator credit in prelude
+
 **Version 2.3.1** - Added victory chime sound effect when completing a poem
 
 **Version 2.3.0** - Added GitHub repository link to Prelude
@@ -168,6 +170,10 @@ Discover connections between poems through shared words. Access the gallery by p
 - **Embrace the journey**: The game rewards both active play and thoughtful pauses
 
 ## Version History
+
+### Version 2.3.2
+- Added Instagram link to creator credit in prelude
+- Creator name "Adri M." now links to Instagram profile (@theagitist)
 
 ### Version 2.3.1
 - Added subtle victory chime sound effect when completing a poem
