@@ -60,12 +60,15 @@ $poems = [];
 $word_connections = [];
 
 try {
-    // Get all poems with word analysis
+    // Get total poem count for stats (accurate regardless of any limit)
+    $count_stmt = $pdo->query("SELECT COUNT(*) FROM poems");
+    $stats['total_poems'] = (int) $count_stmt->fetchColumn();
+
+    // Get all poems with word analysis (no limit so gallery reflects full collection)
     $stmt = $pdo->query("
         SELECT id, player_name, poem_text, syllables_count, created_at 
         FROM poems 
-        ORDER BY created_at DESC 
-        LIMIT 100
+        ORDER BY created_at DESC
     ");
     $poems = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -112,7 +115,6 @@ try {
     }
     
     $stats['user_stats'] = $user_stats;
-    $stats['total_poems'] = count($poems);
     $stats['total_players'] = count($user_stats);
     
     // Find word connections between poems (grouping poems by shared words)

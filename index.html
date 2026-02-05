@@ -55,6 +55,46 @@
             animation: powerBorderBlink 0.5s infinite alternate;
         }
         
+        #canvasWrap {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .touch-hint-btn {
+            display: none;
+            position: absolute;
+            bottom: 16px;
+            width: 144px;
+            height: 144px;
+            border-radius: 50%;
+            border: 1px solid rgba(180, 180, 180, 0.18);
+            background: rgba(255, 255, 255, 0.03);
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        body.touch-device .touch-hint-btn {
+            display: flex;
+        }
+        .touch-hint-triangle {
+            width: 0;
+            height: 0;
+            border-top: 28px solid transparent;
+            border-bottom: 28px solid transparent;
+        }
+        .touch-hint-left .touch-hint-triangle {
+            border-right: 42px solid rgba(180, 180, 180, 0.35);
+        }
+        .touch-hint-right .touch-hint-triangle {
+            border-left: 42px solid rgba(180, 180, 180, 0.35);
+        }
+        .touch-hint-left {
+            left: 16px;
+        }
+        .touch-hint-right {
+            right: 16px;
+        }
+        
         @keyframes powerBorderBlink {
             0% { border-color: #88ccff; }
             100% { border-color: #44aaff; }
@@ -442,7 +482,7 @@
                 <p>This is not a game, it's a tiny isle floating in the ether. It's inspired by Kawika Guillermo's book <a href="https://arsenalpulp.com/Books/O/Of-Floating-Isles" target="_blank" style="color: #00ffff; text-decoration: underline;">Of Floating Isles</a> and created by <a href="https://instagram.com/theagitist/" target="_blank" style="color: #00ffff; text-decoration: underline;">Adri M.</a> as a way to reflect on it. Concept, mechanics and other ideas refer directly to the book. <span style="color: #ffff00; font-weight: bold;">At any time, you can press R to see them for the current context. Try to find all four!</span></p>
                 <p>You can also press X at any time to restart the game.</p>
                 <p>Source code can be found <a href="https://github.com/theagitist/stories_in_whispers" target="_blank" style="color: #00ffff; text-decoration: underline;">here</a>.</p>
-                <p class="instruction">Press any key to continue</p>
+                <p class="instruction">Press anywhere to continue</p>
             </div>
         </div>
         
@@ -466,11 +506,13 @@
                     <br>Catch falling whispers to create poetry.<br>
                     Create loosely 5-7-5 syllable poems and watch your stories come alive.<br><br>
                     Use ← → arrows or A/D keys to move your paddle.<br>
-                    <span style="color: #ffff00; font-weight: bold;">Press R to see references for the current context.</span>
+                    Or tap the sides of the screen to move the paddle if you are on a touch screen.<br><br>
+                    <span style="color: #ffff00; font-weight: bold;">Press R to see references for the current context.</span><br>
+                    Or double tap if you are on a touch screen.
                 </p>
             </div>
             
-            <button class="start-button" onclick="startGame()">Press SPACE to start</button>
+            <button class="start-button" onclick="startGame()">START</button>
         </div>
         
         <div id="introReferencesScreen">
@@ -494,7 +536,11 @@
         
         <div id="haikuProgress">A <span id="playerNameDisplay" style="color: #ff69b4; font-weight: bold;"></span><span style="color: #ff69b4; font-weight: bold;">'s</span> story so far: Poetry Progress: 0/17 syllables | Poems: 0</div>
         <div id="currentHaiku">Building your poem...</div>
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="canvasWrap">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="touch-hint-btn touch-hint-left" aria-hidden="true"><span class="touch-hint-triangle"></span></div>
+            <div class="touch-hint-btn touch-hint-right" aria-hidden="true"><span class="touch-hint-triangle"></span></div>
+        </div>
         <div id="instructions">
             Create poetry by catching falling whispers! Collect words to create 5-7-5 syllable poems (loosely applied).<br>
             Use ← → arrow keys or A/D keys to move. Press SPACE or P to pause.<br>
@@ -533,6 +579,10 @@
         const ctx = canvas.getContext('2d');
         const gameOverElement = document.getElementById('gameOver');
         const pauseOverlayElement = document.getElementById('pauseOverlay');
+
+        if ('ontouchstart' in window) {
+            document.body.classList.add('touch-device');
+        }
 
         // Player name generation
         function generatePlayerName() {
@@ -2108,10 +2158,17 @@
                     <div style="margin: 15px 0;">
                         <a href="poem_gallery.php" id="galleryLink" style="color: #44ff44; text-decoration: none; border: 1px solid #44ff44; padding: 8px 15px; margin: 5px; display: inline-block; transition: all 0.3s;" onmouseover="this.style.background='#44ff44'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#44ff44';">Explore the Poem Gallery (Press E)</a>
                     </div>
-                    <p>Press SPACE or P to continue</p>
+                    <p id="haikuContinuePrompt" style="${'ontouchstart' in window ? 'cursor: pointer;' : ''}">${'ontouchstart' in window ? 'Tap to continue' : 'Press SPACE or P to continue'}</p>
                 `;
                 
                 document.body.appendChild(haikuDisplay);
+                const continuePrompt = document.getElementById('haikuContinuePrompt');
+                if (continuePrompt) {
+                    continuePrompt.addEventListener('click', function handler() {
+                        continuePrompt.removeEventListener('click', handler);
+                        continueAfterPoem();
+                    });
+                }
             } catch (error) {
                 // Error in displayCompletedPoem - continue game
             }
@@ -2176,6 +2233,8 @@
 
         // Input handling
         const keys = {};
+        let touchMoveLeft = false;
+        let touchMoveRight = false;
         // Function to completely restart everything and return to prelude
         function fullRestart() {
             // Clear all session storage
@@ -2299,7 +2358,9 @@
             Object.keys(keys).forEach(key => {
                 keys[key] = false;
             });
-            
+            touchMoveLeft = false;
+            touchMoveRight = false;
+
             // Reinitialize player name (will generate a new one since sessionStorage is cleared)
             initializePlayerName();
             
@@ -2313,6 +2374,8 @@
             // Remove it first to avoid duplicate listeners, then add it again
             document.removeEventListener('keydown', handlePreludeKeydown);
             document.addEventListener('keydown', handlePreludeKeydown);
+            document.removeEventListener('click', handlePreludeClick);
+            document.addEventListener('click', handlePreludeClick);
         }
         
         document.addEventListener('keydown', (e) => {
@@ -2518,6 +2581,31 @@
             keys[e.key] = false;
         });
 
+        // Touch tap-on-sides support for paddle on the game canvas
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 0) return;
+            if (!gameStarted || !gameRunning || gamePaused) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = e.touches[0].clientX - rect.left;
+            const mid = rect.width / 2;
+            if (x < mid) {
+                touchMoveLeft = true;
+                touchMoveRight = false;
+            } else {
+                touchMoveRight = true;
+                touchMoveLeft = false;
+            }
+        }, { passive: false });
+        canvas.addEventListener('touchend', (e) => {
+            touchMoveLeft = false;
+            touchMoveRight = false;
+        }, { passive: true });
+        canvas.addEventListener('touchcancel', (e) => {
+            touchMoveLeft = false;
+            touchMoveRight = false;
+        }, { passive: true });
+
         // Pause functionality
         function togglePause() {
             if (gameRunning && !haikuCompleted) {
@@ -2587,8 +2675,8 @@
         // Paddle movement
         function updatePaddle() {
             if (!gamePaused) {
-                let moveLeft = keys['ArrowLeft'] || keys['a'] || keys['A'];
-                let moveRight = keys['ArrowRight'] || keys['d'] || keys['D'];
+                let moveLeft = keys['ArrowLeft'] || keys['a'] || keys['A'] || touchMoveLeft;
+                let moveRight = keys['ArrowRight'] || keys['d'] || keys['D'] || touchMoveRight;
                 
                 // Apply inverted controls if active
                 if (controlsInverted) {
@@ -3422,7 +3510,20 @@
             }
         }
         
-        // Listen for any keypress to close prelude and show intro screen
+        // Listen for keypress or click/tap to close prelude and show intro screen
+        function handlePreludeClick(e) {
+            const prelude = document.getElementById('prelude');
+            const referencesScreen = document.getElementById('referencesScreen');
+            // Only close main prelude on click/tap when references overlay is not visible
+            if (prelude && !prelude.classList.contains('hidden') &&
+                (!referencesScreen || !referencesScreen.classList.contains('visible'))) {
+                e.preventDefault();
+                closePrelude();
+                document.removeEventListener('keydown', handlePreludeKeydown);
+                document.removeEventListener('click', handlePreludeClick);
+            }
+        }
+        
         function handlePreludeKeydown(e) {
             // Handle X key at any point to fully restart
             if (e.key === 'x' || e.key === 'X') {
@@ -3485,13 +3586,15 @@
                 
                 // Any key (except R which was handled above) closes the prelude and shows intro screen
                 closePrelude();
-                // Remove this listener after prelude is closed
+                // Remove listeners after prelude is closed
                 document.removeEventListener('keydown', handlePreludeKeydown);
+                document.removeEventListener('click', handlePreludeClick);
                 // Don't start the game - just show the intro screen
             }
         }
         
         document.addEventListener('keydown', handlePreludeKeydown);
+        document.addEventListener('click', handlePreludeClick);
         
         // On page load/reload, fully restart the experience (clear session and show prelude)
         // This ensures a fresh start every time the page loads, always starting from the prelude

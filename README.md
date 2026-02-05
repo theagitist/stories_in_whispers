@@ -2,6 +2,10 @@
 
 A mystical HTML5 video game where players control a paddle to catch falling whispers (colored text blocks) representing different parts of speech, with the objective of building poetry (5-7-5 syllable poems). Experience a contemplative journey through floating verses and whispered dreams.
 
+**Version 2.4.1** - Documentation updates
+
+**Version 2.4.0** - Touch support: tap to continue (prelude, poem complete), tap sides to move paddle, tap to pause; virtual hint buttons on touch devices; Poem Gallery shows full poem count
+
 **Version 2.3.2** - Added Instagram link to creator credit in prelude
 
 **Version 2.3.1** - Added victory chime sound effect when completing a poem
@@ -18,9 +22,9 @@ A mystical HTML5 video game where players control a paddle to catch falling whis
 
 ## How to Play
 
-- Use the **left** and **right** arrow keys or **A/D** keys to move your paddle
-- Press **SPACE** to start the game
-- Press **SPACE** or **P** to pause/resume the game
+- Use the **left** and **right** arrow keys or **A/D** keys to move your paddle (or tap the left/right side of the screen on touch devices)
+- Press **SPACE** or tap the **START** button to start the game
+- Press **SPACE** or **P** to pause/resume (or tap anywhere on the game area on touch devices)
 - **Catch falling whispers to build poetry!** Collect words to create 5-7-5 syllable poems
 - Multiple whispers fall simultaneously at different speeds
 - Each whisper displays a word representing a different part of speech with color coding:
@@ -145,7 +149,7 @@ Discover connections between poems through shared words. Access the gallery by p
 
 ### Gallery Features
 - **Word Connections**: View poems that share common words, grouped by connection strength
-- **Statistics**: See overall stats, most used words, and player statistics
+- **Statistics**: See overall stats (total poems reflects the full collection), most used words, and player statistics
 - **Random Poems**: Discover random poems from the collection
 - **Visual Highlighting**: Common words between connected poems are highlighted with color-coded word types
 - **Carousel Navigation**: Browse through poem connections with smooth transitions
@@ -158,13 +162,22 @@ Discover connections between poems through shared words. Access the gallery by p
 - **R**: View references for the current context
 - **B**: Return to the Floating Isle (game)
 
+## Touch Support
+
+On touch-capable devices the game supports tap and touch interactions:
+- **Prelude**: "Press anywhere to continue" — tap or click anywhere to continue; any key also works
+- **References**: Double-tap or press **R** to open references from the intro screen
+- **Movement**: Tap and hold the left half of the game area to move the paddle left, right half to move right (same as holding arrow keys). Transparent hint circles with triangles appear in the lower corners on touch devices as a guide
+- **Pause**: Tap or click anywhere on the game canvas to pause (same as SPACE or P)
+- **Poem Complete**: On touch devices the prompt shows "Tap to continue"; tapping it continues to the next poem (same as SPACE or P)
+
 ## Controls
 
 ### In-Game Controls
-- **Arrow Keys** or **A/D**: Move paddle left/right
-- **SPACE**: Start game / Pause/Resume
+- **Arrow Keys** or **A/D**: Move paddle left/right (touch: tap left/right side of screen)
+- **SPACE**: Start game / Pause/Resume (touch: START button; tap game area to pause)
 - **P**: Pause/Resume (alternative)
-- **R**: View references for current context (available in prelude, intro screen, during gameplay, and in gallery)
+- **R**: View references for current context (available in prelude, intro screen, during gameplay, and in gallery); on touch, double-tap from intro
 - **G**: Go to Poem Gallery
 - **E**: Go to Poem Gallery (during gameplay)
 - **L**: Leave locale (when game is paused)
@@ -178,9 +191,21 @@ Discover connections between poems through shared words. Access the gallery by p
 - **Practice**: The more you play, the better you'll get at poetry building
 - **Take contemplative breaks**: Stop moving for 5 seconds to experience the fade-out and inspirational quotes
 - **Avoid bomb whispers**: Light blue BOOM! whispers will remove your last word
+- **On touch devices**: Use the corner triangles as a guide; you can tap anywhere on the left or right half to move the paddle
 - **Embrace the journey**: The game rewards both active play and thoughtful pauses
 
 ## Version History
+
+### Version 2.4.1
+- Documentation updates
+
+### Version 2.4.0
+- Touch support throughout: prelude continues on tap/click ("Press anywhere to continue")
+- Intro screen: tap sides to move paddle, double-tap for references; START button (replaces "Press SPACE to start")
+- In-game: tap left/right half of canvas to move paddle; tap anywhere on game area to pause
+- Virtual hint buttons on touch devices: transparent circles with left/right triangles in lower corners as tap guides (pointer-events off so taps still hit the canvas)
+- Poem Complete overlay: on touch devices shows "Tap to continue" and tapping continues (same as SPACE/P)
+- Poem Gallery: total poem count now uses full database count; gallery loads all poems (removed 100-poem limit) so stats and connections reflect the entire collection
 
 ### Version 2.3.2
 - Added Instagram link to creator credit in prelude
