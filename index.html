@@ -67,8 +67,8 @@
             width: 144px;
             height: 144px;
             border-radius: 50%;
-            border: 1px solid rgba(180, 180, 180, 0.18);
-            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(180, 180, 180, 0.08);
+            background: rgba(255, 255, 255, 0.015);
             align-items: center;
             justify-content: center;
             pointer-events: none;
@@ -83,10 +83,12 @@
             border-bottom: 28px solid transparent;
         }
         .touch-hint-left .touch-hint-triangle {
-            border-right: 42px solid rgba(180, 180, 180, 0.35);
+            border-right: 42px solid rgba(180, 180, 180, 0.18);
+            margin-right: 7px; /* shift so triangle centroid aligns with circle center */
         }
         .touch-hint-right .touch-hint-triangle {
-            border-left: 42px solid rgba(180, 180, 180, 0.35);
+            border-left: 42px solid rgba(180, 180, 180, 0.18);
+            margin-left: 7px; /* shift so triangle centroid aligns with circle center */
         }
         .touch-hint-left {
             left: 16px;

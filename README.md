@@ -2,6 +2,8 @@
 
 A mystical HTML5 video game where players control a paddle to catch falling whispers (colored text blocks) representing different parts of speech, with the objective of building poetry (5-7-5 syllable poems). Experience a contemplative journey through floating verses and whispered dreams.
 
+**Version 2.5.0** - Virtual button refinements (centering, size, transparency); VERSION file added
+
 **Version 2.4.1** - Documentation updates
 
 **Version 2.4.0** - Touch support: tap to continue (prelude, poem complete), tap sides to move paddle, tap to pause; virtual hint buttons on touch devices; Poem Gallery shows full poem count
@@ -195,6 +197,10 @@ On touch-capable devices the game supports tap and touch interactions:
 - **Embrace the journey**: The game rewards both active play and thoughtful pauses
 
 ## Version History
+
+### Version 2.5.0
+- Virtual touch-hint buttons: improved triangle centering in circles; adjusted size and transparency
+- Added root `VERSION` file with current version (2.5.0)
 
 ### Version 2.4.1
 - Documentation updates
