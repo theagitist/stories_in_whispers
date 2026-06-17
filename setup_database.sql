@@ -3,11 +3,11 @@
 --
 -- One-time provisioning (run as the postgres superuser):
 --   sudo -u postgres psql -c "CREATE ROLE stories_in_whispers LOGIN PASSWORD 'CHANGE_ME';"
---   sudo -u postgres psql -c "CREATE DATABASE stories_in_whispers_pg OWNER stories_in_whispers \
+--   sudo -u postgres psql -c "CREATE DATABASE stories_in_whispers OWNER stories_in_whispers \
 --     ENCODING 'UTF8' TEMPLATE template0 LC_COLLATE 'C.UTF-8' LC_CTYPE 'C.UTF-8';"
 --
 -- Then load this schema into that database:
---   psql -h 127.0.0.1 -U stories_in_whispers -d stories_in_whispers_pg -f setup_database.sql
+--   psql -h 127.0.0.1 -U stories_in_whispers -d stories_in_whispers -f setup_database.sql
 
 CREATE TABLE IF NOT EXISTS poems (
     id              SERIAL PRIMARY KEY,

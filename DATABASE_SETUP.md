@@ -16,8 +16,8 @@ Provision the role and database once as the postgres superuser, then load the sc
 
 ```bash
 sudo -u postgres psql -c "CREATE ROLE stories_in_whispers LOGIN PASSWORD 'CHANGE_ME';"
-sudo -u postgres psql -c "CREATE DATABASE stories_in_whispers_pg OWNER stories_in_whispers ENCODING 'UTF8' TEMPLATE template0 LC_COLLATE 'C.UTF-8' LC_CTYPE 'C.UTF-8';"
-psql -h 127.0.0.1 -U stories_in_whispers -d stories_in_whispers_pg -f setup_database.sql
+sudo -u postgres psql -c "CREATE DATABASE stories_in_whispers OWNER stories_in_whispers ENCODING 'UTF8' TEMPLATE template0 LC_COLLATE 'C.UTF-8' LC_CTYPE 'C.UTF-8';"
+psql -h 127.0.0.1 -U stories_in_whispers -d stories_in_whispers -f setup_database.sql
 ```
 
 ### 2. Configure Database Connection
@@ -27,7 +27,7 @@ Edit `config.php` and update the database credentials:
 ```php
 $host = '127.0.0.1';
 $port = '5432'; // Default PostgreSQL port
-$dbname = 'stories_in_whispers_pg';
+$dbname = 'stories_in_whispers';
 $username = 'stories_in_whispers'; // Replace with your PostgreSQL role
 $password = 'your_password'; // Replace with your PostgreSQL password
 ```
