@@ -101,7 +101,7 @@ A mystical HTML5 video game where players control a paddle to catch falling whis
 ## Technical Details
 
 - **Built with**: HTML5 Canvas and JavaScript
-- **No external dependencies**: Pure vanilla JavaScript (game); PHP + MySQL for Poem Gallery backend
+- **No external dependencies**: Pure vanilla JavaScript (game); PHP + PostgreSQL for Poem Gallery backend
 - **Responsive design**: Works on different screen sizes
 - **Monospace font**: Consistent text rendering for whispers
 - **Local storage**: Game state persistence
@@ -112,10 +112,10 @@ A mystical HTML5 video game where players control a paddle to catch falling whis
 - **poem_gallery.php** — Poem Gallery page (word connections, stats, carousel).
 - **save_poem.php** — API endpoint that stores completed poems when the gallery is enabled.
 - **view_poems.php** — Simple listing of saved poems (optional).
-- **config_blank.php** — Template for database configuration; copy to `config.php` and set your MySQL credentials (do not commit `config.php`).
-- **setup_database.sql** — SQL to create the database and tables for poem storage.
+- **config_blank.php** — Template for database configuration; copy to `config.php` and set your PostgreSQL credentials (do not commit `config.php`).
+- **setup_database.sql** — SQL to create the table and indexes for poem storage.
 
-For full database setup (MySQL, PHP PDO, permissions), see **DATABASE_SETUP.md**.
+For full database setup (PostgreSQL, PHP PDO, permissions), see **DATABASE_SETUP.md**.
 
 ## Game Rules
 

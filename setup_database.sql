@@ -1,20 +1,23 @@
--- Create database (run this first if the database doesn't exist)
-CREATE DATABASE IF NOT EXISTS stories_in_whispers CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- PostgreSQL schema for Stories in Whispers.
+-- The app database lives on the local PostgreSQL server (127.0.0.1:5432).
+--
+-- One-time provisioning (run as the postgres superuser):
+--   sudo -u postgres psql -c "CREATE ROLE stories_in_whispers LOGIN PASSWORD 'CHANGE_ME';"
+--   sudo -u postgres psql -c "CREATE DATABASE stories_in_whispers_pg OWNER stories_in_whispers \
+--     ENCODING 'UTF8' TEMPLATE template0 LC_COLLATE 'C.UTF-8' LC_CTYPE 'C.UTF-8';"
+--
+-- Then load this schema into that database:
+--   psql -h 127.0.0.1 -U stories_in_whispers -d stories_in_whispers_pg -f setup_database.sql
 
--- Use the database
-USE stories_in_whispers;
-
--- Create poems table
 CREATE TABLE IF NOT EXISTS poems (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    player_name VARCHAR(255) NOT NULL,
-    poem_text TEXT NOT NULL,
-    poem_lines JSON NOT NULL, -- Store the structured poem data
-    syllables_count INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_player_name (player_name),
-    INDEX idx_created_at (created_at)
+    id              SERIAL PRIMARY KEY,
+    player_name     VARCHAR(255) NOT NULL,
+    poem_text       TEXT NOT NULL,
+    poem_lines      JSONB NOT NULL,          -- structured poem data
+    syllables_count INTEGER NOT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create an index for better performance
-CREATE INDEX idx_player_created ON poems (player_name, created_at);
+CREATE INDEX IF NOT EXISTS idx_player_name    ON poems (player_name);
+CREATE INDEX IF NOT EXISTS idx_created_at     ON poems (created_at);
+CREATE INDEX IF NOT EXISTS idx_player_created ON poems (player_name, created_at);
